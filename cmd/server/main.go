@@ -1,8 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"path"
+	"strconv"
 )
 
 type Gauge struct {
@@ -20,10 +23,27 @@ type MemStorage struct {
 	GaugeStorage   []Gauge
 }
 
+var store MemStorage
+
 func gaugeHandle(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.URL)
+
+	dir, file := path.Split(r.URL.Path)
+	name := path.Base(dir)
+
+	value, err := strconv.ParseFloat(file, 64)
+	if err != nil {
+		panic(err)
+	}
+
+	gauge := Gauge{
+		Name:  name,
+		Value: value,
+	}
+
+	store.GaugeStorage = append(store.GaugeStorage, gauge)
+
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("gauge"))
+	json.NewEncoder(w).Encode(store.GaugeStorage)
 }
 
 func counterHandle(w http.ResponseWriter, r *http.Request) {
