@@ -18,19 +18,14 @@ func (s *Service) Gauge(name, value string) []models.Gauge {
 	if err != nil {
 		fmt.Println(err)
 	}
-
-	gauge := models.Gauge{
-		Name:  name,
-		Value: floatValue,
-	}
-
-	find := s.Storage.Read("Name", name)
-
-	if find == nil {
-		s.Storage.Create(&gauge)
+	if ok := s.Storage.GaugeRead(name); ok != nil {
+		s.Storage.GaugeUpdate(name, floatValue)
 	} else {
-
-		s.Storage.Update(&gauge, floatValue)
+		gauge := models.Gauge{
+			Name:  name,
+			Value: floatValue,
+		}
+		s.Storage.GaugeCreate(&gauge)
 	}
 	return s.Storage.GaugeStorage
 
@@ -46,14 +41,13 @@ func (s *Service) Counter(name, value string) []models.Counter {
 		Value: intValue,
 	}
 
-	s.Storage.CounterStorage = append(s.Storage.CounterStorage, counter)
+	s.Storage.CounterCreate(&counter)
 	return s.Storage.CounterStorage
 }
 
 func New() *Service {
 
 	return &Service{
-		// Routes:  defineRoutes(),
 		Storage: storage.New(),
 	}
 }

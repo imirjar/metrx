@@ -2,7 +2,6 @@ package storage
 
 import (
 	"fmt"
-	"reflect"
 
 	"github.com/imirjar/metrx/internal/models"
 )
@@ -12,8 +11,6 @@ type MemStorage struct {
 	GaugeStorage   []models.Gauge
 }
 
-var store MemStorage
-
 func New() *MemStorage {
 	return &MemStorage{
 		CounterStorage: []models.Counter{},
@@ -21,24 +18,44 @@ func New() *MemStorage {
 	}
 }
 
-func (m *MemStorage) Create(obj *models.Gauge) {
+func (m *MemStorage) GaugeCreate(obj *models.Gauge) {
 	m.GaugeStorage = append(m.GaugeStorage, *obj)
 }
 
-func (m *MemStorage) Read(value, field string) *models.Gauge {
-
+func (m *MemStorage) GaugeRead(name string) *models.Gauge {
 	for _, v := range m.GaugeStorage {
-		if reflect.ValueOf(v).FieldByName(field).String() == value {
-			fmt.Println("Элемент в списке")
+		if v.Name == name {
 			return &v
 		}
+
 	}
-	fmt.Println("Элемента нет списке")
+
 	return nil
 }
 
-func (m *MemStorage) Update(obj *models.Gauge, value float64) {
-	fmt.Println("Обновляю")
-	obj.Value = value
+func (m *MemStorage) GaugeUpdate(name string, value float64) error {
+
+	for i, v := range m.GaugeStorage {
+		if v.Name == name {
+			m.GaugeStorage[i].Value = value
+			return nil
+		}
+
+	}
+	return fmt.Errorf("Указанная запись не существует")
 }
-func (m *MemStorage) Delete() {}
+
+func (m *MemStorage) CounterCreate(obj *models.Counter) {
+	m.CounterStorage = append(m.CounterStorage, *obj)
+}
+
+func (m *MemStorage) CounterRead(name string) *models.Counter {
+	for _, v := range m.CounterStorage {
+		if v.Name == name {
+			return &v
+		}
+
+	}
+
+	return nil
+}

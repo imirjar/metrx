@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"path"
 
@@ -29,8 +30,11 @@ func middleware(next http.Handler) http.Handler {
 }
 func (h *Handler) GaugeHandle(w http.ResponseWriter, r *http.Request) {
 
-	mamePath, value := path.Split(r.URL.Path)
-	name := path.Base(mamePath)
+	namePath, value := path.Split(r.URL.Path)
+	name := path.Base(namePath)
+	if fmt.Sprintf(name) == "" {
+		w.WriteHeader(http.StatusOK)
+	}
 
 	gauge := h.Service.Gauge(name, value)
 
@@ -40,10 +44,10 @@ func (h *Handler) GaugeHandle(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) CounterHandle(w http.ResponseWriter, r *http.Request) {
 
-	mamePath, value := path.Split(r.URL.Path)
-	name := path.Base(mamePath)
+	namePath, value := path.Split(r.URL.Path)
+	name := path.Base(namePath)
 
-	counter := h.Service.Gauge(name, value)
+	counter := h.Service.Counter(name, value)
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(counter)
