@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"path"
+	"strconv"
 
+	"github.com/gorilla/mux"
 	"github.com/imirjar/metrx/internal/service"
 )
 
@@ -21,50 +21,67 @@ func New() *Handler {
 	}
 }
 
-func middleware(next http.Handler) http.Handler {
+func (h *Handler) Handler404(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotFound)
+	w.Write([]byte("Неверный запрос"))
+}
 
+func (h *Handler) Handler400(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusBadRequest)
+	w.Write([]byte("Неверный запрос"))
+}
+
+func Middleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "text/plain")
-		next.ServeHTTP(w, r)
+		vars := mux.Vars(r)
+		if _, err := strconv.Atoi(vars["value"]); err == nil {
+			h.ServeHTTP(w, r)
+		} else {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write(nil)
+		}
 	})
 }
+
 func (h *Handler) GaugeHandle(w http.ResponseWriter, r *http.Request) {
 
-	namePath, value := path.Split(r.URL.Path)
-	name := path.Base(namePath)
-	if fmt.Sprintf(name) == "" {
+	vars := mux.Vars(r)
+	if vars["name"] != "" && vars["value"] != "" {
+		gauge := h.Service.Gauge(vars["name"], vars["value"])
+
+		w.Header().Add("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
+		// w.Write(nil)
+		json.NewEncoder(w).Encode(gauge)
+	} else {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(nil)
 	}
 
-	gauge := h.Service.Gauge(name, value)
-
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(gauge)
 }
 
 func (h *Handler) CounterHandle(w http.ResponseWriter, r *http.Request) {
 
-	namePath, value := path.Split(r.URL.Path)
-	name := path.Base(namePath)
-
-	counter := h.Service.Counter(name, value)
-
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(counter)
+	vars := mux.Vars(r)
+	if vars["name"] != "" && vars["value"] != "" {
+		counter := h.Service.Counter(vars["name"], vars["value"])
+		w.Header().Add("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		// w.Write(nil)
+		json.NewEncoder(w).Encode(counter)
+	} else {
+		w.WriteHeader(http.StatusBadGateway)
+		w.Write(nil)
+	}
 }
 
-func (h *Handler) DefineRoutes() *http.ServeMux {
-	gauge := http.NewServeMux()
-	gauge.Handle("/", middleware(http.HandlerFunc(h.GaugeHandle)))
+func (h *Handler) DefineRoutes() *mux.Router {
 
-	counter := http.NewServeMux()
-	counter.Handle("/", middleware(http.HandlerFunc(h.CounterHandle)))
+	mux := mux.NewRouter()
+	mux.Use(Middleware)
+	mux.HandleFunc("/update/gauge/{name}/{value}", h.GaugeHandle).Methods("POST")
+	mux.HandleFunc("/update/counter/{name}/{value}", h.CounterHandle).Methods("POST")
+	mux.HandleFunc("/update/{another}/{name}/{value}", h.Handler400).Methods("POST")
 
-	update := http.NewServeMux()
-	update.Handle("/gauge/", http.StripPrefix("/gauge", gauge))
-	update.Handle("/counter/", http.StripPrefix("/counter", counter))
-
-	mux := http.NewServeMux()
-	mux.Handle("/update/", http.StripPrefix("/update", update))
 	return mux
 }

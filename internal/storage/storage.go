@@ -27,9 +27,7 @@ func (m *MemStorage) GaugeRead(name string) *models.Gauge {
 		if v.Name == name {
 			return &v
 		}
-
 	}
-
 	return nil
 }
 
@@ -40,7 +38,6 @@ func (m *MemStorage) GaugeUpdate(name string, value float64) error {
 			m.GaugeStorage[i].Value = value
 			return nil
 		}
-
 	}
 	return fmt.Errorf("Указанная запись не существует")
 }
@@ -54,8 +51,17 @@ func (m *MemStorage) CounterRead(name string) *models.Counter {
 		if v.Name == name {
 			return &v
 		}
-
 	}
-
 	return nil
+}
+
+func (m *MemStorage) CounterUpdate(name string, value int64) error {
+
+	for i, v := range m.CounterStorage {
+		if v.Name == name {
+			m.CounterStorage[i].Value += value
+			return nil
+		}
+	}
+	return fmt.Errorf("Указанная запись не существует")
 }
