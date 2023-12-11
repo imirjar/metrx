@@ -36,12 +36,16 @@ func (s *Service) Counter(name, value string) []models.Counter {
 	if err != nil {
 		fmt.Println(err)
 	}
-	counter := models.Counter{
-		Name:  name,
-		Value: intValue,
-	}
+	if ok := s.Storage.CounterRead(name); ok != nil {
+		s.Storage.CounterUpdate(name, intValue)
+	} else {
+		counter := models.Counter{
+			Name:  name,
+			Value: intValue,
+		}
 
-	s.Storage.CounterCreate(&counter)
+		s.Storage.CounterCreate(&counter)
+	}
 	return s.Storage.CounterStorage
 }
 

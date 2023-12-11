@@ -59,3 +59,15 @@ func (m *MemStorage) CounterRead(name string) *models.Counter {
 
 	return nil
 }
+
+func (m *MemStorage) CounterUpdate(name string, value int64) error {
+
+	for i, v := range m.CounterStorage {
+		if v.Name == name {
+			m.CounterStorage[i].Value += value
+			return nil
+		}
+
+	}
+	return fmt.Errorf("Указанная запись не существует")
+}
