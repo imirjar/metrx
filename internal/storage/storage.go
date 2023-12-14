@@ -11,7 +11,18 @@ type MemStorage struct {
 	GaugeStorage   []models.Gauge
 }
 
-func New() *MemStorage {
+type Storage interface {
+	CounterUpdate(name string, value int64) error
+	CounterRead(name string) *models.Counter
+	CounterReadAll() []models.Counter
+	CounterCreate(obj *models.Counter)
+	GaugeUpdate(name string, value float64) error
+	GaugeRead(name string) *models.Gauge
+	GaugeReadAll() []models.Gauge
+	GaugeCreate(obj *models.Gauge)
+}
+
+func New() Storage {
 	return &MemStorage{
 		CounterStorage: []models.Counter{},
 		GaugeStorage:   []models.Gauge{},
@@ -29,6 +40,10 @@ func (m *MemStorage) GaugeRead(name string) *models.Gauge {
 		}
 	}
 	return nil
+}
+
+func (m *MemStorage) GaugeReadAll() []models.Gauge {
+	return m.GaugeStorage
 }
 
 func (m *MemStorage) GaugeUpdate(name string, value float64) error {
@@ -53,6 +68,10 @@ func (m *MemStorage) CounterRead(name string) *models.Counter {
 		}
 	}
 	return nil
+}
+
+func (m *MemStorage) CounterReadAll() []models.Counter {
+	return m.CounterStorage
 }
 
 func (m *MemStorage) CounterUpdate(name string, value int64) error {

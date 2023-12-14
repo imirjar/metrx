@@ -8,9 +8,14 @@ import (
 	"github.com/imirjar/metrx/internal/storage"
 )
 
+func New() *Service {
+	return &Service{
+		Storage: storage.New(),
+	}
+}
+
 type Service struct {
-	// Routes  *http.ServeMux
-	Storage *storage.MemStorage
+	Storage storage.Storage
 }
 
 func (s *Service) Gauge(name, value string) []models.Gauge {
@@ -27,7 +32,7 @@ func (s *Service) Gauge(name, value string) []models.Gauge {
 		}
 		s.Storage.GaugeCreate(&gauge)
 	}
-	return s.Storage.GaugeStorage
+	return s.Storage.GaugeReadAll()
 
 }
 
@@ -46,12 +51,5 @@ func (s *Service) Counter(name, value string) []models.Counter {
 
 		s.Storage.CounterCreate(&counter)
 	}
-	return s.Storage.CounterStorage
-}
-
-func New() *Service {
-
-	return &Service{
-		Storage: storage.New(),
-	}
+	return s.Storage.CounterReadAll()
 }

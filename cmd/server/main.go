@@ -1,18 +1,11 @@
 package main
 
 import (
-	"net/http"
-
-	"github.com/imirjar/metrx/internal/server"
+	"github.com/imirjar/metrx/internal/app/server"
 )
 
 func main() {
-	if err := run(); err != nil {
+	if err := server.Run(); err != nil {
 		panic(err)
 	}
-}
-
-func run() error {
-	server := server.New()
-	return http.ListenAndServe(":8080", server.Handler.DefineRoutes())
 }

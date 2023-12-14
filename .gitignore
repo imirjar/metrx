@@ -25,4 +25,3 @@ vendor/
 .vscode
 server
 metricstest
-metricstest-darwin-amd64
