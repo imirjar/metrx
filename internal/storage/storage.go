@@ -1,86 +1,51 @@
 package storage
 
 import (
-	"fmt"
-
 	"github.com/imirjar/metrx/internal/models"
 )
 
 type MemStorage struct {
-	CounterStorage []models.Counter
-	GaugeStorage   []models.Gauge
+	Gauge   []models.Gauge
+	Counter []models.Counter
+	Metrics any
 }
 
-type Storage interface {
-	CounterUpdate(name string, value int64) error
-	CounterRead(name string) *models.Counter
-	CounterReadAll() []models.Counter
-	CounterCreate(obj *models.Counter)
-	GaugeUpdate(name string, value float64) error
-	GaugeRead(name string) *models.Gauge
-	GaugeReadAll() []models.Gauge
-	GaugeCreate(obj *models.Gauge)
+type Storager interface {
+	AddGauge(gauge models.Gauge) (*models.Gauge, error)
+	AddCounter(counter models.Counter) (*models.Counter, error)
 }
 
-func New() Storage {
+func New() Storager {
 	return &MemStorage{
-		CounterStorage: []models.Counter{},
-		GaugeStorage:   []models.Gauge{},
+		Gauge:   []models.Gauge{},
+		Counter: []models.Counter{},
 	}
 }
 
-func (m *MemStorage) GaugeCreate(obj *models.Gauge) {
-	m.GaugeStorage = append(m.GaugeStorage, *obj)
-}
-
-func (m *MemStorage) GaugeRead(name string) *models.Gauge {
-	for _, v := range m.GaugeStorage {
-		if v.Name == name {
-			return &v
+func (m *MemStorage) AddGauge(gauge models.Gauge) (*models.Gauge, error) {
+	for i, v := range m.Gauge {
+		if v.Name == gauge.Name {
+			m.Gauge[i] = gauge
+			// fmt.Println(m.Gauge)
+			return &m.Gauge[i], nil
 		}
 	}
-	return nil
+	m.Gauge = append(m.Gauge, gauge)
+	mewElementRef := &m.Gauge[len(m.Gauge)-1]
+	// fmt.Println(m.Gauge)
+	return mewElementRef, nil
 }
 
-func (m *MemStorage) GaugeReadAll() []models.Gauge {
-	return m.GaugeStorage
-}
-
-func (m *MemStorage) GaugeUpdate(name string, value float64) error {
-
-	for i, v := range m.GaugeStorage {
-		if v.Name == name {
-			m.GaugeStorage[i].Value = value
-			return nil
+func (m *MemStorage) AddCounter(counter models.Counter) (*models.Counter, error) {
+	for i, v := range m.Counter {
+		if v.Name == counter.Name {
+			m.Counter[i].Value = v.Sum(counter.Value)
+			// fmt.Println(m.Counter)
+			return &m.Counter[i], nil
 		}
 	}
-	return fmt.Errorf("Указанная запись не существует")
-}
-
-func (m *MemStorage) CounterCreate(obj *models.Counter) {
-	m.CounterStorage = append(m.CounterStorage, *obj)
-}
-
-func (m *MemStorage) CounterRead(name string) *models.Counter {
-	for _, v := range m.CounterStorage {
-		if v.Name == name {
-			return &v
-		}
-	}
-	return nil
-}
-
-func (m *MemStorage) CounterReadAll() []models.Counter {
-	return m.CounterStorage
-}
-
-func (m *MemStorage) CounterUpdate(name string, value int64) error {
-
-	for i, v := range m.CounterStorage {
-		if v.Name == name {
-			m.CounterStorage[i].Value += value
-			return nil
-		}
-	}
-	return fmt.Errorf("Указанная запись не существует")
+	m.Counter = append(m.Counter, counter)
+	mewElementRef := &m.Counter[len(m.Counter)-1]
+	// fmt.Println(m.Counter)
+	return mewElementRef, nil
 }

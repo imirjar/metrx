@@ -2,7 +2,7 @@ package service
 
 import (
 	"fmt"
-	"strconv"
+	"log"
 
 	"github.com/imirjar/metrx/internal/models"
 	"github.com/imirjar/metrx/internal/storage"
@@ -15,41 +15,33 @@ func New() *Service {
 }
 
 type Service struct {
-	Storage storage.Storage
+	Storage storage.Storager
 }
 
-func (s *Service) Gauge(name, value string) []models.Gauge {
-	floatValue, err := strconv.ParseFloat(value, 64)
+func (s *Service) Gauge(name string, value float64) error {
+	log.Println(name)
+	gauge := models.Gauge{
+		Name:  name,
+		Value: value,
+	}
+	_, err := s.Storage.AddGauge(gauge)
 	if err != nil {
-		fmt.Println(err)
+		return fmt.Errorf("Ошибочка какая-то %w", err)
 	}
-	if ok := s.Storage.GaugeRead(name); ok != nil {
-		s.Storage.GaugeUpdate(name, floatValue)
-	} else {
-		gauge := models.Gauge{
-			Name:  name,
-			Value: floatValue,
-		}
-		s.Storage.GaugeCreate(&gauge)
-	}
-	return s.Storage.GaugeReadAll()
 
+	return nil
 }
 
-func (s *Service) Counter(name, value string) []models.Counter {
-	intValue, err := strconv.ParseInt(value, 36, 64)
+func (s *Service) Counter(name string, value int64) error {
+	fmt.Println(name)
+	counter := models.Counter{
+		Name:  name,
+		Value: value,
+	}
+	_, err := s.Storage.AddCounter(counter)
 	if err != nil {
-		fmt.Println(err)
+		return fmt.Errorf("Ошибочка какая-то %w", err)
 	}
-	if ok := s.Storage.CounterRead(name); ok != nil {
-		s.Storage.CounterUpdate(name, intValue)
-	} else {
-		counter := models.Counter{
-			Name:  name,
-			Value: intValue,
-		}
 
-		s.Storage.CounterCreate(&counter)
-	}
-	return s.Storage.CounterReadAll()
+	return nil
 }

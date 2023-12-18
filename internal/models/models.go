@@ -10,8 +10,6 @@ type Counter struct {
 	Value int64  `json:"value"`
 }
 
-type Metrix struct {
-	Type  string
-	Name  string
-	Value any
+func (c Counter) Sum(i int64) int64 {
+	return c.Value + i
 }
