@@ -2,7 +2,7 @@ package service
 
 import (
 	"fmt"
-	"log"
+	"strconv"
 
 	"github.com/imirjar/metrx/internal/models"
 	"github.com/imirjar/metrx/internal/storage"
@@ -18,30 +18,83 @@ type Service struct {
 	Storage storage.Storager
 }
 
-func (s *Service) Gauge(name string, value float64) error {
-	log.Println(name)
-	gauge := models.Gauge{
-		Name:  name,
-		Value: value,
+func (s *Service) UpdateMetric(mType string, name string, value string) error {
+	if name == "" {
+		return metricNameIncorrect
 	}
-	_, err := s.Storage.AddGauge(gauge)
-	if err != nil {
-		return fmt.Errorf("Ошибочка какая-то %w", err)
+	switch mType {
+
+	case "gauge":
+		value, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			return convertationError
+		}
+		gauge := models.Gauge{
+			Name:  name,
+			Value: value,
+		}
+		_, err = s.Storage.AddGauge(gauge)
+		if err != nil {
+			return storageError
+		}
+		return nil
+
+	case "counter":
+		value, err := strconv.ParseInt(value, 10, 64)
+		if err != nil {
+			return convertationError
+		}
+		counter := models.Counter{
+			Name:  name,
+			Value: value,
+		}
+		_, err = s.Storage.AddCounter(counter)
+		if err != nil {
+			return storageError
+		}
+		return nil
+	default:
+		return serviceError
 	}
 
+}
+
+func (s *Service) ViewGaugeByName(name string) (*models.Gauge, error) {
+	if name == "" {
+		return nil, metricNameIncorrect
+	}
+
+	return s.Storage.ReadGauge(name), nil
+
+}
+
+func (s *Service) ViewCounterByName(name string) (*models.Counter, error) {
+	if name == "" {
+		return nil, metricNameIncorrect
+	}
+
+	return s.Storage.ReadCounter(name), nil
+
+}
+
+func (s *Service) FindMetricValue(mType string, name string) any {
 	return nil
 }
 
-func (s *Service) Counter(name string, value int64) error {
-	fmt.Println(name)
-	counter := models.Counter{
-		Name:  name,
-		Value: value,
-	}
-	_, err := s.Storage.AddCounter(counter)
-	if err != nil {
-		return fmt.Errorf("Ошибочка какая-то %w", err)
+func (s *Service) MetricList() string {
+	gauges := s.Storage.ReadAllGauge()
+	counters := s.Storage.ReadAllCounter()
+
+	gaugeForm := "<a>Gauge</a>"
+	for _, g := range gauges {
+		gaugeForm += fmt.Sprintf("<li>%s:%f</li>", g.Name, g.Value)
 	}
 
-	return nil
+	counterForm := "<a>Counter</a>"
+	for _, c := range counters {
+		counterForm += fmt.Sprintf("<li>%s:%d</li>", c.Name, c.Value)
+	}
+
+	form := fmt.Sprintf("<html><ul>%s</ul><ul>%s</ul></html>", gaugeForm, counterForm)
+	return form
 }
