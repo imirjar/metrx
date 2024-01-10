@@ -1,54 +1,33 @@
 package agent
 
 import (
-	"fmt"
 	"math/rand"
-	"net/http"
 	"reflect"
 	"runtime"
 	"time"
 )
 
-const (
-	pollInterval   = 2 * time.Second
-	reportInterval = 10 * time.Second
-)
+func Run() error {
+	conf := newConfig()
+	// fmt.Printf("Client issue on %s", conf.url)
 
-var GaugeMetrics = []string{
-	"Alloc", "BuckHashSys", "Frees", "GCCPUFraction", "GCSys", "HeapAlloc", "HeapIdle", "HeapInuse", "HeapObjects",
-	"HeapReleased", "HeapSys", "LastGC", "Lookups", "MCacheInuse", "MCacheSys", "MSpanInuse", "MSpanSys", "Mallocs",
-	"NextGC", "NumForcedGC", "NumGC", "OtherSys", "PauseTotalNs", "StackInuse", "StackSys", "Sys", "TotalAlloc",
-}
-
-func sendMetric(metricType string, metric string, value any) {
-	_, err := http.Post(fmt.Sprintf("http://localhost:8080/update/%s/%s/%v", metricType, metric, value), "text/plain", nil)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-}
-
-func Run() {
-	var memStats runtime.MemStats
 	counter := 0
 	go func() {
 		for {
-			// fmt.Println("Updating memstats")
-			runtime.ReadMemStats(&memStats)
-			// fmt.Println(memStats.Alloc)
+			runtime.ReadMemStats(&conf.memStats)
 			counter += 1
-			time.Sleep(pollInterval)
+			time.Sleep(conf.pollInterval)
 		}
 	}()
 
 	for {
-		for _, metric := range GaugeMetrics {
-			sendMetric("gauge", metric, reflect.ValueOf(memStats).FieldByName(metric))
+		for _, metric := range conf.gaugeMetrics {
+			sendMetric("gauge", metric, conf.url, reflect.ValueOf(conf.memStats).FieldByName(metric))
 		}
-		sendMetric("gauge", "RandomValue", rand.Intn(100))
-		sendMetric("counter", "PollCount", counter)
-		// fmt.Println(counter)
+		sendMetric("gauge", "RandomValue", conf.url, rand.Intn(100))
+		sendMetric("counter", "PollCount", conf.url, counter)
 		counter = 0
-		time.Sleep(reportInterval)
+		time.Sleep(conf.reportInterval)
 	}
+
 }

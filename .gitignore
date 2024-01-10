@@ -25,3 +25,4 @@ vendor/
 .vscode
 server
 metricstest
+cmd/test/*
