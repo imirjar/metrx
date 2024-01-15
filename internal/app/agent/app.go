@@ -15,6 +15,7 @@ var gaugeMetrics []string = []string{
 }
 
 func Run() error {
+	// var metricStorage []models.Gauge
 	conf := newConfig()
 	// fmt.Printf("Client issue on %s", conf.url)
 

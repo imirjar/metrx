@@ -3,14 +3,25 @@ package agent
 import (
 	"fmt"
 	"net/http"
+	"time"
 )
 
 func sendMetric(metricType string, metric string, appURL string, value any) {
+	client := &http.Client{
+		Timeout: time.Second * 1,
+	}
+
 	path := fmt.Sprintf(appURL+"/update/%s/%s/%v", metricType, metric, value)
-	resp, err := http.Post(path, "text/plain", nil)
+	_, err := client.Post(path, "text/plain", nil)
 
 	if err != nil {
 		fmt.Println(err)
 	}
-	defer resp.Body.Close()
+	// _, err = io.ReadAll(resp.Body)
+
+	// resp.Body.Close()
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	return
+	// }
 }
