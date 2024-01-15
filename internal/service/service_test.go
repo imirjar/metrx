@@ -37,7 +37,7 @@ func TestGauge(t *testing.T) {
 				"name":  "unknownMetric",
 				"value": "10",
 			},
-			expected: serviceServiceError,
+			expected: errServiceError,
 		},
 		{
 			name: "Counter with incorrect value",
@@ -46,7 +46,7 @@ func TestGauge(t *testing.T) {
 				"name":  "counterMetric",
 				"value": "counterValue",
 			},
-			expected: serviceConvertationError,
+			expected: errConvertationError,
 		},
 		{
 			name: "Gauge with incorrect value",
@@ -55,7 +55,7 @@ func TestGauge(t *testing.T) {
 				"name":  "gaugeMetric",
 				"value": "gaugeValue",
 			},
-			expected: serviceConvertationError,
+			expected: errConvertationError,
 		},
 
 		{
@@ -65,7 +65,7 @@ func TestGauge(t *testing.T) {
 				"name":  "",
 				"value": "10",
 			},
-			expected: serviceMetricNameIncorrect, // must be name Error
+			expected: errMetricNameIncorrect, // must be name Error
 		},
 		{
 			name: "Counter without name",
@@ -74,7 +74,7 @@ func TestGauge(t *testing.T) {
 				"name":  "",
 				"value": "10",
 			},
-			expected: serviceMetricNameIncorrect, // must be name Error
+			expected: errMetricNameIncorrect, // must be name Error
 		},
 	}
 	for _, test := range tests {

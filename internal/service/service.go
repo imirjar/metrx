@@ -20,14 +20,14 @@ type Service struct {
 
 func (s *Service) UpdateMetric(mType string, name string, value string) error {
 	if name == "" {
-		return serviceMetricNameIncorrect
+		return errMetricNameIncorrect
 	}
 	switch mType {
 
 	case "gauge":
 		value, err := strconv.ParseFloat(value, 64)
 		if err != nil {
-			return serviceConvertationError
+			return errConvertationError
 		}
 		gauge := models.Gauge{
 			Name:  name,
@@ -35,14 +35,14 @@ func (s *Service) UpdateMetric(mType string, name string, value string) error {
 		}
 		_, err = s.Storage.AddGauge(gauge)
 		if err != nil {
-			return serviceStorageError
+			return errStorageError
 		}
 		return nil
 
 	case "counter":
 		value, err := strconv.ParseInt(value, 10, 64)
 		if err != nil {
-			return serviceConvertationError
+			return errConvertationError
 		}
 		counter := models.Counter{
 			Name:  name,
@@ -50,18 +50,18 @@ func (s *Service) UpdateMetric(mType string, name string, value string) error {
 		}
 		_, err = s.Storage.AddCounter(counter)
 		if err != nil {
-			return serviceStorageError
+			return errStorageError
 		}
 		return nil
 	default:
-		return serviceServiceError
+		return errServiceError
 	}
 
 }
 
 func (s *Service) ViewGaugeByName(name string) (*models.Gauge, error) {
 	if name == "" {
-		return nil, serviceMetricNameIncorrect
+		return nil, errMetricNameIncorrect
 	}
 
 	return s.Storage.ReadGauge(name), nil
@@ -70,7 +70,7 @@ func (s *Service) ViewGaugeByName(name string) (*models.Gauge, error) {
 
 func (s *Service) ViewCounterByName(name string) (*models.Counter, error) {
 	if name == "" {
-		return nil, serviceMetricNameIncorrect
+		return nil, errMetricNameIncorrect
 	}
 
 	return s.Storage.ReadCounter(name), nil
