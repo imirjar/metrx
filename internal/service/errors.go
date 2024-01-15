@@ -3,8 +3,8 @@ package service
 import "errors"
 
 var (
-	serviceError        = errors.New("service error")
-	storageError        = errors.New("storage error")
-	convertationError   = errors.New("string covertation error")
-	metricNameIncorrect = errors.New("metric name is incorrect")
+	serviceServiceError        = errors.New("service error")
+	serviceStorageError        = errors.New("storage error")
+	serviceConvertationError   = errors.New("string covertation error")
+	serviceMetricNameIncorrect = errors.New("metric name is incorrect")
 )
