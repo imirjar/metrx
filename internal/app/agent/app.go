@@ -82,7 +82,7 @@ func sendMetrix(c *config, wg *sync.WaitGroup) {
 	client := &http.Client{
 		Timeout: time.Second * 1,
 	}
-	var counter int = 0
+	counter := 0
 
 	for _, metric := range c.store.ReadAllGauge() {
 		fmt.Println(metric.Name, metric.Value)
