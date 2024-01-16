@@ -16,6 +16,7 @@ type Storager interface {
 	ReadAllCounter() []models.Counter
 	ReadGauge(name string) *models.Gauge
 	ReadCounter(name string) *models.Counter
+	Drop()
 }
 
 func New() Storager {
@@ -77,4 +78,8 @@ func (m *MemStorage) ReadCounter(name string) *models.Counter {
 		}
 	}
 	return nil
+}
+
+func (m *MemStorage) Drop() {
+	m = nil
 }

@@ -7,16 +7,20 @@ import (
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/imirjar/metrx/internal/storage"
 )
 
 type config struct {
 	url            string
 	pollInterval   time.Duration
 	reportInterval time.Duration
+	store          storage.Storager
 }
 
 func newConfig() *config {
 	var cfg config
+	cfg.store = storage.New()
 	cfg.setDefault()
 	cfg.setEnv()
 	cfg.setFlags()
