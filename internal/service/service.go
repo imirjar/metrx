@@ -1,100 +1,37 @@
 package service
 
 import (
-	"fmt"
-	"strconv"
+	"net/http"
+	"time"
 
-	"github.com/imirjar/metrx/internal/models"
 	"github.com/imirjar/metrx/internal/storage"
 )
 
-func New() *Service {
-	return &Service{
+func NewServer() *Server {
+	return &Server{
 		Storage: storage.New(),
 	}
 }
 
-type Service struct {
-	Storage storage.Storager
+func NewAgent() *Agent {
+	agent := &Agent{
+		Metrics: []string{
+			"Alloc", "BuckHashSys", "Frees", "GCCPUFraction", "GCSys", "HeapAlloc", "HeapIdle", "HeapInuse", "HeapObjects",
+			"HeapReleased", "HeapSys", "LastGC", "Lookups", "MCacheInuse", "MCacheSys", "MSpanInuse", "MSpanSys", "Mallocs",
+			"NextGC", "NumForcedGC", "NumGC", "OtherSys", "PauseTotalNs", "StackInuse", "StackSys", "Sys", "TotalAlloc",
+		},
+		Client: &http.Client{
+			Timeout: time.Second * 1,
+		},
+	}
+
+	return agent
 }
 
-func (s *Service) UpdateMetric(mType string, name string, value string) error {
-	if name == "" {
-		return errMetricNameIncorrect
-	}
-	switch mType {
-
-	case "gauge":
-		value, err := strconv.ParseFloat(value, 64)
-		if err != nil {
-			return errConvertationError
-		}
-		gauge := models.Gauge{
-			Name:  name,
-			Value: value,
-		}
-		_, err = s.Storage.AddGauge(gauge)
-		if err != nil {
-			return errStorageError
-		}
-		return nil
-
-	case "counter":
-		value, err := strconv.ParseInt(value, 10, 64)
-		if err != nil {
-			return errConvertationError
-		}
-		counter := models.Counter{
-			Name:  name,
-			Value: value,
-		}
-		_, err = s.Storage.AddCounter(counter)
-		if err != nil {
-			return errStorageError
-		}
-		return nil
-	default:
-		return errServiceError
-	}
-
-}
-
-func (s *Service) ViewGaugeByName(name string) (*models.Gauge, error) {
-	if name == "" {
-		return nil, errMetricNameIncorrect
-	}
-
-	return s.Storage.ReadGauge(name), nil
-
-}
-
-func (s *Service) ViewCounterByName(name string) (*models.Counter, error) {
-	if name == "" {
-		return nil, errMetricNameIncorrect
-	}
-
-	return s.Storage.ReadCounter(name), nil
-
-}
-
-func (s *Service) FindMetricValue(mType string, name string) any {
-	return nil
-}
-
-func (s *Service) MetricList() string {
-	gauges := s.Storage.ReadAllGauge()
-	counters := s.Storage.ReadAllCounter()
-
-	gaugeForm := "<a>Gauge</a>"
-	for _, g := range gauges {
-		gaugeForm += fmt.Sprintf("<li>%s:%f</li>", g.Name, g.Value)
-	}
-
-	counterForm := "<a>Counter</a>"
-	for _, c := range counters {
-		counterForm += fmt.Sprintf("<li>%s:%d</li>", c.Name, c.Value)
-	}
-
-	form := fmt.Sprintf("<html><ul>%s</ul><ul>%s</ul></html>", gaugeForm, counterForm)
-	return form
+type Storager interface {
+	AddGauge(mName string, mValue float64)
+	AddCounter(mName string, mValue int64)
+	ReadAll() *storage.MemStorage
+	ReadGauge(mName string) (float64, bool)
+	ReadCounter(mName string) (int64, bool)
 }

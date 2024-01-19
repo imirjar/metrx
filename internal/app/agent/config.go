@@ -7,31 +7,24 @@ import (
 	"os"
 	"strconv"
 	"time"
-
-	"github.com/imirjar/metrx/internal/storage"
 )
 
 type config struct {
 	url            string
 	pollInterval   time.Duration
 	reportInterval time.Duration
-	store          storage.Storager
 }
 
 func newConfig() *config {
-	var cfg config
-	cfg.store = storage.New()
-	cfg.setDefault()
+	cfg := config{
+		url:            "http://localhost:8080",
+		pollInterval:   time.Duration(1_000_000_000 * 2),  //2s
+		reportInterval: time.Duration(1_000_000_000 * 10), //10s
+	}
 	cfg.setEnv()
 	cfg.setFlags()
-	return &cfg
-}
 
-// set params from local environment
-func (c *config) setDefault() {
-	c.url = "http://localhost:8080"
-	c.pollInterval = time.Duration(1_000_000_000 * 2)    //2s
-	c.reportInterval = time.Duration(1_000_000_000 * 10) //10s
+	return &cfg
 }
 
 // set params from local environment

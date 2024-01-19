@@ -1,32 +1,21 @@
 package server_test
 
-// func Test_server_Middleware(t *testing.T) {
-// 	type fields struct {
-// 		router  *http.ServeMux
-// 		handler *Handler
-// 		config  *config
-// 	}
-// 	type args struct {
-// 		h http.Handler
-// 	}
-// 	tests := []struct {
-// 		name   string
-// 		fields fields
-// 		args   args
-// 		want   http.Handler
-// 	}{
-// 		// TODO: Add test cases.
-// 	}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			s := &server{
-// 				router:  tt.fields.router,
-// 				handler: tt.fields.handler,
-// 				config:  tt.fields.config,
-// 			}
-// 			if got := s.Middleware(tt.args.h); !reflect.DeepEqual(got, tt.want) {
-// 				t.Errorf("server.Middleware() = %v, want %v", got, tt.want)
-// 			}
-// 		})
-// 	}
-// }
+import (
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	"github.com/imirjar/metrx/internal/app/server"
+)
+
+func Test_server_Update_view(t *testing.T) {
+	s := server.NewServer()
+	w := httptest.NewRecorder()
+
+	s.Router.HandleFunc("/update/{mType}/{name}/{value}", s.Update)
+	s.Router.ServeHTTP(w, httptest.NewRequest("POST", "/update/gauge/someGauge/1", nil))
+
+	if w.Code != http.StatusOK {
+		t.Error("Did not get expected HTTP status code, got", w.Code)
+	}
+}

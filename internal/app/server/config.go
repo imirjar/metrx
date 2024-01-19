@@ -2,22 +2,11 @@ package server
 
 import (
 	"flag"
-	"log"
 	"os"
 )
 
 type config struct {
 	url string
-}
-
-func newConfig() *config {
-	cfg := config{
-		url: "localhost:8080",
-	}
-	cfg.setEnv()
-	cfg.setFlags()
-	log.Print("start on ", cfg.url)
-	return &cfg
 }
 
 // set params from local environment
@@ -35,5 +24,4 @@ func (c *config) setFlags() {
 	if *a != "" {
 		c.url = *a
 	}
-
 }

@@ -1,47 +1,72 @@
 package storage
 
-import (
-	"testing"
+import "testing"
 
-	"github.com/imirjar/metrx/internal/models"
-)
+func TestMemStorage_AddGauge_ReadGauge(t *testing.T) {
 
-func TestAddCounter(t *testing.T) {
-	memstorage := New()
-	tests := []struct { // добавляем слайс тестов
-		name  string
-		value models.Counter
-		want  int64
+	tests := []struct {
+		name     string
+		mName    string
+		mValue   float64
+		expected float64
 	}{
 		{
-			name: "Create",
-			value: models.Counter{
-				Name:  "metric",
-				Value: 10,
-			},
-			want: 10,
+			name:     "All right",
+			mName:    "gaugeMetric",
+			mValue:   10.123,
+			expected: 10.123,
 		},
 		{
-			name: "Update",
-			value: models.Counter{
-				Name:  "metric",
-				Value: 10,
-			},
-			want: 20,
-		},
-		{
-			name: "Update",
-			value: models.Counter{
-				Name:  "metric",
-				Value: -20,
-			},
-			want: 0,
+			name:     "Zero value",
+			mName:    "gaugeMetric",
+			mValue:   0,
+			expected: 0,
 		},
 	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			if add, _ := memstorage.AddCounter(test.value); add.Value != test.want {
-				t.Errorf("Sum() = %d, want %d", add.Value, test.want)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			memStorage := New()
+			memStorage.AddGauge(tt.mName, tt.mValue)
+
+			gauge, ok := memStorage.ReadGauge(tt.mName)
+
+			if !ok || gauge != tt.expected {
+				t.Errorf("Value = %f, want %f", gauge, tt.expected)
+			}
+		})
+	}
+}
+
+func TestMemStorage_AddCounter_ReadCounter(t *testing.T) {
+
+	tests := []struct {
+		name     string
+		mName    string
+		mValue   int64
+		expected int64
+	}{
+		{
+			name:     "All right",
+			mName:    "gaugeMetric",
+			mValue:   10,
+			expected: 10,
+		},
+		{
+			name:     "Zero value",
+			mName:    "gaugeMetric",
+			mValue:   0,
+			expected: 0,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			memStorage := New()
+			memStorage.AddCounter(tt.mName, tt.mValue)
+
+			gauge, ok := memStorage.ReadCounter(tt.mName)
+
+			if !ok || gauge != tt.expected {
+				t.Errorf("Value = %d, want %d", gauge, tt.expected)
 			}
 		})
 	}
