@@ -70,6 +70,10 @@ func (s *ServerApp) MainPage(res http.ResponseWriter, req *http.Request) {
 	res.Write([]byte(list))
 }
 
-func (s *ServerApp) BadParams(res http.ResponseWriter, req *http.Request) {
+func (s *ServerApp) UpdateBadParams(res http.ResponseWriter, req *http.Request) {
+	res.WriteHeader(http.StatusBadRequest)
+}
+
+func (s *ServerApp) ValueBadParams(res http.ResponseWriter, req *http.Request) {
 	res.WriteHeader(http.StatusBadRequest)
 }
