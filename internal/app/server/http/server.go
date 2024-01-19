@@ -11,25 +11,23 @@ type ServerApp struct {
 	Service *server.ServerService
 }
 
-func (a *ServerApp) Run(url string) error {
+func (s *ServerApp) Run(url string) error {
 	mux := mux.NewRouter()
 
 	//middleware is cheking if the name and value exist
 	update := mux.PathPrefix("/update").Subrouter()
-	update.HandleFunc("/gauge/{name}/{value:[0-9]+[.]{0,1}[0-9]*}", a.UpdateGauge).Methods("POST") //value:[0-9]+[.]{0,1}[0-9]*
-	update.HandleFunc("/counter/{name}/{value:[0-9]+}", a.UpdateCounter).Methods("POST")
-	update.HandleFunc("/{other}/{name}/{value}", a.UpdateBadParams).Methods("POST")
-	// update.Use(a.UpdateMiddleware)
+	update.HandleFunc("/gauge/{name}/{value:[0-9]+[.]{0,1}[0-9]*}", s.UpdateGauge).Methods("POST") //value:[0-9]+[.]{0,1}[0-9]*
+	update.HandleFunc("/counter/{name}/{value:[0-9]+}", s.UpdateCounter).Methods("POST")
+	update.HandleFunc("/{other}/{name}/{value}", s.UpdateBadParams).Methods("POST")
 
 	//middleware is cheking if the name exists
 	value := mux.PathPrefix("/value").Subrouter()
-	value.HandleFunc("/gauge/{name}", a.ValueGauge).Methods("GET")
-	value.HandleFunc("/counter/{name}", a.ValueCounter).Methods("GET")
-	value.HandleFunc("/{other}/{name}", a.ValueBadParams).Methods("GET")
-	// value.Use(a.ValueMiddleware)
+	value.HandleFunc("/gauge/{name}", s.ValueGauge).Methods("GET")
+	value.HandleFunc("/counter/{name}", s.ValueCounter).Methods("GET")
+	value.HandleFunc("/{other}/{name}", s.ValueBadParams).Methods("GET")
 
 	//without middleware
-	mux.HandleFunc("/", a.MainPage).Methods("GET")
+	mux.HandleFunc("/", s.MainPage).Methods("GET")
 
 	return http.ListenAndServe(url, mux)
 }
