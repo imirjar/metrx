@@ -23,24 +23,27 @@ func (a *AgentService) SendMetrix(path string) {
 	for _, mName := range a.Metrics {
 		value := reflect.ValueOf(a.MemStats).FieldByName(mName)
 		fullPath := fmt.Sprintf(path+"/update/%s/%s/%v", "gauge", mName, value)
-		_, err := a.Client.Post(fullPath, "text/plain", nil)
+		resp, err := a.Client.Post(fullPath, "text/plain", nil)
 		if err != nil {
 			fmt.Println(err)
 		}
+		resp.Body.Close()
 		counter += 1
 	}
 
 	fullPath := fmt.Sprintf(path+"/update/%s/%s/%v", "gauge", "RandomValue", rand.Float64())
-	_, err := a.Client.Post(fullPath, "text/plain", nil)
-	if err != nil {
-		fmt.Println(err)
-	}
-	counter += 1
-
-	counterPath := fmt.Sprintf(path+"/update/%s/%s/%v", "counter", "PollCount", counter)
-	resp, err := a.Client.Post(counterPath, "text/plain", nil)
+	resp, err := a.Client.Post(fullPath, "text/plain", nil)
 	if err != nil {
 		fmt.Println(err)
 	}
 	resp.Body.Close()
+	counter += 1
+
+	counterPath := fmt.Sprintf(path+"/update/%s/%s/%v", "counter", "PollCount", counter)
+	resp, err = a.Client.Post(counterPath, "text/plain", nil)
+	if err != nil {
+		fmt.Println(err)
+	}
+	resp.Body.Close()
+	defer a.Client.CloseIdleConnections()
 }
