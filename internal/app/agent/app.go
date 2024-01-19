@@ -16,28 +16,6 @@ func Run() error {
 	poll := time.NewTicker(conf.pollInterval)
 	report := time.NewTicker(conf.reportInterval)
 
-	// wg.Add(1)
-
-	// go func() {
-	// 	for {
-	// 		agent.CollectMetrix()
-	// 		time.Sleep(conf.pollInterval)
-	// 	}
-	// }()
-
-	// time.Sleep(conf.pollInterval)
-
-	// go func() {
-	// 	for {
-	// 		agent.SendMetrix(conf.url)
-	// 		time.Sleep(conf.reportInterval)
-
-	// 	}
-	// }()
-
-	// wg.Wait()
-	// return nil
-
 	for {
 		select {
 		case <-poll.C:

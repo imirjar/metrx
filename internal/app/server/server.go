@@ -19,8 +19,10 @@ func NewServer() *Server {
 		Router:  newRouter(),
 		Service: service.NewServer(),
 	}
-	server.Router.HandleFunc("/update/{mType}/{name}/{value}", server.Update).Methods("POST")
-	server.Router.HandleFunc("/value/{mType}/{name}", server.View).Methods("GET")
+	server.Router.HandleFunc("/update/gauge/{name}/{value}", server.UpdateGauge).Methods("POST")
+	server.Router.HandleFunc("/update/counter/{name}/{value:[0-9]+}", server.UpdateCounter).Methods("POST")
+	server.Router.HandleFunc("/value/gauge/{name}", server.ValueGauge).Methods("GET")
+	server.Router.HandleFunc("/value/counter/{name}", server.ValueCounter).Methods("GET")
 	server.Router.HandleFunc("/", server.MainPage).Methods("GET")
 	return server
 }
