@@ -1,4 +1,4 @@
-package service
+package server
 
 import (
 	"fmt"
@@ -6,6 +6,15 @@ import (
 
 type Server struct {
 	Storage Storager
+}
+
+type Storager interface {
+	AddGauge(mName string, mValue float64)
+	AddCounter(mName string, mValue int64)
+	ReadAllGauge() map[string]float64
+	ReadAllCounter() map[string]int64
+	ReadGauge(mName string) (float64, bool)
+	ReadCounter(mName string) (int64, bool)
 }
 
 // update gauge
@@ -67,15 +76,16 @@ func (s *Server) ViewCounterByName(mName string) (int64, error) {
 
 // get all metrics as html page
 func (s *Server) MetricList() string {
-	metric := s.Storage.ReadAll()
+	gauges := s.Storage.ReadAllGauge()
+	counters := s.Storage.ReadAllCounter()
 
 	gaugeForm := "<a>Gauge</a>"
-	for i, g := range metric.Gauge {
+	for i, g := range gauges {
 		gaugeForm += fmt.Sprintf("<li>%s:%f</li>", i, g)
 	}
 
 	counterForm := "<a>Counter</a>"
-	for i, c := range metric.Counter {
+	for i, c := range counters {
 		counterForm += fmt.Sprintf("<li>%s:%d</li>", i, c)
 	}
 

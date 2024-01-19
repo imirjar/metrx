@@ -1,4 +1,4 @@
-package service
+package agent
 
 import (
 	"fmt"
@@ -43,5 +43,4 @@ func (a *Agent) SendMetrix(path string) {
 		fmt.Println(err)
 	}
 	resp.Body.Close()
-
 }

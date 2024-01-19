@@ -8,20 +8,19 @@ import (
 
 // var memStats runtime.MemStats
 
-func Run() error {
+func Run(path string, pollInterval, reportInterval time.Duration) error {
 
-	conf := newConfig()
 	agent := service.NewAgent()
 
-	poll := time.NewTicker(conf.pollInterval)
-	report := time.NewTicker(conf.reportInterval)
+	poll := time.NewTicker(pollInterval)
+	report := time.NewTicker(reportInterval)
 
 	for {
 		select {
 		case <-poll.C:
 			agent.CollectMetrix()
 		case <-report.C:
-			agent.SendMetrix(conf.url)
+			agent.SendMetrix(path)
 		}
 	}
 }

@@ -20,8 +20,12 @@ func (m *MemStorage) AddCounter(mName string, mValue int64) {
 	m.Counter[mName] = mValue
 }
 
-func (m *MemStorage) ReadAll() *MemStorage {
-	return m
+func (m *MemStorage) ReadAllGauge() map[string]float64 {
+	return m.Gauge
+}
+
+func (m *MemStorage) ReadAllCounter() map[string]int64 {
+	return m.Counter
 }
 
 func (m *MemStorage) ReadGauge(mName string) (float64, bool) {

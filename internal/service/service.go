@@ -4,17 +4,21 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/imirjar/metrx/internal/service/agent"
+	"github.com/imirjar/metrx/internal/service/server"
 	"github.com/imirjar/metrx/internal/storage"
 )
 
-func NewServer() *Server {
-	return &Server{
+// лучше вынести в подпакет
+func NewServer() *server.Server {
+	return &server.Server{
 		Storage: storage.New(),
 	}
 }
 
-func NewAgent() *Agent {
-	agent := &Agent{
+// лучше вынести в подпакет
+func NewAgent() *agent.Agent {
+	agent := &agent.Agent{
 		Metrics: []string{
 			"Alloc", "BuckHashSys", "Frees", "GCCPUFraction", "GCSys", "HeapAlloc", "HeapIdle", "HeapInuse", "HeapObjects",
 			"HeapReleased", "HeapSys", "LastGC", "Lookups", "MCacheInuse", "MCacheSys", "MSpanInuse", "MSpanSys", "Mallocs",
@@ -26,12 +30,4 @@ func NewAgent() *Agent {
 	}
 
 	return agent
-}
-
-type Storager interface {
-	AddGauge(mName string, mValue float64)
-	AddCounter(mName string, mValue int64)
-	ReadAll() *storage.MemStorage
-	ReadGauge(mName string) (float64, bool)
-	ReadCounter(mName string) (int64, bool)
 }

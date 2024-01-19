@@ -1,27 +1,27 @@
-package server
+package config
 
 import (
 	"flag"
 	"os"
 )
 
-type config struct {
-	url string
+type ServerConfig struct {
+	URL string
 }
 
 // set params from local environment
-func (c *config) setEnv() {
+func (c *ServerConfig) setEnv() {
 	//if address in env
 	if a := os.Getenv("ADDRESS"); a != "" {
-		c.url = a
+		c.URL = a
 	}
 }
 
 // set params from os.Args[]
-func (c *config) setFlags() {
+func (c *ServerConfig) setFlags() {
 	a := flag.String("a", "", "executable port")
 	flag.Parse()
 	if *a != "" {
-		c.url = *a
+		c.URL = *a
 	}
 }
