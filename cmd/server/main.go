@@ -2,12 +2,13 @@ package main
 
 import (
 	"github.com/imirjar/metrx/config"
-	"github.com/imirjar/metrx/internal/app/server"
+	"github.com/imirjar/metrx/internal/app"
 )
 
 func main() {
 	config := config.NewServerConfig()
-	if err := server.Run(config.URL); err != nil {
+	serverApp := app.NewServerApp()
+	if err := serverApp.Run(config.URL); err != nil {
 		panic(err)
 	}
 }

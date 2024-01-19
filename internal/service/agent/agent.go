@@ -8,17 +8,17 @@ import (
 	"runtime"
 )
 
-type Agent struct {
+type AgentService struct {
 	Metrics  []string
 	Client   *http.Client
 	MemStats runtime.MemStats
 }
 
-func (a *Agent) CollectMetrix() {
+func (a *AgentService) CollectMetrix() {
 	runtime.ReadMemStats(&a.MemStats)
 }
 
-func (a *Agent) SendMetrix(path string) {
+func (a *AgentService) SendMetrix(path string) {
 	counter := 0
 	for _, mName := range a.Metrics {
 		value := reflect.ValueOf(a.MemStats).FieldByName(mName)

@@ -2,12 +2,13 @@ package main
 
 import (
 	"github.com/imirjar/metrx/config"
-	"github.com/imirjar/metrx/internal/app/agent"
+	"github.com/imirjar/metrx/internal/app"
 )
 
 func main() {
 	config := config.NewAgentConfig()
-	if err := agent.Run(config.URL, config.PollInterval, config.ReportInterval); err != nil {
+	agentApp := app.NewAgentApp()
+	if err := agentApp.Run(config.URL, config.PollInterval, config.ReportInterval); err != nil {
 		panic(err)
 	}
 }

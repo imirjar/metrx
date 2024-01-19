@@ -10,15 +10,15 @@ import (
 )
 
 // лучше вынести в подпакет
-func NewServer() *server.Server {
-	return &server.Server{
+func NewServerService() *server.ServerService {
+	return &server.ServerService{
 		Storage: storage.New(),
 	}
 }
 
 // лучше вынести в подпакет
-func NewAgent() *agent.Agent {
-	agent := &agent.Agent{
+func NewAgentService() *agent.AgentService {
+	agent := &agent.AgentService{
 		Metrics: []string{
 			"Alloc", "BuckHashSys", "Frees", "GCCPUFraction", "GCSys", "HeapAlloc", "HeapIdle", "HeapInuse", "HeapObjects",
 			"HeapReleased", "HeapSys", "LastGC", "Lookups", "MCacheInuse", "MCacheSys", "MSpanInuse", "MSpanSys", "Mallocs",

@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-type Server struct {
+type ServerService struct {
 	Storage Storager
 }
 
@@ -18,7 +18,7 @@ type Storager interface {
 }
 
 // update gauge
-func (s *Server) UpdateGauge(mName string, mValue float64) error {
+func (s *ServerService) UpdateGauge(mName string, mValue float64) error {
 	if mName == "" {
 		return errMetricNameIncorrect
 	}
@@ -28,7 +28,7 @@ func (s *Server) UpdateGauge(mName string, mValue float64) error {
 }
 
 // оupdate counter
-func (s *Server) UpdateCounter(mName string, mValue int64) error {
+func (s *ServerService) UpdateCounter(mName string, mValue int64) error {
 	if mName == "" {
 		return errMetricNameIncorrect
 	}
@@ -46,7 +46,7 @@ func (s *Server) UpdateCounter(mName string, mValue int64) error {
 }
 
 // get gauge metric
-func (s *Server) ViewGaugeByName(mName string) (float64, error) {
+func (s *ServerService) ViewGaugeByName(mName string) (float64, error) {
 	if mName == "" {
 		return 0, errMetricNameIncorrect
 	}
@@ -60,7 +60,7 @@ func (s *Server) ViewGaugeByName(mName string) (float64, error) {
 }
 
 // get counter metric
-func (s *Server) ViewCounterByName(mName string) (int64, error) {
+func (s *ServerService) ViewCounterByName(mName string) (int64, error) {
 	if mName == "" {
 		return 0, errMetricNameIncorrect
 	}
@@ -75,7 +75,7 @@ func (s *Server) ViewCounterByName(mName string) (int64, error) {
 }
 
 // get all metrics as html page
-func (s *Server) MetricList() string {
+func (s *ServerService) MetricList() string {
 	gauges := s.Storage.ReadAllGauge()
 	counters := s.Storage.ReadAllCounter()
 

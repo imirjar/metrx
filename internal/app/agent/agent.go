@@ -6,11 +6,11 @@ import (
 	"github.com/imirjar/metrx/internal/service"
 )
 
-// var memStats runtime.MemStats
+type AgentApp struct{}
 
-func Run(path string, pollInterval, reportInterval time.Duration) error {
+func (a *AgentApp) Run(path string, pollInterval, reportInterval time.Duration) error {
 
-	agent := service.NewAgent()
+	agent := service.NewAgentService()
 
 	poll := time.NewTicker(pollInterval)
 	report := time.NewTicker(reportInterval)
