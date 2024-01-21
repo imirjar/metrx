@@ -2,7 +2,15 @@ package server
 
 import (
 	"fmt"
+
+	"github.com/imirjar/metrx/internal/storage"
 )
+
+func NewServerService() *ServerService {
+	return &ServerService{
+		Storage: storage.New(),
+	}
+}
 
 type ServerService struct {
 	Storage Storager

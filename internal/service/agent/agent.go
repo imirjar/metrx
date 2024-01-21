@@ -6,12 +6,28 @@ import (
 	"net/http"
 	"reflect"
 	"runtime"
+	"time"
 )
 
 type AgentService struct {
 	Metrics  []string
 	Client   *http.Client
 	MemStats runtime.MemStats
+}
+
+func NewAgentService() *AgentService {
+	agent := &AgentService{
+		Metrics: []string{
+			"Alloc", "BuckHashSys", "Frees", "GCCPUFraction", "GCSys", "HeapAlloc", "HeapIdle", "HeapInuse", "HeapObjects",
+			"HeapReleased", "HeapSys", "LastGC", "Lookups", "MCacheInuse", "MCacheSys", "MSpanInuse", "MSpanSys", "Mallocs",
+			"NextGC", "NumForcedGC", "NumGC", "OtherSys", "PauseTotalNs", "StackInuse", "StackSys", "Sys", "TotalAlloc",
+		},
+		Client: &http.Client{
+			Timeout: time.Second * 1,
+		},
+	}
+
+	return agent
 }
 
 func (a *AgentService) CollectMetrix() {
