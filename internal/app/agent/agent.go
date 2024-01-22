@@ -19,10 +19,8 @@ func (a *AgentApp) Run(path string, pollInterval, reportInterval time.Duration) 
 		select {
 		case <-poll.C:
 			agent.CollectMetrix()
-			defer poll.Stop()
 		case <-report.C:
 			agent.SendMetrix(path)
-			defer report.Stop()
 		}
 	}
 }
