@@ -28,6 +28,7 @@ func (s *ServerApp) Run(url string) error {
 
 	//all metric values as a html page
 	mux.HandleFunc("/", s.MainPage).Methods("GET")
+	mux.Use(s.Logger)
 
 	return http.ListenAndServe(url, mux)
 }
