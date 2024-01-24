@@ -2,29 +2,26 @@ package agent
 
 import (
 	"fmt"
-	"math/rand"
-	"net/http"
 	"reflect"
 	"runtime"
-	"time"
+
+	"github.com/imirjar/metrx/internal/entity"
 )
 
 type AgentService struct {
-	Metrics  []string
-	Client   *http.Client
+	Metrics  []entity.Metrics
 	MemStats runtime.MemStats
 }
 
 func NewAgentService() *AgentService {
-	agent := &AgentService{
-		Metrics: []string{
-			"Alloc", "BuckHashSys", "Frees", "GCCPUFraction", "GCSys", "HeapAlloc", "HeapIdle", "HeapInuse", "HeapObjects",
-			"HeapReleased", "HeapSys", "LastGC", "Lookups", "MCacheInuse", "MCacheSys", "MSpanInuse", "MSpanSys", "Mallocs",
-			"NextGC", "NumForcedGC", "NumGC", "OtherSys", "PauseTotalNs", "StackInuse", "StackSys", "Sys", "TotalAlloc",
-		},
-		Client: &http.Client{
-			Timeout: time.Second * 1,
-		},
+
+	agent := &AgentService{}
+	for _, m := range entity.MemStats {
+		metric := entity.Metrics{
+			ID:    m,
+			MType: "gauge",
+		}
+		agent.Metrics = append(agent.Metrics, metric)
 	}
 
 	return agent
@@ -34,32 +31,54 @@ func (a *AgentService) CollectMetrix() {
 	runtime.ReadMemStats(&a.MemStats)
 }
 
-func (a *AgentService) SendMetrix(path string) {
-	counter := 0
-	for _, mName := range a.Metrics {
-		value := reflect.ValueOf(a.MemStats).FieldByName(mName)
-		fullPath := fmt.Sprintf(path+"/update/%s/%s/%v", "gauge", mName, value)
-		resp, err := a.Client.Post(fullPath, "text/plain", nil)
+func (a *AgentService) SendMetrix(URI string) {
+
+	var counter int64 = 0
+	path := URI + "/update/"
+
+	//for metric list
+	for _, metric := range a.Metrics {
+		a.ReadValueFromMemStats(&metric)
+		err := metric.SendJSONToPath(path)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Printf("%s", err)
 		}
-		resp.Body.Close()
 		counter += 1
 	}
 
-	fullPath := fmt.Sprintf(path+"/update/%s/%s/%v", "gauge", "RandomValue", rand.Float64())
-	resp, err := a.Client.Post(fullPath, "text/plain", nil)
-	if err != nil {
-		fmt.Println(err)
+	//for random metric
+	randomMetric := entity.Metrics{
+		ID:    "RandomValue",
+		MType: "gauge",
 	}
-	resp.Body.Close()
+	randomMetric.SetRandomValue()
+
+	err := randomMetric.SendJSONToPath(path)
+	if err != nil {
+		fmt.Printf("%s", err)
+	}
+
 	counter += 1
 
-	counterPath := fmt.Sprintf(path+"/update/%s/%s/%v", "counter", "PollCount", counter)
-	resp, err = a.Client.Post(counterPath, "text/plain", nil)
-	if err != nil {
-		fmt.Println(err)
+	//for metric counter
+	counterMetric := entity.Metrics{
+		ID:    "PollCount",
+		MType: "counter",
+		Delta: &counter,
 	}
-	resp.Body.Close()
-	defer a.Client.CloseIdleConnections()
+	counterMetric.SendJSONToPath(path)
+
+}
+
+func (a *AgentService) ReadValueFromMemStats(metric *entity.Metrics) {
+	value := reflect.ValueOf(a.MemStats).FieldByName(metric.ID)
+	// fmt.Println(value)
+	if value.CanFloat() {
+		v := value.Float()
+		metric.Value = &v
+	} else {
+		v := float64(value.Uint())
+		metric.Value = &v
+
+	}
 }

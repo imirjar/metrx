@@ -79,7 +79,6 @@ func (s *ServerService) ViewCounterByName(mName string) (int64, error) {
 	}
 
 	return counter, nil
-
 }
 
 // get all metrics as html page

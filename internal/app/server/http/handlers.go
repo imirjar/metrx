@@ -1,41 +1,18 @@
 package http
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
+	"github.com/imirjar/metrx/internal/entity"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/gorilla/mux"
 )
-
-type (
-	// берём структуру для хранения сведений об ответе
-	responseData struct {
-		status int
-		size   int
-	}
-
-	// добавляем реализацию http.ResponseWriter
-	loggedResponseWriter struct {
-		http.ResponseWriter // встраиваем оригинальный http.ResponseWriter
-		responseData        *responseData
-	}
-)
-
-func (r *loggedResponseWriter) Write(b []byte) (int, error) {
-	// записываем ответ, используя оригинальный http.ResponseWriter
-	size, err := r.ResponseWriter.Write(b)
-	r.responseData.size += size // захватываем размер
-	return size, err
-}
-
-func (r *loggedResponseWriter) WriteHeader(statusCode int) {
-	// записываем код статуса, используя оригинальный http.ResponseWriter
-	r.ResponseWriter.WriteHeader(statusCode)
-	r.responseData.status = statusCode // захватываем код статуса
-}
 
 func (s *ServerApp) UpdateGauge(resp http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
@@ -141,6 +118,110 @@ func (s *ServerApp) MainPage(resp http.ResponseWriter, req *http.Request) {
 	resp.Write([]byte(list))
 }
 
+func (s *ServerApp) UpdateJSON(resp http.ResponseWriter, req *http.Request) {
+	var metric entity.Metrics
+	var buf bytes.Buffer
+	_, err := buf.ReadFrom(req.Body)
+	if err != nil {
+		http.Error(resp, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if err = json.Unmarshal(buf.Bytes(), &metric); err != nil {
+		http.Error(resp, err.Error(), http.StatusBadRequest)
+		return
+	}
+	switch metric.MType {
+	case "gauge":
+		s.Service.UpdateGauge(metric.ID, *metric.Value) //надо возвращать обновленное значение!
+		r, err := json.Marshal(metric)
+		if err != nil {
+			//может быть проблемма связанная с тем что значение не найдено а не сбой
+			http.Error(resp, err.Error(), http.StatusBadRequest)
+			return
+		}
+		resp.Header().Set("content-type", "application/json")
+		resp.WriteHeader(http.StatusOK)
+		resp.Write(r)
+
+	case "counter":
+		s.Service.UpdateCounter(metric.ID, *metric.Delta)
+		r, err := json.Marshal(metric)
+		if err != nil {
+			http.Error(resp, err.Error(), http.StatusBadRequest)
+			return
+		}
+		resp.Header().Set("content-type", "application/json")
+		resp.WriteHeader(http.StatusOK)
+		resp.Write(r)
+
+	default:
+		resp.Header().Set("content-type", "application/json")
+		resp.WriteHeader(http.StatusNotFound)
+		resp.Write(nil)
+	}
+}
+
+func (s *ServerApp) ValueJSON(resp http.ResponseWriter, req *http.Request) {
+
+	var metric entity.Metrics
+
+	var buf bytes.Buffer
+	_, err := buf.ReadFrom(req.Body)
+	if err != nil {
+		http.Error(resp, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err = json.Unmarshal(buf.Bytes(), &metric); err != nil {
+		http.Error(resp, err.Error(), http.StatusBadRequest)
+		return
+	}
+	// fmt.Println("###", metric, "###")
+
+	switch metric.MType {
+	case "gauge":
+		v, err := s.Service.ViewGaugeByName(metric.ID)
+		if err != nil {
+			resp.Header().Set("content-type", "application/json")
+			resp.WriteHeader(http.StatusNotFound)
+			resp.Write(nil)
+		}
+		metric.Value = &v
+
+		r, err := json.Marshal(metric)
+		if err != nil {
+			resp.Header().Set("content-type", "application/json")
+			resp.WriteHeader(http.StatusBadRequest)
+			resp.Write(nil)
+		}
+		resp.Header().Set("content-type", "application/json")
+		resp.WriteHeader(http.StatusOK)
+		resp.Write(r)
+	case "counter":
+		v, err := s.Service.ViewCounterByName(metric.ID)
+		if err != nil {
+			resp.Header().Set("content-type", "application/json")
+			resp.WriteHeader(http.StatusNotFound)
+			resp.Write(nil)
+		}
+		metric.Delta = &v
+		r, err := json.Marshal(metric)
+		if err != nil {
+			resp.Header().Set("content-type", "application/json")
+			resp.WriteHeader(http.StatusBadRequest)
+			resp.Write(nil)
+		}
+		resp.Header().Set("content-type", "application/json")
+		resp.WriteHeader(http.StatusOK)
+		resp.Write(r)
+	default:
+		resp.Header().Set("content-type", "application/json")
+		resp.WriteHeader(http.StatusNotFound)
+		resp.Write(nil)
+	}
+
+}
+
 func (s *ServerApp) BadParams(resp http.ResponseWriter, req *http.Request) {
 	resp.WriteHeader(http.StatusBadRequest)
 }
@@ -148,8 +229,8 @@ func (s *ServerApp) BadParams(resp http.ResponseWriter, req *http.Request) {
 func (s *ServerApp) Logger(next http.Handler) http.Handler {
 
 	loggedFunc := func(resp http.ResponseWriter, req *http.Request) {
-		// start := time.Now()
-		// method := req.Method
+		start := time.Now()
+		method := req.Method
 
 		responseData := &responseData{
 			status: 0,
@@ -160,14 +241,14 @@ func (s *ServerApp) Logger(next http.Handler) http.Handler {
 			responseData:   responseData,
 		}
 		next.ServeHTTP(&loggedResp, req)
-		// duration := time.Since(start)
+		duration := time.Since(start)
 
-		// reqLog := log.WithFields(log.Fields{
-		// 	"URI":      req.RequestURI,
-		// 	"method":   method,
-		// 	"duration": duration,
-		// })
-		// reqLog.Info("request")
+		reqLog := log.WithFields(log.Fields{
+			"URI":      req.RequestURI,
+			"method":   method,
+			"duration": duration,
+		})
+		reqLog.Info("request")
 
 		respLog := log.WithFields(log.Fields{
 			"status": responseData.status,
@@ -178,3 +259,14 @@ func (s *ServerApp) Logger(next http.Handler) http.Handler {
 	}
 	return http.HandlerFunc(loggedFunc)
 }
+
+// func (s *ServerApp) error(w http.ResponseWriter, r *http.Request, code int, err error) {
+// 	s.respond(w, r, code, map[string]string{"error": err.Error()})
+// }
+
+// func (s *ServerApp) respond(w http.ResponseWriter, r *http.Request, code int, data interface{}) {
+// 	w.WriteHeader(code)
+// 	if data != nil {
+// 		json.NewEncoder(w).Encode(data)
+// 	}
+// }
