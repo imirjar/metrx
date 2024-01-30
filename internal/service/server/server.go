@@ -82,7 +82,7 @@ func (s *ServerService) ViewCounterByName(mName string) (int64, error) {
 }
 
 // get all metrics as html page
-func (s *ServerService) MetricList() string {
+func (s *ServerService) MetricPage() string {
 	gauges := s.Storage.ReadAllGauge()
 	counters := s.Storage.ReadAllCounter()
 

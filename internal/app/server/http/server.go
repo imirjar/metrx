@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/imirjar/metrx/internal/app/server/http/middleware"
 	"github.com/imirjar/metrx/internal/service/server"
 )
 
@@ -30,7 +31,8 @@ func (s *ServerApp) Run(url string) error {
 
 	//all metric values as a html page
 	mux.HandleFunc("/", s.MainPage).Methods("GET")
-	mux.Use(s.Logger)
+	mux.Use(middleware.Logger)
+	mux.Use(middleware.Encoder)
 
 	return http.ListenAndServe(url, mux)
 }

@@ -8,6 +8,10 @@ import (
 
 type AgentApp struct{}
 
+func NewAgentApp() *AgentApp {
+	return &AgentApp{}
+}
+
 func (a *AgentApp) Run(path string, pollInterval, reportInterval time.Duration) error {
 
 	agent := agent.NewAgentService()

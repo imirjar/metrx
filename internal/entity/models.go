@@ -2,6 +2,7 @@ package entity
 
 import (
 	"bytes"
+	"compress/gzip"
 	"encoding/json"
 	"math/rand"
 	"net/http"
@@ -25,7 +26,21 @@ func (m *Metrics) SendJSONToPath(path string) error {
 		return err
 	}
 
-	resp, err := client.Post(path, "application/json", bytes.NewBuffer(mm))
+	var buf bytes.Buffer
+	gz := gzip.NewWriter(&buf)
+	gz.Write(mm)
+	gz.Close()
+
+	req, err := http.NewRequest(http.MethodPost, path, &buf)
+	if err != nil {
+		panic(err)
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Content-Encoding", "gzip")
+
+	resp, err := client.Do(req)
+
 	if err != nil {
 		return err
 	}

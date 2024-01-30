@@ -7,11 +7,11 @@ import (
 	"testing"
 
 	"github.com/gorilla/mux"
-	"github.com/imirjar/metrx/internal/app"
+	server "github.com/imirjar/metrx/internal/app/server"
 )
 
 func TestServerApp_GaugeHandlers(t *testing.T) {
-	serverApp := app.NewServerApp()
+	serverApp := server.NewServerApp()
 	type want struct {
 		updateStatus int
 		valueStatus  int
@@ -111,7 +111,7 @@ func TestServerApp_GaugeHandlers(t *testing.T) {
 }
 
 func TestServerApp_CounterHandlers(t *testing.T) {
-	serverApp := app.NewServerApp()
+	serverApp := server.NewServerApp()
 	type want struct {
 		updateStatus int
 		valueStatus  int
