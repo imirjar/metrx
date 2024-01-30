@@ -45,7 +45,7 @@ func (m *Metrics) SendJSONToPath(path string) error {
 		return err
 	}
 
-	defer resp.Body.Close()
+	resp.Body.Close()
 	return nil
 }
 

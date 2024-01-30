@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 
@@ -112,8 +113,9 @@ func (s *ServerApp) ValueCounter(resp http.ResponseWriter, req *http.Request) {
 
 func (s *ServerApp) MainPage(resp http.ResponseWriter, req *http.Request) {
 	page := s.Service.MetricPage()
+	resp.Header().Set("content-type", "text/html")
 	resp.WriteHeader(http.StatusOK)
-	resp.Write([]byte(page))
+	io.WriteString(resp, page)
 }
 
 func (s *ServerApp) UpdateJSON(resp http.ResponseWriter, req *http.Request) {

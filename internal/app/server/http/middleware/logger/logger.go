@@ -1,10 +1,24 @@
-package middleware
+package logger
 
 import (
 	"net/http"
 	"time"
 
 	log "github.com/sirupsen/logrus"
+)
+
+type (
+	// берём структуру для хранения сведений об ответе
+	responseData struct {
+		status int
+		size   int
+	}
+
+	// добавляем реализацию http.ResponseWriter
+	loggedResponseWriter struct {
+		http.ResponseWriter // встраиваем оригинальный http.ResponseWriter
+		responseData        *responseData
+	}
 )
 
 func Logger(next http.Handler) http.Handler {
