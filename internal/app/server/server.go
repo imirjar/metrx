@@ -5,8 +5,8 @@ import (
 	"github.com/imirjar/metrx/internal/service/server"
 )
 
-func NewServerApp() *http.HttpApp {
-	return &http.HttpApp{
+func NewServerApp() *http.HTTPApp {
+	return &http.HTTPApp{
 		Service: server.NewServerService(),
 	}
 }

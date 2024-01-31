@@ -13,7 +13,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func (s *HttpApp) UpdateGauge(resp http.ResponseWriter, req *http.Request) {
+func (h *HTTPApp) UpdateGauge(resp http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 
 	vn, ok := vars["name"]
@@ -32,7 +32,7 @@ func (s *HttpApp) UpdateGauge(resp http.ResponseWriter, req *http.Request) {
 		resp.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	err = s.Service.UpdateGauge(vn, mValue)
+	err = h.Service.UpdateGauge(vn, mValue)
 	if err != nil {
 		resp.WriteHeader(http.StatusBadRequest)
 		return
@@ -42,7 +42,7 @@ func (s *HttpApp) UpdateGauge(resp http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (s *HttpApp) UpdateCounter(resp http.ResponseWriter, req *http.Request) {
+func (h *HTTPApp) UpdateCounter(resp http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 
 	vn, ok := vars["name"]
@@ -61,7 +61,7 @@ func (s *HttpApp) UpdateCounter(resp http.ResponseWriter, req *http.Request) {
 		resp.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	err = s.Service.UpdateCounter(vn, mValue)
+	err = h.Service.UpdateCounter(vn, mValue)
 	if err != nil {
 		resp.WriteHeader(http.StatusBadRequest)
 		return
@@ -71,7 +71,7 @@ func (s *HttpApp) UpdateCounter(resp http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (s *HttpApp) ValueGauge(resp http.ResponseWriter, req *http.Request) {
+func (h *HTTPApp) ValueGauge(resp http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 
 	vn, ok := vars["name"]
@@ -80,7 +80,7 @@ func (s *HttpApp) ValueGauge(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	metric, err := s.Service.ViewGaugeByName(vn)
+	metric, err := h.Service.ViewGaugeByName(vn)
 	if err != nil {
 		resp.WriteHeader(http.StatusNotFound)
 		resp.Write([]byte(fmt.Sprint(metric)))
@@ -92,7 +92,7 @@ func (s *HttpApp) ValueGauge(resp http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (s *HttpApp) ValueCounter(resp http.ResponseWriter, req *http.Request) {
+func (h *HTTPApp) ValueCounter(resp http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 
 	vn, ok := vars["name"]
@@ -101,7 +101,7 @@ func (s *HttpApp) ValueCounter(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	metric, err := s.Service.ViewCounterByName(vn)
+	metric, err := h.Service.ViewCounterByName(vn)
 	if err != nil {
 		resp.WriteHeader(http.StatusNotFound)
 		resp.Write([]byte(fmt.Sprint(metric)))
@@ -111,14 +111,14 @@ func (s *HttpApp) ValueCounter(resp http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (s *HttpApp) MainPage(resp http.ResponseWriter, req *http.Request) {
-	page := s.Service.MetricPage()
+func (h *HTTPApp) MainPage(resp http.ResponseWriter, req *http.Request) {
+	page := h.Service.MetricPage()
 	resp.Header().Set("content-type", "text/html")
 	resp.WriteHeader(http.StatusOK)
 	io.WriteString(resp, page)
 }
 
-func (s *HttpApp) UpdateJSON(resp http.ResponseWriter, req *http.Request) {
+func (h *HTTPApp) UpdateJSON(resp http.ResponseWriter, req *http.Request) {
 
 	var metric entity.Metrics
 	var buf bytes.Buffer //byte buffer
@@ -140,7 +140,7 @@ func (s *HttpApp) UpdateJSON(resp http.ResponseWriter, req *http.Request) {
 	switch metric.MType {
 	case "gauge":
 		//update value in storage
-		s.Service.UpdateGauge(metric.ID, *metric.Value) //надо возвращать обновленное значение!
+		h.Service.UpdateGauge(metric.ID, *metric.Value) //надо возвращать обновленное значение!
 
 		r, err := json.Marshal(metric)
 		if err != nil {
@@ -155,7 +155,7 @@ func (s *HttpApp) UpdateJSON(resp http.ResponseWriter, req *http.Request) {
 
 	case "counter":
 		//update value in storage
-		s.Service.UpdateCounter(metric.ID, *metric.Delta)
+		h.Service.UpdateCounter(metric.ID, *metric.Delta)
 
 		r, err := json.Marshal(metric)
 		if err != nil {
@@ -175,7 +175,7 @@ func (s *HttpApp) UpdateJSON(resp http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (s *HttpApp) ValueJSON(resp http.ResponseWriter, req *http.Request) {
+func (h *HTTPApp) ValueJSON(resp http.ResponseWriter, req *http.Request) {
 
 	var metric entity.Metrics
 	var buf bytes.Buffer //byte buffer
@@ -197,7 +197,7 @@ func (s *HttpApp) ValueJSON(resp http.ResponseWriter, req *http.Request) {
 	switch metric.MType {
 	case "gauge":
 		//get value from storage
-		v, err := s.Service.ViewGaugeByName(metric.ID)
+		v, err := h.Service.ViewGaugeByName(metric.ID)
 		if err != nil {
 			//404 if metric doesn't found in storage
 			resp.Header().Set("content-type", "application/json")
@@ -218,7 +218,7 @@ func (s *HttpApp) ValueJSON(resp http.ResponseWriter, req *http.Request) {
 		resp.WriteHeader(http.StatusOK)
 		resp.Write(r)
 	case "counter":
-		v, err := s.Service.ViewCounterByName(metric.ID)
+		v, err := h.Service.ViewCounterByName(metric.ID)
 		if err != nil {
 			//404 if metric doesn't found in storage
 			resp.Header().Set("content-type", "application/json")
@@ -246,7 +246,7 @@ func (s *HttpApp) ValueJSON(resp http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (s *HttpApp) BadParams(resp http.ResponseWriter, req *http.Request) {
+func (h *HTTPApp) BadParams(resp http.ResponseWriter, req *http.Request) {
 	resp.WriteHeader(http.StatusBadRequest)
 }
 

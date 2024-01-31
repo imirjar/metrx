@@ -4,7 +4,7 @@ import (
 	"net/http"
 )
 
-func (h *HttpApp) Backuper(next http.Handler) http.Handler {
+func (h *HTTPApp) Backuper(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 
 		next.ServeHTTP(resp, req)

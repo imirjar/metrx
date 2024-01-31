@@ -10,14 +10,15 @@ import (
 	"github.com/imirjar/metrx/internal/service/server"
 )
 
-type HttpApp struct {
+type HTTPApp struct {
 	Service  *server.ServerService
 	DumpPath string
 }
 
-func (h *HttpApp) Run(url string, useDump bool, dumpPath string, backupInterval time.Duration) error {
+func (h *HTTPApp) Run(url string, useDump bool, dumpPath string, backupInterval time.Duration) error {
 	h.DumpPath = dumpPath
-	if useDump == true {
+
+	if useDump {
 		h.Service.Storage.Import(dumpPath)
 	}
 
