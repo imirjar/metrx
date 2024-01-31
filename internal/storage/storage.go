@@ -2,7 +2,6 @@ package storage
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 )
 
@@ -45,27 +44,45 @@ func (m *MemStorage) ReadCounter(mName string) (int64, bool) {
 }
 
 func (m *MemStorage) Export(path string) error {
-	file, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, 0777)
+	// fmt.Println("###")
+	// file, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, 0777)
+	// if err != nil {
+	// 	return err
+	// }
+
+	// 	mm, err := json.Marshal(m)
+	// 	file.Write(mm)
+	// 	file.Close()н
+
+	// 	return nil
+
+	// сериализуем структуру в JSON формат
+	data, err := json.MarshalIndent(m, "", "   ")
 	if err != nil {
 		return err
 	}
-
-	mm, err := json.Marshal(m)
-	file.Write(mm)
-
-	return nil
+	// сохраняем данные в файл
+	return os.WriteFile(path, data, 0666)
 }
 
 func (m *MemStorage) Import(path string) error {
 	// fmt.Println(path)
-	file, err := os.ReadFile(path)
+	// file, err := os.ReadFile(path)
+	// if err != nil {
+	// 	return err
+	// }
+	// // fmt.Println(file)
+	// err = json.Unmarshal(file, m)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	return err
+	// }
+	// return nil
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return err
 	}
-	// fmt.Println(file)
-	err = json.Unmarshal(file, m)
-	if err != nil {
-		fmt.Println(err)
+	if err := json.Unmarshal(data, m); err != nil {
 		return err
 	}
 	return nil

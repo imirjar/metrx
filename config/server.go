@@ -26,11 +26,15 @@ func (c *ServerConfig) setEnv() {
 	}
 
 	if i := os.Getenv("STORE_INTERVAL"); i != "" {
-		c.URL = i
+		intI, err := strconv.ParseInt(i, 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		c.Opts.BackupInterval = time.Duration(1_000_000_000 * intI)
 	}
 
 	if f := os.Getenv("FILE_STORAGE_PATH"); f != "" {
-		c.URL = f
+		c.Opts.DumpPath = f
 	}
 
 	if r := os.Getenv("RESTORE"); r != "" {
