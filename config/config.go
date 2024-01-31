@@ -8,6 +8,11 @@ import (
 func NewServerConfig() *ServerConfig {
 	cfg := ServerConfig{
 		URL: "localhost:8080",
+		Opts: DataBackupOptions{
+			DumpPath:       "/tmp/metrics-db.json",
+			BackupInterval: time.Duration(1_000_000_000 * 300), //2s
+			DumpAutoImport: true,
+		},
 	}
 	cfg.setEnv()
 	cfg.setFlags()

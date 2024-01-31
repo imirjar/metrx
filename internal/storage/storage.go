@@ -1,5 +1,11 @@
 package storage
 
+import (
+	"encoding/json"
+	"fmt"
+	"os"
+)
+
 type MemStorage struct {
 	Gauge   map[string]float64
 	Counter map[string]int64
@@ -36,4 +42,31 @@ func (m *MemStorage) ReadGauge(mName string) (float64, bool) {
 func (m *MemStorage) ReadCounter(mName string) (int64, bool) {
 	v, ok := m.Counter[mName]
 	return v, ok
+}
+
+func (m *MemStorage) Export(path string) error {
+	file, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, 0777)
+	if err != nil {
+		return err
+	}
+
+	mm, err := json.Marshal(m)
+	file.Write(mm)
+
+	return nil
+}
+
+func (m *MemStorage) Import(path string) error {
+	// fmt.Println(path)
+	file, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	// fmt.Println(file)
+	err = json.Unmarshal(file, m)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
 }

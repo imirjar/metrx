@@ -23,6 +23,8 @@ type Storager interface {
 	ReadAllCounter() map[string]int64
 	ReadGauge(mName string) (float64, bool)
 	ReadCounter(mName string) (int64, bool)
+	Import(path string) error
+	Export(path string) error
 }
 
 // update gauge

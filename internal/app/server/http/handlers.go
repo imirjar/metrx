@@ -13,7 +13,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func (s *ServerApp) UpdateGauge(resp http.ResponseWriter, req *http.Request) {
+func (s *HttpApp) UpdateGauge(resp http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 
 	vn, ok := vars["name"]
@@ -42,7 +42,7 @@ func (s *ServerApp) UpdateGauge(resp http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (s *ServerApp) UpdateCounter(resp http.ResponseWriter, req *http.Request) {
+func (s *HttpApp) UpdateCounter(resp http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 
 	vn, ok := vars["name"]
@@ -71,7 +71,7 @@ func (s *ServerApp) UpdateCounter(resp http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (s *ServerApp) ValueGauge(resp http.ResponseWriter, req *http.Request) {
+func (s *HttpApp) ValueGauge(resp http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 
 	vn, ok := vars["name"]
@@ -92,7 +92,7 @@ func (s *ServerApp) ValueGauge(resp http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (s *ServerApp) ValueCounter(resp http.ResponseWriter, req *http.Request) {
+func (s *HttpApp) ValueCounter(resp http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 
 	vn, ok := vars["name"]
@@ -111,14 +111,14 @@ func (s *ServerApp) ValueCounter(resp http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (s *ServerApp) MainPage(resp http.ResponseWriter, req *http.Request) {
+func (s *HttpApp) MainPage(resp http.ResponseWriter, req *http.Request) {
 	page := s.Service.MetricPage()
 	resp.Header().Set("content-type", "text/html")
 	resp.WriteHeader(http.StatusOK)
 	io.WriteString(resp, page)
 }
 
-func (s *ServerApp) UpdateJSON(resp http.ResponseWriter, req *http.Request) {
+func (s *HttpApp) UpdateJSON(resp http.ResponseWriter, req *http.Request) {
 
 	var metric entity.Metrics
 	var buf bytes.Buffer //byte buffer
@@ -175,7 +175,7 @@ func (s *ServerApp) UpdateJSON(resp http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (s *ServerApp) ValueJSON(resp http.ResponseWriter, req *http.Request) {
+func (s *HttpApp) ValueJSON(resp http.ResponseWriter, req *http.Request) {
 
 	var metric entity.Metrics
 	var buf bytes.Buffer //byte buffer
@@ -246,7 +246,7 @@ func (s *ServerApp) ValueJSON(resp http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (s *ServerApp) BadParams(resp http.ResponseWriter, req *http.Request) {
+func (s *HttpApp) BadParams(resp http.ResponseWriter, req *http.Request) {
 	resp.WriteHeader(http.StatusBadRequest)
 }
 
