@@ -2,28 +2,12 @@ package server
 
 import (
 	"testing"
-	"time"
 
 	"github.com/imirjar/metrx/config"
 )
 
 func TestServerGauge(t *testing.T) {
-	appCfg := config.AppConfig{
-		URL: "localhost:8080",
-	}
-	srvCfg := config.ServiceConfig{
-		Interval: time.Duration(1_000_000_000 * 300), //2s
-	}
-	strCfg := config.StorageConfig{
-		FilePath:   "/tmp/metrics-db.json",
-		AutoImport: true,
-	}
-	cfg := config.ServerConfig{
-		AppConfig:     appCfg,
-		ServiceConfig: srvCfg,
-		StorageConfig: strCfg,
-	}
-
+	cfg := config.Testcfg
 	server := NewServerService(cfg)
 	tests := []struct { // добавляем слайс тестов
 		name          string
@@ -55,21 +39,7 @@ func TestServerGauge(t *testing.T) {
 }
 
 func TestServerCounter(t *testing.T) {
-	appCfg := config.AppConfig{
-		URL: "localhost:8080",
-	}
-	srvCfg := config.ServiceConfig{
-		Interval: time.Duration(1_000_000_000 * 300), //2s
-	}
-	strCfg := config.StorageConfig{
-		FilePath:   "/tmp/metrics-db.json",
-		AutoImport: true,
-	}
-	cfg := config.ServerConfig{
-		AppConfig:     appCfg,
-		ServiceConfig: srvCfg,
-		StorageConfig: strCfg,
-	}
+	cfg := config.Testcfg
 	server := NewServerService(cfg)
 	tests := []struct { // добавляем слайс тестов
 		name          string
