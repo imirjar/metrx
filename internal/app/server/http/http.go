@@ -2,25 +2,28 @@ package http
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/imirjar/metrx/config"
 	"github.com/imirjar/metrx/internal/app/server/http/middleware/compressor"
 	"github.com/imirjar/metrx/internal/app/server/http/middleware/logger"
 	"github.com/imirjar/metrx/internal/service/server"
 )
 
-type HTTPApp struct {
-	Service  *server.ServerService
-	DumpPath string
+func NewServerApp(cfg config.ServerConfig) *HTTPApp {
+	app := HTTPApp{
+		Service: server.NewServerService(cfg),
+		cfg:     &cfg.AppConfig,
+	}
+	return &app
 }
 
-func (h *HTTPApp) Run(url string, useDump bool, dumpPath string, backupInterval time.Duration) error {
-	h.DumpPath = dumpPath
+type HTTPApp struct {
+	Service *server.ServerService
+	cfg     *config.AppConfig
+}
 
-	if useDump {
-		h.Service.Storage.Import(dumpPath)
-	}
+func (h *HTTPApp) Run() error {
 
 	router := mux.NewRouter()
 	// set metric value
@@ -30,9 +33,9 @@ func (h *HTTPApp) Run(url string, useDump bool, dumpPath string, backupInterval 
 	update.HandleFunc("/{other}/{name}/{value}", h.BadParams).Methods("POST") //status 400
 	update.HandleFunc("/", h.UpdateJSON).Methods("POST").HeadersRegexp("Content-Type", "application/json")
 	// backup storage dump when metrics have updated if ->
-	if backupInterval == 0 {
-		update.Use(h.Backuper)
-	}
+	// if backupInterval == 0 {
+	// 	update.Use(h.Backuper)
+	// }
 
 	// read metric value
 	value := router.PathPrefix("/value").Subrouter()
@@ -46,5 +49,5 @@ func (h *HTTPApp) Run(url string, useDump bool, dumpPath string, backupInterval 
 	router.Use(compressor.Compressor)
 	router.Use(logger.Logger)
 
-	return http.ListenAndServe(url, router)
+	return http.ListenAndServe(h.cfg.URL, router)
 }

@@ -8,33 +8,19 @@ import (
 )
 
 type ServerConfig struct {
-	URL  string
-	Opts DataBackupOptions
+	AppConfig
+	ServiceConfig
+	StorageConfig
 }
 
-type DataBackupOptions struct {
-	DumpPath       string
-	BackupInterval time.Duration
-	DumpAutoImport bool
-}
-
-// set params from local environment
-func (c *ServerConfig) setEnv() {
+func (s *ServerConfig) setEnv() {
 	//if address in env
 	if a := os.Getenv("ADDRESS"); a != "" {
-		c.URL = a
-	}
-
-	if i := os.Getenv("STORE_INTERVAL"); i != "" {
-		intI, err := strconv.ParseInt(i, 10, 64)
-		if err != nil {
-			panic(err)
-		}
-		c.Opts.BackupInterval = time.Duration(1_000_000_000 * intI)
+		s.AppConfig.URL = a
 	}
 
 	if f := os.Getenv("FILE_STORAGE_PATH"); f != "" {
-		c.Opts.DumpPath = f
+		s.StorageConfig.FilePath = f
 	}
 
 	if r := os.Getenv("RESTORE"); r != "" {
@@ -42,32 +28,50 @@ func (c *ServerConfig) setEnv() {
 		if err != nil {
 			panic(err)
 		}
-		c.Opts.DumpAutoImport = rf
+		s.StorageConfig.AutoImport = rf
+	}
+
+	if i := os.Getenv("STORE_INTERVAL"); i != "" {
+		intI, err := strconv.ParseInt(i, 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		s.ServiceConfig.Interval = time.Duration(1_000_000_000 * intI)
 	}
 }
 
 // set params from os.Args[]
-func (c *ServerConfig) setFlags() {
+func (s *ServerConfig) setFlags() {
 	a := flag.String("a", "", "executable port")
-	i := flag.Int("i", -1, "frequency at which data should be saved")
 	f := flag.String("f", "", "path to the file where the data should be saved")
-	r := flag.Bool("r", c.Opts.DumpAutoImport, "if true -> load data from the backup File into storage automatically at startup")
+	r := flag.Bool("r", s.AutoImport, "if true -> load data from the backup File into storage automatically at startup")
+	i := flag.Int("i", -1, "frequency at which data should be saved")
+
 	flag.Parse()
 
 	if *a != "" {
-		c.URL = *a
+		s.AppConfig.URL = *a
 	}
-
-	if *i != -1 {
-		c.Opts.BackupInterval = time.Duration(1_000_000_000 * *i)
-	}
-
 	if *f != "" {
-
-		c.Opts.DumpPath = *f
+		s.StorageConfig.FilePath = *f
 	}
-
-	if *r != c.Opts.DumpAutoImport {
-		c.Opts.DumpAutoImport = *r
+	if *r != s.AutoImport {
+		s.StorageConfig.AutoImport = *r
 	}
+	if *i != -1 {
+		s.ServiceConfig.Interval = time.Duration(1_000_000_000 * *i)
+	}
+}
+
+type AppConfig struct {
+	URL string
+}
+
+type StorageConfig struct {
+	FilePath   string
+	AutoImport bool
+}
+
+type ServiceConfig struct {
+	Interval time.Duration
 }

@@ -3,18 +3,55 @@ package storage
 import (
 	"encoding/json"
 	"os"
+
+	"github.com/imirjar/metrx/config"
 )
 
 type MemStorage struct {
 	Gauge   map[string]float64
 	Counter map[string]int64
+	cfg     *config.StorageConfig
 }
 
-func New() *MemStorage {
-	return &MemStorage{
+func NewStorage(cfg config.ServerConfig) *MemStorage {
+
+	storage := MemStorage{
 		Gauge:   map[string]float64{},
 		Counter: map[string]int64{},
+		cfg:     &cfg.StorageConfig,
 	}
+
+	if storage.cfg.AutoImport {
+		storage.Import()
+	}
+
+	return &storage
+}
+
+func (m *MemStorage) Export() error {
+	file, err := os.OpenFile(m.cfg.FilePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	data, err := json.Marshal(m)
+	if err != nil {
+		return err
+	}
+	file.Write(data)
+	return nil
+	// return os.WriteFile(m.cfg.FilePath, data, 0666)
+}
+
+func (m *MemStorage) Import() error {
+	file, err := os.ReadFile(m.cfg.FilePath)
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(file, m); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (m *MemStorage) AddGauge(mName string, mValue float64) {
@@ -41,49 +78,4 @@ func (m *MemStorage) ReadGauge(mName string) (float64, bool) {
 func (m *MemStorage) ReadCounter(mName string) (int64, bool) {
 	v, ok := m.Counter[mName]
 	return v, ok
-}
-
-func (m *MemStorage) Export(path string) error {
-	// fmt.Println("###")
-	// file, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, 0777)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// 	mm, err := json.Marshal(m)
-	// 	file.Write(mm)
-	// 	file.Close()н
-
-	// 	return nil
-
-	// сериализуем структуру в JSON формат
-	data, err := json.MarshalIndent(m, "", "   ")
-	if err != nil {
-		return err
-	}
-	// сохраняем данные в файл
-	return os.WriteFile(path, data, 0666)
-}
-
-func (m *MemStorage) Import(path string) error {
-	// fmt.Println(path)
-	// file, err := os.ReadFile(path)
-	// if err != nil {
-	// 	return err
-	// }
-	// // fmt.Println(file)
-	// err = json.Unmarshal(file, m)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return err
-	// }
-	// return nil
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return err
-	}
-	if err := json.Unmarshal(data, m); err != nil {
-		return err
-	}
-	return nil
 }

@@ -2,6 +2,8 @@ package server
 
 import (
 	"testing"
+
+	"github.com/imirjar/metrx/config"
 )
 
 // import (
@@ -11,7 +13,7 @@ import (
 // )
 
 func TestServerUpdateGauge(t *testing.T) {
-	server := NewServerService()
+	server := NewServerService(*config.NewServerConfig())
 	tests := []struct { // добавляем слайс тестов
 		name     string
 		mName    string
@@ -43,7 +45,7 @@ func TestServerUpdateGauge(t *testing.T) {
 }
 
 func TestServerUpdateCounter(t *testing.T) {
-	server := NewServerService()
+	server := NewServerService(*config.NewServerConfig())
 	tests := []struct { // добавляем слайс тестов
 		name     string
 		mName    string
@@ -75,7 +77,7 @@ func TestServerUpdateCounter(t *testing.T) {
 }
 
 func TestServerViewGauge(t *testing.T) {
-	server := NewServerService()
+	server := NewServerService(*config.NewServerConfig())
 	tests := []struct { // добавляем слайс тестов
 		name          string
 		mName         string
@@ -123,7 +125,7 @@ func TestServerViewGauge(t *testing.T) {
 }
 
 func TestViewUpdateCounter(t *testing.T) {
-	server := NewServerService()
+	server := NewServerService(*config.NewServerConfig())
 	tests := []struct { // добавляем слайс тестов
 		name     string
 		mName    string

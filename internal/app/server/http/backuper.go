@@ -2,12 +2,16 @@ package http
 
 import (
 	"net/http"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func (h *HTTPApp) Backuper(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
-
-		next.ServeHTTP(resp, req)
-		h.Service.Storage.Export(h.DumpPath)
-	})
+	err := h.Service.Backup()
+	if err != nil {
+		log.Error(err)
+		return http.HandlerFunc(h.Error)
+	}
+	return next
+	// next.ServeHTTP(resp, req)
 }

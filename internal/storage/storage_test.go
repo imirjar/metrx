@@ -1,6 +1,10 @@
 package storage
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/imirjar/metrx/config"
+)
 
 func TestMemStorage_AddGauge_ReadGauge(t *testing.T) {
 
@@ -25,7 +29,7 @@ func TestMemStorage_AddGauge_ReadGauge(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			memStorage := New()
+			memStorage := NewStorage(*config.NewServerConfig())
 			memStorage.AddGauge(tt.mName, tt.mValue)
 
 			gauge, ok := memStorage.ReadGauge(tt.mName)
@@ -60,7 +64,7 @@ func TestMemStorage_AddCounter_ReadCounter(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			memStorage := New()
+			memStorage := NewStorage(*config.NewServerConfig())
 			memStorage.AddCounter(tt.mName, tt.mValue)
 
 			gauge, ok := memStorage.ReadCounter(tt.mName)

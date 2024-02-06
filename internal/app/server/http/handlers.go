@@ -250,6 +250,10 @@ func (h *HTTPApp) BadParams(resp http.ResponseWriter, req *http.Request) {
 	resp.WriteHeader(http.StatusBadRequest)
 }
 
+func (h *HTTPApp) Error(resp http.ResponseWriter, req *http.Request) {
+	resp.WriteHeader(http.StatusInternalServerError)
+}
+
 // func (s *ServerApp) error(w http.ResponseWriter, r *http.Request, code int, err error) {
 // 	s.respond(w, r, code, map[string]string{"error": err.Error()})
 // }
