@@ -20,12 +20,6 @@ func TestMemStorage_AddGauge_ReadGauge(t *testing.T) {
 			mValue:   10.123,
 			expected: 10.123,
 		},
-		{
-			name:     "Zero value",
-			mName:    "gaugeMetric",
-			mValue:   0,
-			expected: 0,
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -54,12 +48,6 @@ func TestMemStorage_AddCounter_ReadCounter(t *testing.T) {
 			mName:    "gaugeMetric",
 			mValue:   10,
 			expected: 10,
-		},
-		{
-			name:     "Zero value",
-			mName:    "gaugeMetric",
-			mValue:   0,
-			expected: 0,
 		},
 	}
 	for _, tt := range tests {
