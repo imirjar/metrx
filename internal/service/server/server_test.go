@@ -19,10 +19,11 @@ func TestServerGauge(t *testing.T) {
 		AutoImport: true,
 	}
 	cfg := config.ServerConfig{
-		appCfg,
-		srvCfg,
-		strCfg,
+		AppConfig:     appCfg,
+		ServiceConfig: srvCfg,
+		StorageConfig: strCfg,
 	}
+
 	server := NewServerService(cfg)
 	tests := []struct { // добавляем слайс тестов
 		name          string
@@ -65,9 +66,9 @@ func TestServerCounter(t *testing.T) {
 		AutoImport: true,
 	}
 	cfg := config.ServerConfig{
-		appCfg,
-		srvCfg,
-		strCfg,
+		AppConfig:     appCfg,
+		ServiceConfig: srvCfg,
+		StorageConfig: strCfg,
 	}
 	server := NewServerService(cfg)
 	tests := []struct { // добавляем слайс тестов
