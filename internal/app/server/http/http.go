@@ -32,10 +32,6 @@ func (h *HTTPApp) Run() error {
 	update.HandleFunc("/counter/{name}/{value:[0-9]+}", h.UpdateCounter).Methods("POST")
 	update.HandleFunc("/{other}/{name}/{value}", h.BadParams).Methods("POST") //status 400
 	update.HandleFunc("/", h.UpdateJSON).Methods("POST").HeadersRegexp("Content-Type", "application/json")
-	// backup storage dump when metrics have updated if ->
-	// if backupInterval == 0 {
-	// 	update.Use(h.Backuper)
-	// }
 
 	// read metric value
 	value := router.PathPrefix("/value").Subrouter()
