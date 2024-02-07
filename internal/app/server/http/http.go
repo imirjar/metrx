@@ -47,7 +47,7 @@ func (h *HTTPApp) Run() error {
 	router.Use(logger.Logger)
 
 	// DB connection test
-	router.HandleFunc("/ping", h.ConnectioTest).Methods("GET")
+	// router.HandleFunc("/ping", h.ConnectioTest).Methods("GET")
 
 	return http.ListenAndServe(h.cfg.URL, router)
 }
