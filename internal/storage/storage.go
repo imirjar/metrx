@@ -3,6 +3,7 @@ package storage
 import (
 	"encoding/json"
 	"os"
+	"sync"
 
 	"github.com/imirjar/metrx/config"
 )
@@ -11,6 +12,7 @@ type MemStorage struct {
 	Gauge   map[string]float64
 	Counter map[string]int64
 	cfg     *config.StorageConfig
+	mutex   sync.Mutex
 }
 
 func NewStorage(cfg config.ServerConfig) *MemStorage {
@@ -29,6 +31,7 @@ func NewStorage(cfg config.ServerConfig) *MemStorage {
 }
 
 func (m *MemStorage) Export() error {
+	m.mutex.Lock()
 	file, err := os.OpenFile(m.cfg.FilePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
 	if err != nil {
 		return err
@@ -39,8 +42,9 @@ func (m *MemStorage) Export() error {
 		return err
 	}
 	file.Write(data)
+	m.mutex.Unlock()
 	return nil
-	// return os.WriteFile(m.cfg.FilePath, data, 0666)
+
 }
 
 func (m *MemStorage) Import() error {

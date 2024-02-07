@@ -42,8 +42,12 @@ func (h *HTTPApp) Run() error {
 
 	// all metric values as a html page
 	router.HandleFunc("/", h.MainPage).Methods("GET")
+
 	router.Use(compressor.Compressor)
 	router.Use(logger.Logger)
+
+	// DB connection test
+	router.HandleFunc("/ping", h.ConnectioTest).Methods("GET")
 
 	return http.ListenAndServe(h.cfg.URL, router)
 }

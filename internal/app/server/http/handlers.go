@@ -13,6 +13,20 @@ import (
 	"github.com/gorilla/mux"
 )
 
+func (h *HTTPApp) ConnectioTest(resp http.ResponseWriter, req *http.Request) {
+	//if connection is ok
+	ok := true
+	if ok {
+		resp.WriteHeader(http.StatusOK)
+		resp.Write([]byte("ok"))
+		return
+	} else {
+		resp.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+}
+
 func (h *HTTPApp) UpdateGauge(resp http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 
