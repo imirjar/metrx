@@ -2,6 +2,7 @@ package http
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/imirjar/metrx/config"
@@ -47,7 +48,13 @@ func (h *HTTPApp) Run() error {
 	router.HandleFunc("/", h.MainPage).Methods("GET")
 
 	// DB connection test
-	// router.HandleFunc("/ping", h.ConnectioTest).Methods("GET")
+	router.HandleFunc("/ping", h.Ping).Methods("GET")
 
-	return http.ListenAndServe(h.cfg.URL, router)
+	s := &http.Server{
+		Addr:         h.cfg.URL,
+		Handler:      router,
+		ReadTimeout:  1 * time.Second,
+		WriteTimeout: 1 * time.Second,
+	}
+	return s.ListenAndServe()
 }

@@ -46,7 +46,6 @@ func (m *MemStorage) Export() error {
 	file.Write(data)
 
 	return nil
-
 }
 
 func (m *MemStorage) Import() error {

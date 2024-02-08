@@ -11,6 +11,7 @@ func NewServerConfig() *ServerConfig {
 		},
 		ServiceConfig{
 			Interval: time.Duration(1_000_000_000 * 300), //2s
+			DBConn:   "",
 		},
 		StorageConfig{
 			FilePath:   "/tmp/metrics-db.json",

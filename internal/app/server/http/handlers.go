@@ -2,27 +2,32 @@ package http
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/imirjar/metrx/internal/entity"
 
 	"github.com/gorilla/mux"
 )
 
-func (h *HTTPApp) ConnectioTest(resp http.ResponseWriter, req *http.Request) {
-	//if connection is ok
-	ok := true
-	if ok {
-		resp.WriteHeader(http.StatusOK)
-		resp.Write([]byte("ok"))
+func (h *HTTPApp) Ping(resp http.ResponseWriter, req *http.Request) {
+	ctx, cancel := context.WithCancel(context.Background())
+	time.AfterFunc(1*time.Second, cancel)
+	// defer cancel()
+
+	err := h.Service.CheckDBConn(ctx)
+	if err != nil {
+		resp.WriteHeader(http.StatusInternalServerError)
+		resp.Write([]byte(err.Error()))
 		return
 	} else {
-		resp.WriteHeader(http.StatusInternalServerError)
-		return
+		resp.WriteHeader(http.StatusOK)
+		resp.Write([]byte("ok"))
 	}
 
 }

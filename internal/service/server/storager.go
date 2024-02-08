@@ -1,6 +1,11 @@
 package server
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+
+	"github.com/jackc/pgx/v5"
+)
 
 type Storager interface {
 	AddGauge(mName string, mValue float64)
@@ -93,4 +98,32 @@ func (s *ServerService) MetricPage() string {
 		s.Backup()
 	}
 	return form
+}
+
+func (s *ServerService) CheckDBConn(ctx context.Context) error {
+
+	if s.cfg.DBConn == "" {
+		return errDBConnError
+	}
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	db, err := pgx.Connect(ctx, s.cfg.DBConn)
+	// db, err := sql.Open("pgx", s.cfg.DBConn)
+	if err != nil {
+		return err
+	}
+	defer db.Close(ctx)
+	if err := db.Ping(ctx); err != nil {
+		return err
+	}
+	return nil
+
+	// select {
+	// case <-ctx.Done():
+	// 	fmt.Println("Прервали работу")
+	// 	return
+	// default:
+	// 	fmt.Println(i)
+	// 	time.Sleep(1 * time.Second)
+	// }
 }

@@ -7,4 +7,5 @@ var (
 	errStorageError        = errors.New("storage error")
 	errConvertationError   = errors.New("string covertation error")
 	errMetricNameIncorrect = errors.New("metric name is incorrect")
+	errDBConnError         = errors.New("incorrect DB params")
 )
