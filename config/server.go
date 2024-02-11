@@ -40,7 +40,7 @@ func (s *ServerConfig) setEnv() {
 	}
 
 	if d := os.Getenv("DATABASE_DSN"); d != "" {
-		s.ServiceConfig.DBConn = d
+		s.StorageConfig.DBConn = d
 	}
 }
 
@@ -67,7 +67,7 @@ func (s *ServerConfig) setFlags() {
 		s.ServiceConfig.Interval = time.Duration(1_000_000_000 * *i)
 	}
 	if *d != "" {
-		s.ServiceConfig.DBConn = *d
+		s.StorageConfig.DBConn = *d
 	}
 }
 
@@ -78,9 +78,9 @@ type AppConfig struct {
 type StorageConfig struct {
 	FilePath   string
 	AutoImport bool
+	DBConn     string
 }
 
 type ServiceConfig struct {
 	Interval time.Duration
-	DBConn   string
 }

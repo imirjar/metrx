@@ -2,15 +2,15 @@ package server
 
 import (
 	"github.com/imirjar/metrx/config"
-	"github.com/imirjar/metrx/internal/storage"
+	"github.com/imirjar/metrx/internal/storage/mock"
 )
 
 func NewServerService(cfg config.ServerConfig) *ServerService {
-	storage := storage.NewStorage(cfg)
+	store := mock.NewMockStorage(&cfg.StorageConfig)
 	serverService := ServerService{
-		Storage: storage,
-		Dump:    storage,
-		cfg:     &cfg.ServiceConfig,
+		MemStorager: store,
+		Backuper:    store,
+		cfg:         &cfg.ServiceConfig,
 	}
 	// run dump auto-exporter
 	if serverService.cfg.Interval > 0 {
@@ -20,7 +20,7 @@ func NewServerService(cfg config.ServerConfig) *ServerService {
 }
 
 type ServerService struct {
-	Storage Storager
-	Dump    Backuper
-	cfg     *config.ServiceConfig
+	MemStorager MemStorager
+	Backuper    Backuper
+	cfg         *config.ServiceConfig
 }

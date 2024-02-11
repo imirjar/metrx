@@ -2,13 +2,11 @@ package http
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/imirjar/metrx/internal/entity"
 
@@ -16,19 +14,14 @@ import (
 )
 
 func (h *HTTPApp) Ping(resp http.ResponseWriter, req *http.Request) {
-	ctx, cancel := context.WithCancel(context.Background())
-	time.AfterFunc(1*time.Second, cancel)
-	// defer cancel()
 
-	err := h.Service.CheckDBConn(ctx)
+	_, err := h.Service.CheckDBConn(req.Context())
 	if err != nil {
-		resp.WriteHeader(http.StatusInternalServerError)
-		resp.Write([]byte(err.Error()))
+		http.Error(resp, "Failed DB connection", http.StatusInternalServerError)
 		return
-	} else {
-		resp.WriteHeader(http.StatusOK)
-		resp.Write([]byte("ok"))
 	}
+	resp.WriteHeader(http.StatusOK)
+	resp.Write([]byte("OK"))
 
 }
 

@@ -1,13 +1,12 @@
 package server
 
 import (
-	"context"
 	"fmt"
 
-	"github.com/jackc/pgx/v5"
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
-type Storager interface {
+type MemStorager interface {
 	AddGauge(mName string, mValue float64)
 	AddCounter(mName string, mValue int64)
 	ReadAllGauge() map[string]float64
@@ -18,12 +17,12 @@ type Storager interface {
 
 // Storager
 // update gauge
-func (s *ServerService) UpdateGauge(mName string, mValue float64) error {
+func (s ServerService) UpdateGauge(mName string, mValue float64) error {
 	if mName == "" {
 		return errMetricNameIncorrect
 	}
 
-	s.Storage.AddGauge(mName, mValue)
+	s.MemStorager.AddGauge(mName, mValue)
 	if s.cfg.Interval == 0 {
 		s.Backup()
 	}
@@ -31,17 +30,17 @@ func (s *ServerService) UpdateGauge(mName string, mValue float64) error {
 }
 
 // оupdate counter
-func (s *ServerService) UpdateCounter(mName string, mValue int64) error {
+func (s ServerService) UpdateCounter(mName string, mValue int64) error {
 	if mName == "" {
 		return errMetricNameIncorrect
 	}
 
 	// if counter exists -> counter += new value
-	curV, ok := s.Storage.ReadCounter(mName)
+	curV, ok := s.MemStorager.ReadCounter(mName)
 	if ok {
-		s.Storage.AddCounter(mName, curV+mValue)
+		s.MemStorager.AddCounter(mName, curV+mValue)
 	} else {
-		s.Storage.AddCounter(mName, mValue)
+		s.MemStorager.AddCounter(mName, mValue)
 	}
 	if s.cfg.Interval == 0 {
 		s.Backup()
@@ -51,12 +50,12 @@ func (s *ServerService) UpdateCounter(mName string, mValue int64) error {
 }
 
 // get gauge metric
-func (s *ServerService) ViewGaugeByName(mName string) (float64, error) {
+func (s ServerService) ViewGaugeByName(mName string) (float64, error) {
 	if mName == "" {
 		return 0, errMetricNameIncorrect
 	}
 
-	gauge, ok := s.Storage.ReadGauge(mName)
+	gauge, ok := s.MemStorager.ReadGauge(mName)
 	if !ok {
 		return gauge, errServiceError
 	}
@@ -65,12 +64,12 @@ func (s *ServerService) ViewGaugeByName(mName string) (float64, error) {
 }
 
 // get counter metric
-func (s *ServerService) ViewCounterByName(mName string) (int64, error) {
+func (s ServerService) ViewCounterByName(mName string) (int64, error) {
 	if mName == "" {
 		return 0, errMetricNameIncorrect
 	}
 
-	counter, ok := s.Storage.ReadCounter(mName)
+	counter, ok := s.MemStorager.ReadCounter(mName)
 	if !ok {
 		return counter, errServiceError
 	}
@@ -79,9 +78,9 @@ func (s *ServerService) ViewCounterByName(mName string) (int64, error) {
 }
 
 // get all metrics as html page
-func (s *ServerService) MetricPage() string {
-	gauges := s.Storage.ReadAllGauge()
-	counters := s.Storage.ReadAllCounter()
+func (s ServerService) MetricPage() string {
+	gauges := s.MemStorager.ReadAllGauge()
+	counters := s.MemStorager.ReadAllCounter()
 
 	gaugeForm := "<a>Gauge</a>"
 	for i, g := range gauges {
@@ -98,32 +97,4 @@ func (s *ServerService) MetricPage() string {
 		s.Backup()
 	}
 	return form
-}
-
-func (s *ServerService) CheckDBConn(ctx context.Context) error {
-
-	if s.cfg.DBConn == "" {
-		return errDBConnError
-	}
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
-	db, err := pgx.Connect(ctx, s.cfg.DBConn)
-	// db, err := sql.Open("pgx", s.cfg.DBConn)
-	if err != nil {
-		return err
-	}
-	defer db.Close(ctx)
-	if err := db.Ping(ctx); err != nil {
-		return err
-	}
-	return nil
-
-	// select {
-	// case <-ctx.Done():
-	// 	fmt.Println("Прервали работу")
-	// 	return
-	// default:
-	// 	fmt.Println(i)
-	// 	time.Sleep(1 * time.Second)
-	// }
 }

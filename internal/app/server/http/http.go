@@ -2,7 +2,6 @@ package http
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/imirjar/metrx/config"
@@ -41,20 +40,20 @@ func (h *HTTPApp) Run() error {
 	value.HandleFunc("/{other}/{name}", h.BadParams).Methods("GET") //status 400
 	value.HandleFunc("/", h.ValueJSON).Methods("POST").HeadersRegexp("Content-Type", "application/json")
 
-	router.Use(compressor.Compressor)
-	router.Use(logger.Logger)
-
 	// all metric values as a html page
 	router.HandleFunc("/", h.MainPage).Methods("GET")
 
 	// DB connection test
 	router.HandleFunc("/ping", h.Ping).Methods("GET")
 
+	router.Use(compressor.Compressor)
+	router.Use(logger.Logger)
+
 	s := &http.Server{
-		Addr:         h.cfg.URL,
-		Handler:      router,
-		ReadTimeout:  1 * time.Second,
-		WriteTimeout: 1 * time.Second,
+		Addr:    h.cfg.URL,
+		Handler: router,
+		// ReadTimeout:  1 * time.Second,
+		// WriteTimeout: 1 * time.Second,
 	}
 	return s.ListenAndServe()
 }
