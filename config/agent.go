@@ -56,5 +56,4 @@ func (c *AgentConfig) setFlags() {
 	if *p != 0 {
 		c.PollInterval = time.Duration(1_000_000_000 * *p)
 	}
-
 }

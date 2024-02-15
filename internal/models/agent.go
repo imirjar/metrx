@@ -1,4 +1,4 @@
-package entity
+package models
 
 var MemStats = []string{
 	"Alloc", "BuckHashSys", "Frees", "GCCPUFraction", "GCSys", "HeapAlloc", "HeapIdle", "HeapInuse", "HeapObjects",

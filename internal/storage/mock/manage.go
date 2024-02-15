@@ -1,17 +1,15 @@
 package mock
 
 import (
-	"context"
-	"database/sql"
 	"encoding/json"
 	"os"
 )
 
-func (m *MemStorage) Export() error {
+func (m *MemStorage) Export(path string) error {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 
-	file, err := os.OpenFile(m.cfg.FilePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
+	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
 	if err != nil {
 		return err
 	}
@@ -25,10 +23,10 @@ func (m *MemStorage) Export() error {
 	return nil
 }
 
-func (m *MemStorage) Import() error {
+func (m *MemStorage) Import(path string) error {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
-	file, err := os.ReadFile(m.cfg.FilePath)
+	file, err := os.ReadFile(path)
 	if err != nil {
 		return err
 	}
@@ -36,23 +34,4 @@ func (m *MemStorage) Import() error {
 		return err
 	}
 	return nil
-}
-
-func (m *MemStorage) Ping(ctx context.Context) (bool, error) {
-	if m.cfg.DBConn == "" {
-		return false, errDBConnError
-	}
-
-	db, err := sql.Open("pgx", m.cfg.DBConn)
-	if err != nil {
-		// log.Fatalf(err.Error())
-		return false, err
-	}
-
-	err = db.PingContext(ctx)
-	if err != nil {
-		// log.Fatalf(err.Error())
-		return false, err
-	}
-	return true, nil
 }

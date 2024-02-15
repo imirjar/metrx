@@ -13,7 +13,7 @@ import (
 
 func TestServerApp_GaugeHandlers(t *testing.T) {
 	cfg := config.Testcfg
-	serverApp := server.NewServerApp(cfg)
+	serverApp := server.NewGateway(cfg)
 	type want struct {
 		updateStatus int
 		valueStatus  int
@@ -114,7 +114,7 @@ func TestServerApp_GaugeHandlers(t *testing.T) {
 
 func TestServerApp_CounterHandlers(t *testing.T) {
 	cfg := config.Testcfg
-	serverApp := server.NewServerApp(cfg)
+	serverApp := server.NewGateway(cfg)
 	type want struct {
 		updateStatus int
 		valueStatus  int

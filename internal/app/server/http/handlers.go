@@ -8,24 +8,53 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/imirjar/metrx/internal/entity"
+	"github.com/imirjar/metrx/internal/models"
 
 	"github.com/gorilla/mux"
 )
 
-func (h *HTTPApp) Ping(resp http.ResponseWriter, req *http.Request) {
+func (h *HTTPGateway) UpdatesMetrics(resp http.ResponseWriter, req *http.Request) {
+	var metricList []models.Metrics
 
-	_, err := h.Service.CheckDBConn(req.Context())
+	body, err := io.ReadAll(req.Body)
 	if err != nil {
-		http.Error(resp, "Failed DB connection", http.StatusInternalServerError)
+		resp.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	defer req.Body.Close()
+
+	err = json.Unmarshal(body, &metricList)
+	if err != nil {
+		resp.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	for _, m := range metricList {
+		switch m.MType {
+		case "gauge":
+			// gauges[m.ID] = metric.Gauge(*m.Value)
+			h.Service.UpdateGauge(m.ID, *m.Value)
+		case "counter":
+			h.Service.UpdateCounter(m.ID, *m.Delta)
+
+		}
+	}
+	resp.WriteHeader(http.StatusOK)
+
+}
+
+func (h *HTTPGateway) Ping(resp http.ResponseWriter, req *http.Request) {
+	err := h.Service.PingDB()
+	if err != nil {
+		resp.WriteHeader(http.StatusInternalServerError)
+		resp.Write([]byte(err.Error()))
 		return
 	}
 	resp.WriteHeader(http.StatusOK)
 	resp.Write([]byte("OK"))
-
 }
 
-func (h *HTTPApp) UpdateGauge(resp http.ResponseWriter, req *http.Request) {
+func (h *HTTPGateway) UpdateGauge(resp http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 
 	vn, ok := vars["name"]
@@ -54,7 +83,7 @@ func (h *HTTPApp) UpdateGauge(resp http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (h *HTTPApp) UpdateCounter(resp http.ResponseWriter, req *http.Request) {
+func (h *HTTPGateway) UpdateCounter(resp http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 
 	vn, ok := vars["name"]
@@ -83,7 +112,7 @@ func (h *HTTPApp) UpdateCounter(resp http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (h *HTTPApp) ValueGauge(resp http.ResponseWriter, req *http.Request) {
+func (h *HTTPGateway) ValueGauge(resp http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 
 	vn, ok := vars["name"]
@@ -104,7 +133,7 @@ func (h *HTTPApp) ValueGauge(resp http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (h *HTTPApp) ValueCounter(resp http.ResponseWriter, req *http.Request) {
+func (h *HTTPGateway) ValueCounter(resp http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 
 	vn, ok := vars["name"]
@@ -123,16 +152,16 @@ func (h *HTTPApp) ValueCounter(resp http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (h *HTTPApp) MainPage(resp http.ResponseWriter, req *http.Request) {
+func (h *HTTPGateway) MainPage(resp http.ResponseWriter, req *http.Request) {
 	page := h.Service.MetricPage()
 	resp.Header().Set("content-type", "text/html")
 	resp.WriteHeader(http.StatusOK)
 	io.WriteString(resp, page)
 }
 
-func (h *HTTPApp) UpdateJSON(resp http.ResponseWriter, req *http.Request) {
+func (h *HTTPGateway) UpdateJSON(resp http.ResponseWriter, req *http.Request) {
 
-	var metric entity.Metrics
+	var metric models.Metrics
 	var buf bytes.Buffer //byte buffer
 
 	//request body -> buf
@@ -187,9 +216,9 @@ func (h *HTTPApp) UpdateJSON(resp http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (h *HTTPApp) ValueJSON(resp http.ResponseWriter, req *http.Request) {
+func (h *HTTPGateway) ValueJSON(resp http.ResponseWriter, req *http.Request) {
 
-	var metric entity.Metrics
+	var metric models.Metrics
 	var buf bytes.Buffer //byte buffer
 
 	//request body -> buf
@@ -258,11 +287,11 @@ func (h *HTTPApp) ValueJSON(resp http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (h *HTTPApp) BadParams(resp http.ResponseWriter, req *http.Request) {
+func (h *HTTPGateway) BadParams(resp http.ResponseWriter, req *http.Request) {
 	resp.WriteHeader(http.StatusBadRequest)
 }
 
-func (h *HTTPApp) Error(resp http.ResponseWriter, req *http.Request) {
+func (h *HTTPGateway) Error(resp http.ResponseWriter, req *http.Request) {
 	resp.WriteHeader(http.StatusInternalServerError)
 }
 

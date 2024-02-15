@@ -10,7 +10,6 @@ import (
 type ServerConfig struct {
 	AppConfig
 	ServiceConfig
-	StorageConfig
 }
 
 func (s *ServerConfig) setEnv() {
@@ -20,7 +19,7 @@ func (s *ServerConfig) setEnv() {
 	}
 
 	if f := os.Getenv("FILE_STORAGE_PATH"); f != "" {
-		s.StorageConfig.FilePath = f
+		s.ServiceConfig.FilePath = f
 	}
 
 	if r := os.Getenv("RESTORE"); r != "" {
@@ -28,7 +27,7 @@ func (s *ServerConfig) setEnv() {
 		if err != nil {
 			panic(err)
 		}
-		s.StorageConfig.AutoImport = rf
+		s.ServiceConfig.AutoImport = rf
 	}
 
 	if i := os.Getenv("STORE_INTERVAL"); i != "" {
@@ -40,7 +39,7 @@ func (s *ServerConfig) setEnv() {
 	}
 
 	if d := os.Getenv("DATABASE_DSN"); d != "" {
-		s.StorageConfig.DBConn = d
+		s.ServiceConfig.DBConn = d
 	}
 }
 
@@ -58,16 +57,16 @@ func (s *ServerConfig) setFlags() {
 		s.AppConfig.URL = *a
 	}
 	if *f != "" {
-		s.StorageConfig.FilePath = *f
+		s.ServiceConfig.FilePath = *f
 	}
 	if *r != s.AutoImport {
-		s.StorageConfig.AutoImport = *r
+		s.ServiceConfig.AutoImport = *r
 	}
 	if *i != -1 {
 		s.ServiceConfig.Interval = time.Duration(1_000_000_000 * *i)
 	}
 	if *d != "" {
-		s.StorageConfig.DBConn = *d
+		s.ServiceConfig.DBConn = *d
 	}
 }
 
@@ -75,12 +74,9 @@ type AppConfig struct {
 	URL string
 }
 
-type StorageConfig struct {
+type ServiceConfig struct {
+	Interval   time.Duration
 	FilePath   string
 	AutoImport bool
 	DBConn     string
-}
-
-type ServiceConfig struct {
-	Interval time.Duration
 }

@@ -7,21 +7,9 @@ import (
 
 func main() {
 	cfg := config.NewServerConfig()
-	app := http.NewServerApp(*cfg)
+	app := http.NewGateway(*cfg)
 
-	// gateway := http.NewServerApp(*cfg)
-	// service := metrics.NewMetricsService(*cfg)
-	// // gateway.Service = service
-	// storage := mock.NewMockStorage(*cfg)
-	// gateway.Service =
-	// service.Storage = storage
-
-	//export dump when app stoped
-	defer app.Service.Backup()
-
-	//run app
 	if err := app.Run(); err != nil {
 		panic(err)
 	}
-
 }

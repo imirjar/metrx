@@ -5,19 +5,19 @@ import (
 	"reflect"
 	"runtime"
 
-	"github.com/imirjar/metrx/internal/entity"
+	"github.com/imirjar/metrx/internal/models"
 )
 
 type AgentService struct {
-	Metrics  []entity.Metrics
+	Metrics  []models.Metrics
 	MemStats runtime.MemStats
 }
 
 func NewAgentService() *AgentService {
 
 	agent := &AgentService{}
-	for _, m := range entity.MemStats {
-		metric := entity.Metrics{
+	for _, m := range models.MemStats {
+		metric := models.Metrics{
 			ID:    m,
 			MType: "gauge",
 		}
@@ -47,7 +47,7 @@ func (a *AgentService) SendMetrix(URI string) {
 	}
 
 	//for random metric
-	randomMetric := entity.Metrics{
+	randomMetric := models.Metrics{
 		ID:    "RandomValue",
 		MType: "gauge",
 	}
@@ -61,7 +61,7 @@ func (a *AgentService) SendMetrix(URI string) {
 	counter += 1
 
 	//for metric counter
-	counterMetric := entity.Metrics{
+	counterMetric := models.Metrics{
 		ID:    "PollCount",
 		MType: "counter",
 		Delta: &counter,
@@ -70,7 +70,7 @@ func (a *AgentService) SendMetrix(URI string) {
 
 }
 
-func (a *AgentService) ReadValueFromMemStats(metric *entity.Metrics) {
+func (a *AgentService) ReadValueFromMemStats(metric *models.Metrics) {
 	value := reflect.ValueOf(a.MemStats).FieldByName(metric.ID)
 	// fmt.Println(value)
 	if value.CanFloat() {
