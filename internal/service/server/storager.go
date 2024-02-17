@@ -1,66 +1,12 @@
 package server
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+	"strconv"
 
-func (s ServerService) UpdateGauge(mName string, mValue float64) error {
-	if mName == "" {
-		return errMetricNameIncorrect
-	}
-
-	s.MemStorager.AddGauge(mName, mValue)
-	if s.cfg.Interval == 0 {
-		s.Backup()
-	}
-	return nil
-}
-
-// оupdate counter
-func (s ServerService) UpdateCounter(mName string, mValue int64) error {
-	if mName == "" {
-		return errMetricNameIncorrect
-	}
-
-	// if counter exists -> counter += new value
-	curV, ok := s.MemStorager.ReadCounter(mName)
-	if ok {
-		s.MemStorager.AddCounter(mName, curV+mValue)
-	} else {
-		s.MemStorager.AddCounter(mName, mValue)
-	}
-	if s.cfg.Interval == 0 {
-		s.Backup()
-	}
-	//no error
-	return nil
-}
-
-// get gauge metric
-func (s ServerService) ViewGaugeByName(mName string) (float64, error) {
-	if mName == "" {
-		return 0, errMetricNameIncorrect
-	}
-
-	gauge, ok := s.MemStorager.ReadGauge(mName)
-	if !ok {
-		return gauge, errServiceError
-	}
-
-	return gauge, nil
-}
-
-// get counter metric
-func (s ServerService) ViewCounterByName(mName string) (int64, error) {
-	if mName == "" {
-		return 0, errMetricNameIncorrect
-	}
-
-	counter, ok := s.MemStorager.ReadCounter(mName)
-	if !ok {
-		return counter, errServiceError
-	}
-
-	return counter, nil
-}
+	"github.com/imirjar/metrx/internal/models"
+)
 
 // get all metrics as html page
 func (s ServerService) MetricPage() string {
@@ -82,4 +28,103 @@ func (s ServerService) MetricPage() string {
 		s.Backup()
 	}
 	return form
+}
+
+func (s ServerService) ByteUpdate(bMetric []byte) ([]byte, error) {
+	var metric models.Metrics
+	if err := json.Unmarshal(bMetric, &metric); err != nil {
+		return nil, err
+	}
+
+	switch metric.MType {
+	case "gauge":
+		s.MemStorager.AddGauge(metric.ID, *metric.Value)
+		return bMetric, nil
+	case "counter":
+		newDelta, err := s.MemStorager.AddCounter(metric.ID, *metric.Delta)
+		if err != nil {
+			return nil, err
+		}
+		metric.Delta = &newDelta
+		return bMetric, nil
+	default:
+		return nil, errServiceError
+	}
+}
+
+func (s ServerService) ByteRead(bMetric []byte) ([]byte, error) {
+	var metric models.Metrics
+	if err := json.Unmarshal(bMetric, &metric); err != nil {
+		return nil, err
+	}
+
+	switch metric.MType {
+	case "gauge":
+		value, ok := s.MemStorager.ReadGauge(metric.ID)
+		if !ok {
+			return nil, errServiceError
+		}
+		metric.Value = &value
+
+	case "counter":
+		delta, ok := s.MemStorager.ReadCounter(metric.ID)
+		if !ok {
+			return nil, errServiceError
+		}
+		metric.Delta = &delta
+
+	default:
+		return nil, errServiceError
+	}
+
+	b, err := json.Marshal(metric)
+	if err != nil {
+		fmt.Printf("Error: %s", err)
+		return nil, errServiceError
+	}
+
+	return b, nil
+}
+
+func (s ServerService) Update(mName, mType, mValue string) error {
+
+	switch mType {
+	case "gauge":
+		value, err := strconv.ParseFloat(mValue, 64)
+		if err != nil {
+			return errConvertationError
+		}
+		_, err = s.MemStorager.AddGauge(mName, value)
+		return err
+	case "counter":
+		delta, err := strconv.ParseInt(mValue, 10, 64)
+		if err != nil {
+			return errConvertationError
+		}
+		_, err = s.MemStorager.AddCounter(mName, delta)
+		return err
+	default:
+		return errServiceError
+	}
+}
+
+func (s ServerService) View(mName, mType string) (string, error) {
+	switch mType {
+	case "gauge":
+		v, ok := s.MemStorager.ReadGauge(mName)
+		if !ok {
+			return "", errServiceError
+		}
+		value := fmt.Sprintf("%g", v)
+		return value, nil
+	case "counter":
+		d, ok := s.MemStorager.ReadCounter(mName)
+		if !ok {
+			return "", errServiceError
+		}
+		delta := fmt.Sprintf("%d", d)
+		return delta, nil
+	default:
+		return "", errServiceError
+	}
 }

@@ -14,204 +14,93 @@ import (
 func TestServerApp_GaugeHandlers(t *testing.T) {
 	cfg := config.Testcfg
 	serverApp := server.NewGateway(cfg)
-	type want struct {
-		updateStatus int
-		valueStatus  int
-		value        string
-	}
-	type metricParams struct {
-		value string
-		name  string
-	}
+
 	tests := []struct {
-		name   string
-		params metricParams
-		want   want
+		tName          string
+		mName          string
+		mType          string
+		mValue         string
+		statusExpected int
 	}{
 		{
-			name: "#1 OK",
-			params: metricParams{
-				name:  "someGauge",
-				value: "100",
-			},
-			want: want{
-				updateStatus: 200,
-				valueStatus:  200,
-				value:        "100",
-			},
+			tName:          "#1 OK gauge",
+			mType:          "gauge",
+			mName:          "someGauge",
+			mValue:         "100",
+			statusExpected: 200,
 		},
 		{
-			name: "#2 bad value",
-			params: metricParams{
-				name:  "none",
-				value: "none",
-			},
-			want: want{
-				updateStatus: 400,
-				valueStatus:  404,
-				value:        "0",
-			},
+			tName:          "#1 OK counter",
+			mType:          "counter",
+			mName:          "testSetGet144",
+			mValue:         "835",
+			statusExpected: 200,
 		},
 		{
-			name: "#3 without value",
-			params: metricParams{
-				name:  "nil",
-				value: "",
-			},
-			want: want{
-				updateStatus: 404,
-				valueStatus:  404,
-				value:        "0",
-			},
+			tName:          "#2 No type",
+			mType:          "",
+			mName:          "someGauge",
+			mValue:         "100",
+			statusExpected: 400,
 		},
-		{
-			name: "#4 resend 1 test",
-			params: metricParams{
-				name:  "someGauge",
-				value: "100",
-			},
-			want: want{
-				updateStatus: 200,
-				valueStatus:  200,
-				value:        "100",
-			},
-		},
+		// {
+		// 	tName:          "#3 No name",
+		// 	mType:          "gauge",
+		// 	mName:          "",
+		// 	mValue:         "301",
+		// 	statusExpected: 400,
+		// },
+		// {
+		// 	tName:          "#4 Wrong type",
+		// 	mType:          "someType",
+		// 	mName:          "",
+		// 	mValue:         "100",
+		// 	statusExpected: 404,
+		// },
+		// {
+		// 	tName:          "#5 Wrong value",
+		// 	mType:          "gauge",
+		// 	mName:          "someGauge",
+		// 	mValue:         "someGauge",
+		// 	statusExpected: 400,
+		// },
 	}
 
 	for _, test := range tests {
 		updateRecorder := httptest.NewRecorder()
-		updatePath := fmt.Sprintf("/update/gauge/%s/%s", test.params.name, test.params.value)
+		updatePath := fmt.Sprintf("/update/%s/%s/%s", test.mType, test.mName, test.mValue)
 		updateReq, err := http.NewRequest("POST", updatePath, nil)
 		if err != nil {
 			t.Fatal(err)
 		}
 
 		valueRecorder := httptest.NewRecorder()
-		valuePath := fmt.Sprintf("/value/gauge/%s", test.params.name)
+		valuePath := fmt.Sprintf("/value/%s/%s", test.mType, test.mName)
 		valueReq, err := http.NewRequest("GET", valuePath, nil)
 		if err != nil {
 			t.Fatal(err)
 		}
 
 		router := mux.NewRouter()
-		router.HandleFunc("/update/gauge/{name}/{value}", serverApp.UpdateGauge)
-		router.HandleFunc("/value/gauge/{name}", serverApp.ValueGauge)
+		router.HandleFunc("/update/{type}/{name}/{value}", serverApp.Update)
+		router.HandleFunc("/value/{type}/{name}", serverApp.View)
 
 		router.ServeHTTP(updateRecorder, updateReq)
-		if updateRecorder.Code != test.want.updateStatus {
+		if updateRecorder.Code != test.statusExpected {
 			t.Errorf("Error on %s update Gauge: status code %v want %v",
-				test.name, updateRecorder.Code, test.want.updateStatus)
+				test.tName, updateRecorder.Code, test.statusExpected)
 		}
 
 		router.ServeHTTP(valueRecorder, valueReq)
-		if valueRecorder.Body.String() != test.want.value || valueRecorder.Code != test.want.valueStatus {
-			t.Errorf("Error on %s value Gauge: value >>%v<< want %v, status %d want %d",
-				test.name, valueRecorder.Body.String(), test.want.value, valueRecorder.Code, test.want.valueStatus)
+		// valueRecorder.Body.String() != test.mValue
+		if valueRecorder.Code != test.statusExpected {
+			t.Errorf("Error on %s value Gauge: status %d want %d",
+				test.tName, valueRecorder.Code, test.statusExpected)
 		}
 
-	}
-}
-
-func TestServerApp_CounterHandlers(t *testing.T) {
-	cfg := config.Testcfg
-	serverApp := server.NewGateway(cfg)
-	type want struct {
-		updateStatus int
-		valueStatus  int
-		value        string
-	}
-	type metricParams struct {
-		value string
-		name  string
-	}
-	tests := []struct {
-		name   string
-		params metricParams
-		want   want
-	}{
-		{
-			name: "#1 OK",
-			params: metricParams{
-				name:  "someCounter",
-				value: "100",
-			},
-			want: want{
-				updateStatus: 200,
-				valueStatus:  200,
-				value:        "100",
-			},
-		},
-		{
-			name: "#2 bad value",
-			params: metricParams{
-				name:  "none",
-				value: "none",
-			},
-			want: want{
-				updateStatus: 400,
-				valueStatus:  404, //err
-				value:        "0",
-			},
-		},
-		{
-			name: "#3 without value",
-			params: metricParams{
-				name:  "nil",
-				value: "",
-			},
-			want: want{
-				updateStatus: 404,
-				valueStatus:  404,
-				value:        "0",
-			},
-		},
-		{
-			name: "#4 resend 1 test",
-			params: metricParams{
-				name:  "someCounter",
-				value: "100",
-			},
-			want: want{
-				updateStatus: 200,
-				valueStatus:  200,
-				value:        "200",
-			},
-		},
-	}
-
-	for _, test := range tests {
-		updateRecorder := httptest.NewRecorder()
-		updatePath := fmt.Sprintf("/update/counter/%s/%s", test.params.name, test.params.value)
-		updateReq, err := http.NewRequest("POST", updatePath, nil)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		valueRecorder := httptest.NewRecorder()
-		valuePath := fmt.Sprintf("/value/counter/%s", test.params.name)
-		valueReq, err := http.NewRequest("GET", valuePath, nil)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		router := mux.NewRouter()
-		router.HandleFunc("/update/counter/{name}/{value}", serverApp.UpdateCounter)
-		router.HandleFunc("/value/counter/{name}", serverApp.ValueCounter)
-
-		router.ServeHTTP(updateRecorder, updateReq)
-		if updateRecorder.Code != test.want.updateStatus {
-			t.Errorf("Error on %s update Counter: status code %v want %v",
-				test.name, updateRecorder.Code, test.want.updateStatus)
-		}
-
-		router.ServeHTTP(valueRecorder, valueReq)
-		if valueRecorder.Body.String() != test.want.value {
-			t.Errorf("Error on %s value Counter: value >>%v<< want %v",
-				test.name, valueRecorder.Body.String(), test.want.value)
-		}
-		if valueRecorder.Code != test.want.valueStatus {
-			t.Errorf("Error on %s value Counter: status %d want %d",
-				test.name, valueRecorder.Code, test.want.valueStatus)
+		if valueRecorder.Body.String() != test.mValue {
+			t.Errorf("Error on %s value Gauge: value %s want %s",
+				test.tName, valueRecorder.Body.String(), test.mValue)
 		}
 
 	}

@@ -43,8 +43,8 @@ type ServerService struct {
 }
 
 type Storager interface {
-	AddGauge(mName string, mValue float64)
-	AddCounter(mName string, mValue int64)
+	AddGauge(mName string, mValue float64) (float64, error)
+	AddCounter(mName string, mValue int64) (int64, error)
 	ReadAllGauge() map[string]float64
 	ReadAllCounter() map[string]int64
 	ReadGauge(mName string) (float64, bool)

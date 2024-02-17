@@ -24,11 +24,12 @@ func NewGateway(cfg config.ServerConfig) *HTTPGateway {
 }
 
 type Service interface {
-	UpdateGauge(mName string, mValue float64) error
-	UpdateCounter(mName string, mValue int64) error
-	ViewGaugeByName(mName string) (float64, error)
-	ViewCounterByName(mName string) (int64, error)
+	ByteUpdate(bMetric []byte) ([]byte, error)
+	ByteRead(bMetric []byte) ([]byte, error)
+	Update(mName, mType, mValue string) error
+	View(mName, mType string) (string, error)
 	MetricPage() string
+
 	Backup() error
 	Restore() error
 	PingDB() error
@@ -42,28 +43,19 @@ type HTTPGateway struct {
 func (h *HTTPGateway) Run() error {
 
 	router := mux.NewRouter()
-
 	// set metric value
 	update := router.PathPrefix("/update").Subrouter()
-	update.HandleFunc("/gauge/{name}/{value:[0-9]+[.]{0,1}[0-9]*}", h.UpdateGauge).Methods("POST")
-	update.HandleFunc("/counter/{name}/{value:[0-9]+}", h.UpdateCounter).Methods("POST")
-	update.HandleFunc("/{other}/{name}/{value}", h.BadParams).Methods("POST") //status 400
+	update.HandleFunc("/{type}/{name}/{value}", h.Update).Methods("POST")
 	update.HandleFunc("/", h.UpdateJSON).Methods("POST").HeadersRegexp("Content-Type", "application/json")
 
 	// read metric value
 	value := router.PathPrefix("/value").Subrouter()
-	value.HandleFunc("/gauge/{name}", h.ValueGauge).Methods("GET")
-	value.HandleFunc("/counter/{name}", h.ValueCounter).Methods("GET")
-	value.HandleFunc("/{other}/{name}", h.BadParams).Methods("GET") //status 400
+	value.HandleFunc("/{type}/{name}", h.View).Methods("GET")
 	value.HandleFunc("/", h.ValueJSON).Methods("POST").HeadersRegexp("Content-Type", "application/json")
-
-	// updates
-	updates := router.PathPrefix("/updates").Subrouter()
-	updates.HandleFunc("/", h.UpdatesMetrics).Methods("POST").HeadersRegexp("Content-Type", "application/json")
 
 	// all metric values as a html page
 	router.HandleFunc("/ping", h.Ping).Methods("GET")
-	router.HandleFunc("/updates", h.MainPage).Methods("GET")
+	router.HandleFunc("/", h.MainPage).Methods("GET")
 
 	router.Use(compressor.Compressor)
 	router.Use(logger.Logger)

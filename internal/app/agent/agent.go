@@ -3,18 +3,29 @@ package agent
 import (
 	"time"
 
+	"github.com/imirjar/metrx/config"
 	"github.com/imirjar/metrx/internal/service/agent"
 )
 
-type AgentApp struct{}
+type Servicer interface {
+	CollectMetrix()
+	SendMetrix(url string)
+	// GetGauges() map[string]float64
+	// GetCounters() map[string]int64
+	// Send(path string, buf io.Reader)
+}
 
-func NewAgentApp() *AgentApp {
-	return &AgentApp{}
+type AgentApp struct {
+	Service Servicer
+}
+
+func NewAgentApp(cfg config.AgentConfig) *AgentApp {
+	return &AgentApp{
+		Service: agent.NewAgentService(cfg),
+	}
 }
 
 func (a *AgentApp) Run(path string, pollInterval, reportInterval time.Duration) error {
-
-	agent := agent.NewAgentService()
 
 	poll := time.NewTicker(pollInterval)
 	report := time.NewTicker(reportInterval)
@@ -22,9 +33,9 @@ func (a *AgentApp) Run(path string, pollInterval, reportInterval time.Duration) 
 	for {
 		select {
 		case <-poll.C:
-			agent.CollectMetrix()
+			a.Service.CollectMetrix()
 		case <-report.C:
-			agent.SendMetrix(path)
+			a.Service.SendMetrix(path)
 		}
 	}
 }

@@ -15,11 +15,11 @@ create database metrics;
 create user metrics_master with encrypted password 'userpassword';
 ```
 ```
-grant all privileges on database dbname to metrics_master; 
+grant all privileges on database metrics to metrics_master; 
 ```
 
 Для создания таблицы metrics выполните команду
 
 ```
-CREATE TABLE metrics (`"id" VARCHAR(50) NOT NULL, "type" VARCHAR(250) NOT NULL, "delta" FLOAT, "value" INTEGER`) 
+CREATE TABLE metrics ("id" VARCHAR(50) NOT NULL, "type" VARCHAR(250) NOT NULL, "delta" FLOAT, "value" INTEGER); 
 ```

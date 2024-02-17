@@ -1,18 +1,35 @@
 package mock
 
-func (m *MemStorage) AddGauge(mName string, mValue float64) {
+func (m *MemStorage) Create(name, category string, value float64, delta int64) {
+
+}
+func (m *MemStorage) Read()   {}
+func (m *MemStorage) Update() {}
+func (m *MemStorage) Delete() {}
+
+func (m *MemStorage) AddGauge(mName string, mValue float64) (float64, error) {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 	m.Gauge[mName] = mValue
+	return mValue, nil
 }
 
-func (m *MemStorage) AddCounter(mName string, mValue int64) {
+func (m *MemStorage) AddCounter(mName string, mValue int64) (int64, error) {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 	// if s.cfg.Interval == 0 {
 	// 	s.Backup()
 	// }
-	m.Counter[mName] = mValue
+	cValue, ok := m.Counter[mName]
+	if !ok {
+		m.Counter[mName] = mValue
+		return mValue, nil
+	} else {
+		newValue := cValue + mValue
+		m.Counter[mName] = newValue
+		return newValue, nil
+	}
+
 }
 
 func (m *MemStorage) ReadAllGauge() map[string]float64 {

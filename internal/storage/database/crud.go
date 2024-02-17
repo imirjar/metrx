@@ -15,7 +15,7 @@ type counter struct {
 	Value int64
 }
 
-func (m *DB) AddGauge(mName string, mValue float64) {
+func (m *DB) AddGauge(mName string, mValue float64) (float64, error) {
 	_, ok := m.ReadGauge(mName)
 
 	value := strconv.FormatFloat(mValue, 'f', 6, 64)
@@ -24,38 +24,38 @@ func (m *DB) AddGauge(mName string, mValue float64) {
 			"INSERT INTO metrics (id, type, value)"+
 				" VALUES($1,$2,$3)", mName, "gauge", value)
 		if err != nil {
-			panic(err)
+			return 0, err
 		}
 	} else {
 		_, err := m.db.Exec(
 			"UPDATE metrics SET value = $1"+
 				"WHERE id = $2 AND type = $3)", value, mName, "gauge")
 		if err != nil {
-			panic(err)
+			return 0, err
 		}
 	}
-
+	return mValue, nil
 }
 
-func (m *DB) AddCounter(mName string, mValue int64) {
-
-	_, ok := m.ReadCounter(mName)
+func (m *DB) AddCounter(mName string, mValue int64) (int64, error) {
+	curVal, ok := m.ReadCounter(mName)
 	value := strconv.FormatInt(mValue, 10)
 	if !ok {
 		_, err := m.db.Exec(
 			"INSERT INTO metrics (id, type, value)"+
 				" VALUES($1,$2,$3)", mName, "counter", value)
 		if err != nil {
-			panic(err)
+			return 0, err
 		}
 	} else {
 		_, err := m.db.Exec(
 			"UPDATE metrics SET value = $1"+
 				"WHERE id = $2 AND type = $3)", value, mName, "counter")
 		if err != nil {
-			panic(err)
+			return 0, err
 		}
 	}
+	return curVal + mValue, nil
 }
 
 func (m *DB) ReadAllGauge() map[string]float64 {

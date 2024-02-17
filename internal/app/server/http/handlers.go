@@ -2,46 +2,11 @@ package http
 
 import (
 	"bytes"
-	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
-	"strconv"
-
-	"github.com/imirjar/metrx/internal/models"
 
 	"github.com/gorilla/mux"
 )
-
-func (h *HTTPGateway) UpdatesMetrics(resp http.ResponseWriter, req *http.Request) {
-	var metricList []models.Metrics
-
-	body, err := io.ReadAll(req.Body)
-	if err != nil {
-		resp.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	defer req.Body.Close()
-
-	err = json.Unmarshal(body, &metricList)
-	if err != nil {
-		resp.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	for _, m := range metricList {
-		switch m.MType {
-		case "gauge":
-			// gauges[m.ID] = metric.Gauge(*m.Value)
-			h.Service.UpdateGauge(m.ID, *m.Value)
-		case "counter":
-			h.Service.UpdateCounter(m.ID, *m.Delta)
-
-		}
-	}
-	resp.WriteHeader(http.StatusOK)
-
-}
 
 func (h *HTTPGateway) Ping(resp http.ResponseWriter, req *http.Request) {
 	err := h.Service.PingDB()
@@ -54,26 +19,28 @@ func (h *HTTPGateway) Ping(resp http.ResponseWriter, req *http.Request) {
 	resp.Write([]byte("OK"))
 }
 
-func (h *HTTPGateway) UpdateGauge(resp http.ResponseWriter, req *http.Request) {
+func (h *HTTPGateway) Update(resp http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 
 	vn, ok := vars["name"]
-	if !ok {
-		resp.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	vv, ok := vars["value"]
-	if !ok {
-		resp.WriteHeader(http.StatusBadRequest)
+	if !ok || vn == "" {
+		http.Error(resp, errMetricNameIncorrect.Error(), http.StatusBadRequest)
 		return
 	}
 
-	mValue, err := strconv.ParseFloat(vv, 64)
-	if err != nil {
-		resp.WriteHeader(http.StatusBadRequest)
+	vt, ok := vars["type"]
+	if !ok || !(vt == "gauge" || vt == "counter") {
+		http.Error(resp, errMetricNameIncorrect.Error(), http.StatusNotFound)
 		return
 	}
-	err = h.Service.UpdateGauge(vn, mValue)
+
+	vv, ok := vars["value"]
+	if !ok || vv == "" {
+		http.Error(resp, errMetricNameIncorrect.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err := h.Service.Update(vn, vt, vv) //here
 	if err != nil {
 		resp.WriteHeader(http.StatusBadRequest)
 		return
@@ -83,72 +50,29 @@ func (h *HTTPGateway) UpdateGauge(resp http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (h *HTTPGateway) UpdateCounter(resp http.ResponseWriter, req *http.Request) {
+func (h *HTTPGateway) View(resp http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 
 	vn, ok := vars["name"]
-	if !ok {
-		resp.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	vv, ok := vars["value"]
-	if !ok {
-		resp.WriteHeader(http.StatusBadRequest)
+	if !ok || vn == "" {
+		http.Error(resp, errMetricNameIncorrect.Error(), http.StatusNotFound)
 		return
 	}
 
-	mValue, err := strconv.ParseInt(vv, 10, 64)
-	if err != nil {
-		resp.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	err = h.Service.UpdateCounter(vn, mValue)
-	if err != nil {
-		resp.WriteHeader(http.StatusBadRequest)
-		return
-	} else {
-		resp.WriteHeader(http.StatusOK)
-		return
-	}
-}
-
-func (h *HTTPGateway) ValueGauge(resp http.ResponseWriter, req *http.Request) {
-	vars := mux.Vars(req)
-
-	vn, ok := vars["name"]
-	if !ok {
-		resp.WriteHeader(http.StatusBadRequest)
+	vt, ok := vars["type"]
+	if !ok || !(vt == "gauge" || vt == "counter") {
+		http.Error(resp, errMetricNameIncorrect.Error(), http.StatusNotFound)
 		return
 	}
 
-	metric, err := h.Service.ViewGaugeByName(vn)
+	value, err := h.Service.View(vn, vt) //here
 	if err != nil {
 		resp.WriteHeader(http.StatusNotFound)
-		resp.Write([]byte(fmt.Sprint(metric)))
 		return
 	} else {
 		resp.WriteHeader(http.StatusOK)
-		resp.Write([]byte(fmt.Sprint(metric)))
+		resp.Write([]byte(value))
 		return
-	}
-}
-
-func (h *HTTPGateway) ValueCounter(resp http.ResponseWriter, req *http.Request) {
-	vars := mux.Vars(req)
-
-	vn, ok := vars["name"]
-	if !ok {
-		resp.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	metric, err := h.Service.ViewCounterByName(vn)
-	if err != nil {
-		resp.WriteHeader(http.StatusNotFound)
-		resp.Write([]byte(fmt.Sprint(metric)))
-	} else {
-		resp.WriteHeader(http.StatusOK)
-		resp.Write([]byte(fmt.Sprint(metric)))
 	}
 }
 
@@ -160,8 +84,7 @@ func (h *HTTPGateway) MainPage(resp http.ResponseWriter, req *http.Request) {
 }
 
 func (h *HTTPGateway) UpdateJSON(resp http.ResponseWriter, req *http.Request) {
-
-	var metric models.Metrics
+	// var metric models.Metrics
 	var buf bytes.Buffer //byte buffer
 
 	//request body -> buf
@@ -171,54 +94,17 @@ func (h *HTTPGateway) UpdateJSON(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	//put body JSON to metric model
-	if err = json.Unmarshal(buf.Bytes(), &metric); err != nil {
+	bMetric, err := h.Service.ByteUpdate(buf.Bytes())
+	if err != nil {
 		http.Error(resp, err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	//counter||gauge||StatusNotFound
-	switch metric.MType {
-	case "gauge":
-		//update value in storage
-		h.Service.UpdateGauge(metric.ID, *metric.Value) //надо возвращать обновленное значение!
-
-		r, err := json.Marshal(metric)
-		if err != nil {
-			//400 if marshal error
-			http.Error(resp, err.Error(), http.StatusBadRequest)
-			return
-		}
-		//200 with Content-type:application/json
-		resp.Header().Set("content-type", "application/json")
-		resp.WriteHeader(http.StatusOK)
-		resp.Write(r)
-
-	case "counter":
-		//update value in storage
-		h.Service.UpdateCounter(metric.ID, *metric.Delta)
-
-		r, err := json.Marshal(metric)
-		if err != nil {
-			//400 if marshal error
-			http.Error(resp, err.Error(), http.StatusBadRequest)
-			return
-		}
-		//200 with Content-type:application/json
-		resp.Header().Set("content-type", "application/json")
-		resp.WriteHeader(http.StatusOK)
-		resp.Write(r)
-
-	default:
-		resp.Header().Set("content-type", "application/json")
-		resp.WriteHeader(http.StatusNotFound)
-		resp.Write(nil)
-	}
+	resp.Header().Set("content-type", "application/json")
+	resp.WriteHeader(http.StatusOK)
+	resp.Write(bMetric)
 }
 
 func (h *HTTPGateway) ValueJSON(resp http.ResponseWriter, req *http.Request) {
-
-	var metric models.Metrics
 	var buf bytes.Buffer //byte buffer
 
 	//request body -> buf
@@ -228,82 +114,12 @@ func (h *HTTPGateway) ValueJSON(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	//put body JSON to metric model
-	if err = json.Unmarshal(buf.Bytes(), &metric); err != nil {
+	bMetric, err := h.Service.ByteRead(buf.Bytes())
+	if err != nil {
 		http.Error(resp, err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	//counter||gauge||StatusNotFound
-	switch metric.MType {
-	case "gauge":
-		//get value from storage
-		v, err := h.Service.ViewGaugeByName(metric.ID)
-		if err != nil {
-			//404 if metric doesn't found in storage
-			resp.Header().Set("content-type", "application/json")
-			resp.WriteHeader(http.StatusNotFound)
-			resp.Write(nil)
-		}
-		metric.Value = &v
-
-		r, err := json.Marshal(metric)
-		if err != nil {
-			//400 if marshal error
-			resp.Header().Set("content-type", "application/json")
-			resp.WriteHeader(http.StatusBadRequest)
-			resp.Write(nil)
-		}
-		//200 with Content-type:application/json
-		resp.Header().Set("content-type", "application/json")
-		resp.WriteHeader(http.StatusOK)
-		resp.Write(r)
-	case "counter":
-		v, err := h.Service.ViewCounterByName(metric.ID)
-		if err != nil {
-			//404 if metric doesn't found in storage
-			resp.Header().Set("content-type", "application/json")
-			resp.WriteHeader(http.StatusNotFound)
-			resp.Write(nil)
-		}
-		metric.Delta = &v
-
-		r, err := json.Marshal(metric)
-		if err != nil {
-			//400 if marshal error
-			resp.Header().Set("content-type", "application/json")
-			resp.WriteHeader(http.StatusBadRequest)
-			resp.Write(nil)
-		}
-		//200 with Content-type:application/json
-		resp.Header().Set("content-type", "application/json")
-		resp.WriteHeader(http.StatusOK)
-		resp.Write(r)
-	default:
-		//404 for all values
-		resp.Header().Set("content-type", "application/json")
-		resp.WriteHeader(http.StatusNotFound)
-		resp.Write(nil)
-	}
+	resp.Header().Set("content-type", "application/json")
+	resp.WriteHeader(http.StatusOK)
+	resp.Write(bMetric)
 }
-
-func (h *HTTPGateway) BadParams(resp http.ResponseWriter, req *http.Request) {
-	resp.WriteHeader(http.StatusBadRequest)
-}
-
-func (h *HTTPGateway) Error(resp http.ResponseWriter, req *http.Request) {
-	resp.WriteHeader(http.StatusInternalServerError)
-}
-
-// func (s *ServerApp) error(w http.ResponseWriter, r *http.Request, code int, err error) {
-// 	s.respond(w, r, code, map[string]string{"error": err.Error()})
-// }
-
-// func (s *ServerApp) respond(resp http.ResponseWriter, req *http.Request, code int, data interface{}) {
-// 	resp.Header().Set("content-type", "application/json")
-// 	resp.WriteHeader(code)
-// 	if data != nil {
-// 		json.NewEncoder(resp).Encode(data)
-// 	}
-
-// }
