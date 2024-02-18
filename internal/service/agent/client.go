@@ -1,75 +1,43 @@
 package agent
 
 import (
+	"math/rand"
 	"runtime"
 
 	"github.com/imirjar/metrx/internal/models"
 )
 
 func (a *AgentService) SendMetrix(url string) {
-
-	gauges, err := a.Storage.ReadAll("gauge")
-	if err != nil {
-		panic(err)
-	}
-	counters, err := a.Storage.ReadAll("counter")
-	if err != nil {
-		panic(err)
-	}
-
-	for _, g := range gauges {
-		a.MetricsClient.POSTMetric(&g)
-	}
-
-	for _, c := range counters {
-		a.MetricsClient.POSTMetric(&c)
-	}
-}
-
-func (a *AgentService) CollectMetrix() {
 	var counter int64 = 0
-	runtime.ReadMemStats(&a.MemStats)
-
 	for _, ms := range a.GaugeList {
-		var metric = models.Metrics{
+		value := a.ReadMemValue(ms)
+
+		metric := models.Metrics{
 			ID:    ms,
 			MType: "gauge",
+			Value: &value,
 		}
-		// value, ok := a.ReadMemValue(ms)
-		// if ok {
-		// 	metric.Value = &value
-		// }
-		metric.SetRandomValue()
-
-		err := a.Storage.AddGauge(metric)
-		if err != nil {
-			return
-		}
-
+		a.MetricsClient.POSTMetric(metric)
 		counter++
 	}
 
-	var randMetric = models.Metrics{
+	randV := rand.Float64()
+	randMetric := models.Metrics{
 		ID:    "RandomValue",
 		MType: "gauge",
+		Value: &randV,
 	}
-	randMetric.SetRandomValue()
-
-	err := a.Storage.AddGauge(randMetric)
-	if err != nil {
-		return
-	}
-
+	a.MetricsClient.POSTMetric(randMetric)
 	counter++
 
-	var cMetric = models.Metrics{
+	cMetric := models.Metrics{
 		ID:    "PollCount",
 		MType: "counter",
 		Delta: &counter,
 	}
-	err = a.Storage.AddGauge(cMetric)
-	if err != nil {
-		return
-	}
+	a.MetricsClient.POSTMetric(cMetric)
+}
 
+func (a *AgentService) CollectMetrix() {
+	runtime.ReadMemStats(&a.MemStats)
 }

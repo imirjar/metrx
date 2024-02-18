@@ -2,25 +2,21 @@ package agent
 
 import (
 	"bytes"
-	"compress/gzip"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/imirjar/metrx/internal/models"
 )
 
-func (m *MetricsClient) POSTMetric(metric *models.Metrics) {
-	mm, err := json.Marshal(metric)
+func (m *MetricsClient) POSTMetric(metric models.Metrics) {
 	var buf bytes.Buffer
 
+	err := json.NewEncoder(&buf).Encode(metric)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-
-	gz := gzip.NewWriter(&buf)
-	gz.Write(mm)
-	gz.Close()
 
 	req, err := http.NewRequest(http.MethodPost, m.Path, &buf)
 	if err != nil {

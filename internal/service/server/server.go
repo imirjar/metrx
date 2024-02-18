@@ -45,16 +45,10 @@ type ServerService struct {
 
 type Storager interface {
 	AddGauge(metric models.Metrics) error
-	ReadOne(metric models.Metrics) (models.Metrics, bool)
-	ReadAll(mType string) ([]models.Metrics, error)
-	Delete(metric models.Metrics) error
 	AddCounter(name string, delta int64) error
-	// AddGauge(mName string, mValue float64) (float64, error)
-	// AddCounter(mName string, mValue int64) (int64, error)
-	// ReadAllGauge() map[string]float64
-	// ReadAllCounter() map[string]int64
-	// ReadGauge(mName string) (float64, bool)
-	// ReadCounter(mName string) (int64, bool)
+	ReadOne(metric models.Metrics) (models.Metrics, bool)
+	ReadAllGauges() (map[string]float64, error)
+	ReadAllCounters() (map[string]int64, error)
 }
 
 type DBManager interface {

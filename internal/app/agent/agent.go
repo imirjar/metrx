@@ -10,9 +10,6 @@ import (
 type Servicer interface {
 	CollectMetrix()
 	SendMetrix(url string)
-	// GetGauges() map[string]float64
-	// GetCounters() map[string]int64
-	// Send(path string, buf io.Reader)
 }
 
 type AgentApp struct {

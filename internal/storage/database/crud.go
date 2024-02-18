@@ -152,5 +152,6 @@ type counter struct {
 func (m *DB) AddGauge(metric models.Metrics) error                 { return nil }
 func (m *DB) AddCounter(name string, delta int64) error            { return nil }
 func (m *DB) ReadOne(metric models.Metrics) (models.Metrics, bool) { return models.Metrics{}, true }
-func (m *DB) ReadAll(mType string) ([]models.Metrics, error)       { return []models.Metrics{}, nil }
+func (m *DB) ReadAllGauges() (map[string]float64, error)           { return map[string]float64{}, nil }
+func (m *DB) ReadAllCounters() (map[string]int64, error)           { return map[string]int64{}, nil }
 func (m *DB) Delete(metric models.Metrics) error                   { return nil }

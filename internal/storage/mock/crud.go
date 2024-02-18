@@ -48,35 +48,16 @@ func (m *MemStorage) ReadOne(metric models.Metrics) (models.Metrics, bool) {
 	}
 }
 
-func (m *MemStorage) ReadAll(mType string) ([]models.Metrics, error) {
+func (m *MemStorage) ReadAllGauges() (map[string]float64, error) {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
-	var metrics = []models.Metrics{}
-	// for i:= range m[mType]{
-
-	// }
-	switch mType {
-	case "gauge":
-		gMap := m.Gauge
-		for i, v := range gMap {
-			var metric = models.Metrics{ID: i, MType: mType, Value: &v}
-			metrics = append(metrics, metric)
-			// fmt.Println(metric.ID, metric.Value)
-		}
-		return metrics, nil
-	case "counter":
-		cMap := m.Counter
-		for i, v := range cMap {
-			metrics = append(metrics, models.Metrics{ID: i, MType: mType, Delta: &v})
-		}
-		return metrics, nil
-	default:
-		return metrics, errMetricStructureError
-	}
+	return m.Gauge, nil
 }
 
-func (m *MemStorage) Delete(metric models.Metrics) error {
-	return nil
+func (m *MemStorage) ReadAllCounters() (map[string]int64, error) {
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+	return m.Counter, nil
 }
 
 // func (m *MemStorage) AddGauge(mName string, mValue float64) (float64, error) {

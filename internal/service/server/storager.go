@@ -8,23 +8,23 @@ import (
 
 // get all metrics as html page
 func (s ServerService) MetricPage() (string, error) {
-	gauges, err := s.MemStorager.ReadAll("gauge")
+	gauges, err := s.MemStorager.ReadAllGauges()
 	if err != nil {
 		return "", err
 	}
-	counters, err := s.MemStorager.ReadAll("counter")
+	counters, err := s.MemStorager.ReadAllCounters()
 	if err != nil {
 		return "", err
 	}
 
 	gaugeForm := "<a>Gauge</a>"
-	for _, g := range gauges {
-		gaugeForm += fmt.Sprintf("<li>%s:%f</li>", g.ID, *g.Value)
+	for k, g := range gauges {
+		gaugeForm += fmt.Sprintf("<li>%s:%f</li>", k, g)
 	}
 
 	counterForm := "<a>Counter</a>"
-	for _, c := range counters {
-		counterForm += fmt.Sprintf("<li>%s:%d</li>", c.ID, *c.Delta)
+	for k, c := range counters {
+		counterForm += fmt.Sprintf("<li>%s:%d</li>", k, c)
 	}
 
 	form := fmt.Sprintf("<html><ul>%s</ul><ul>%s</ul></html>", gaugeForm, counterForm)
