@@ -1,10 +1,12 @@
 package mock
 
 import (
+	"fmt"
+
 	"github.com/imirjar/metrx/internal/models"
 )
 
-func (m *MemStorage) Create(metric models.Metrics) error {
+func (m *MemStorage) AddGauge(metric models.Metrics) error {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 	switch metric.MType {
@@ -19,18 +21,30 @@ func (m *MemStorage) Create(metric models.Metrics) error {
 	}
 }
 
+func (m *MemStorage) AddCounter(name string, delta int64) error {
+	m.Counter[name] = m.Counter[name] + delta
+	return nil
+}
+
 func (m *MemStorage) ReadOne(metric models.Metrics) (models.Metrics, bool) {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 	switch metric.MType {
 	case "gauge":
-		value := m.Gauge[metric.ID]
-		metric.Value = &value
-		return metric, false
+		if value, ok := m.Gauge[metric.ID]; ok {
+			metric.Value = &value
+			return metric, true
+		} else {
+			return metric, false
+		}
+
 	case "counter":
-		delta := m.Counter[metric.ID]
-		metric.Delta = &delta
-		return metric, false
+		if delta, ok := m.Counter[metric.ID]; ok {
+			metric.Delta = &delta
+			return metric, true
+		} else {
+			return metric, false
+		}
 	default:
 		return metric, false
 	}
@@ -47,7 +61,9 @@ func (m *MemStorage) ReadAll(mType string) ([]models.Metrics, error) {
 	case "gauge":
 		gMap := m.Gauge
 		for i, v := range gMap {
-			metrics = append(metrics, models.Metrics{ID: i, MType: mType, Value: &v})
+			var metric = models.Metrics{ID: i, MType: mType, Value: &v}
+			metrics = append(metrics, metric)
+			fmt.Println(metric.ID, metric.Value)
 		}
 		return metrics, nil
 	case "counter":
@@ -58,21 +74,6 @@ func (m *MemStorage) ReadAll(mType string) ([]models.Metrics, error) {
 		return metrics, nil
 	default:
 		return metrics, errMetricStructureError
-	}
-}
-
-func (m *MemStorage) Update(metric models.Metrics) error {
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
-	switch metric.MType {
-	case "gauge":
-		m.Gauge[metric.ID] = *metric.Value
-		return nil
-	case "counter":
-		m.Counter[metric.ID] = *metric.Delta
-		return nil
-	default:
-		return errMetricStructureError
 	}
 }
 

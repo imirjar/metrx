@@ -18,13 +18,13 @@ func (s ServerService) MetricPage() (string, error) {
 	}
 
 	gaugeForm := "<a>Gauge</a>"
-	for i, g := range gauges {
-		gaugeForm += fmt.Sprintf("<li>%s:%f</li>", i, g)
+	for _, g := range gauges {
+		gaugeForm += fmt.Sprintf("<li>%s:%f</li>", g.ID, *g.Value)
 	}
 
 	counterForm := "<a>Counter</a>"
-	for i, c := range counters {
-		counterForm += fmt.Sprintf("<li>%s:%d</li>", i, c)
+	for _, c := range counters {
+		counterForm += fmt.Sprintf("<li>%s:%d</li>", c.ID, *c.Delta)
 	}
 
 	form := fmt.Sprintf("<html><ul>%s</ul><ul>%s</ul></html>", gaugeForm, counterForm)
@@ -38,38 +38,18 @@ func (s ServerService) Update(metric models.Metrics) error {
 
 	switch metric.MType {
 	case "gauge":
-		_, exists := s.MemStorager.ReadOne(metric)
-		if exists {
-			err := s.MemStorager.Update(metric)
-			if err != nil {
-				return err
-			}
-			return nil
-		} else {
-			err := s.MemStorager.Create(metric)
-			if err != nil {
-				return err
-			}
-			return nil
+		err := s.MemStorager.AddGauge(metric)
+		if err != nil {
+			return err
 		}
+		return nil
 
 	case "counter":
-		nMetric, exists := s.MemStorager.ReadOne(metric)
-		if exists {
-			value := *metric.Delta + *nMetric.Delta
-			metric.Delta = &value
-			err := s.MemStorager.Update(metric)
-			if err != nil {
-				return err
-			}
-			return nil
-		} else {
-			err := s.MemStorager.Create(metric)
-			if err != nil {
-				return err
-			}
-			return nil
+		err := s.MemStorager.AddCounter(metric.ID, *metric.Delta)
+		if err != nil {
+			return err
 		}
+		return nil
 	default:
 		return errServiceError
 	}

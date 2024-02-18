@@ -44,11 +44,11 @@ type ServerService struct {
 }
 
 type Storager interface {
-	Create(metric models.Metrics) error
+	AddGauge(metric models.Metrics) error
 	ReadOne(metric models.Metrics) (models.Metrics, bool)
 	ReadAll(mType string) ([]models.Metrics, error)
-	Update(metric models.Metrics) error
 	Delete(metric models.Metrics) error
+	AddCounter(name string, delta int64) error
 	// AddGauge(mName string, mValue float64) (float64, error)
 	// AddCounter(mName string, mValue int64) (int64, error)
 	// ReadAllGauge() map[string]float64

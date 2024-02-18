@@ -17,10 +17,9 @@ type Storager interface {
 	// ReadAllCounter() map[string]int64
 	// ReadGauge(mName string) (float64, bool)
 	// ReadCounter(mName string) (int64, bool)
-	Create(metric models.Metrics) error
+	AddGauge(metric models.Metrics) error
 	ReadOne(metric models.Metrics) (models.Metrics, bool)
 	ReadAll(mType string) ([]models.Metrics, error)
-	Update(metric models.Metrics) error
 	Delete(metric models.Metrics) error
 }
 
