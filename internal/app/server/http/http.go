@@ -11,6 +11,7 @@ import (
 	"github.com/imirjar/metrx/config"
 	"github.com/imirjar/metrx/internal/app/server/http/middleware/compressor"
 	"github.com/imirjar/metrx/internal/app/server/http/middleware/logger"
+	"github.com/imirjar/metrx/internal/models"
 	"github.com/imirjar/metrx/internal/service/server"
 )
 
@@ -26,8 +27,10 @@ func NewGateway(cfg config.ServerConfig) *HTTPGateway {
 type Service interface {
 	ByteUpdate(bMetric []byte) ([]byte, error)
 	ByteRead(bMetric []byte) ([]byte, error)
-	Update(mName, mType, mValue string) error
-	View(mName, mType string) (string, error)
+	// Update(mName, mType, mValue string) error
+	Update(metric models.Metrics) error
+	// View(mName, mType string) (string, error)
+	View(metric *models.Metrics) error
 	MetricPage() string
 
 	Backup() error

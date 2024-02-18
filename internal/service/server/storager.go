@@ -3,7 +3,6 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"strconv"
 
 	"github.com/imirjar/metrx/internal/models"
 )
@@ -86,45 +85,79 @@ func (s ServerService) ByteRead(bMetric []byte) ([]byte, error) {
 	return b, nil
 }
 
-func (s ServerService) Update(mName, mType, mValue string) error {
+// func (s ServerService) Update(mName, mType, mValue string) error {
 
-	switch mType {
+// 	switch mType {
+// 	case "gauge":
+// 		value, err := strconv.ParseFloat(mValue, 64)
+// 		if err != nil {
+// 			return errConvertationError
+// 		}
+// 		_, err = s.MemStorager.AddGauge(mName, value)
+// 		return err
+// 	case "counter":
+// 		delta, err := strconv.ParseInt(mValue, 10, 64)
+// 		if err != nil {
+// 			return errConvertationError
+// 		}
+// 		_, err = s.MemStorager.AddCounter(mName, delta)
+// 		return err
+// 	default:
+// 		return errServiceError
+// 	}
+// }
+
+func (s ServerService) Update(metric models.Metrics) error {
+
+	switch metric.MType {
 	case "gauge":
-		value, err := strconv.ParseFloat(mValue, 64)
-		if err != nil {
-			return errConvertationError
-		}
-		_, err = s.MemStorager.AddGauge(mName, value)
+		_, err := s.MemStorager.AddGauge(metric.ID, *metric.Value)
 		return err
 	case "counter":
-		delta, err := strconv.ParseInt(mValue, 10, 64)
-		if err != nil {
-			return errConvertationError
-		}
-		_, err = s.MemStorager.AddCounter(mName, delta)
+		_, err := s.MemStorager.AddCounter(metric.ID, *metric.Delta)
 		return err
 	default:
 		return errServiceError
 	}
 }
 
-func (s ServerService) View(mName, mType string) (string, error) {
-	switch mType {
+// func (s ServerService) View(mName, mType string) (string, error) {
+// 	switch mType {
+// 	case "gauge":
+// 		v, ok := s.MemStorager.ReadGauge(mName)
+// 		if !ok {
+// 			return "", errServiceError
+// 		}
+// 		value := fmt.Sprintf("%g", v)
+// 		return value, nil
+// 	case "counter":
+// 		d, ok := s.MemStorager.ReadCounter(mName)
+// 		if !ok {
+// 			return "", errServiceError
+// 		}
+// 		delta := fmt.Sprintf("%d", d)
+// 		return delta, nil
+// 	default:
+// 		return "", errServiceError
+// 	}
+// }
+
+func (s ServerService) View(metric *models.Metrics) error {
+	switch metric.MType {
 	case "gauge":
-		v, ok := s.MemStorager.ReadGauge(mName)
+		value, ok := s.MemStorager.ReadGauge(metric.ID)
 		if !ok {
-			return "", errServiceError
+			return errStorageError
 		}
-		value := fmt.Sprintf("%g", v)
-		return value, nil
+		metric.Value = &value
 	case "counter":
-		d, ok := s.MemStorager.ReadCounter(mName)
+		delta, ok := s.MemStorager.ReadCounter(metric.ID)
 		if !ok {
-			return "", errServiceError
+			return errStorageError
 		}
-		delta := fmt.Sprintf("%d", d)
-		return delta, nil
+		metric.Delta = &delta
 	default:
-		return "", errServiceError
+		return errServiceError
 	}
+	return nil
 }

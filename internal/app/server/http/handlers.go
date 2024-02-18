@@ -2,10 +2,13 @@ package http
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
+	"github.com/imirjar/metrx/internal/models"
 )
 
 func (h *HTTPGateway) Ping(resp http.ResponseWriter, req *http.Request) {
@@ -22,25 +25,33 @@ func (h *HTTPGateway) Ping(resp http.ResponseWriter, req *http.Request) {
 func (h *HTTPGateway) Update(resp http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 
-	vn, ok := vars["name"]
-	if !ok || vn == "" {
-		http.Error(resp, errMetricNameIncorrect.Error(), http.StatusBadRequest)
-		return
+	var metric = models.Metrics{
+		ID:    vars["name"],
+		MType: vars["type"],
 	}
 
-	vt, ok := vars["type"]
-	if !ok || !(vt == "gauge" || vt == "counter") {
+	switch vars["type"] {
+	case "gauge":
+		value, err := strconv.ParseFloat(vars["value"], 64)
+		if err != nil {
+			http.Error(resp, errMetricNameIncorrect.Error(), http.StatusBadRequest)
+			return
+		}
+		metric.Value = &value
+	case "counter":
+		delta, err := strconv.ParseInt(vars["value"], 10, 64)
+		if err != nil {
+			http.Error(resp, errMetricNameIncorrect.Error(), http.StatusBadRequest)
+			return
+		}
+		metric.Delta = &delta
+	default:
 		http.Error(resp, errMetricNameIncorrect.Error(), http.StatusNotFound)
 		return
 	}
 
-	vv, ok := vars["value"]
-	if !ok || vv == "" {
-		http.Error(resp, errMetricNameIncorrect.Error(), http.StatusBadRequest)
-		return
-	}
-
-	err := h.Service.Update(vn, vt, vv) //here
+	err := h.Service.Update(metric)
+	fmt.Println(metric)
 	if err != nil {
 		resp.WriteHeader(http.StatusBadRequest)
 		return
@@ -53,27 +64,27 @@ func (h *HTTPGateway) Update(resp http.ResponseWriter, req *http.Request) {
 func (h *HTTPGateway) View(resp http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 
-	vn, ok := vars["name"]
-	if !ok || vn == "" {
-		http.Error(resp, errMetricNameIncorrect.Error(), http.StatusNotFound)
-		return
+	var metric = models.Metrics{
+		ID:    vars["name"],
+		MType: vars["type"],
 	}
 
-	vt, ok := vars["type"]
-	if !ok || !(vt == "gauge" || vt == "counter") {
-		http.Error(resp, errMetricNameIncorrect.Error(), http.StatusNotFound)
-		return
-	}
-
-	value, err := h.Service.View(vn, vt) //here
-	if err != nil {
-		resp.WriteHeader(http.StatusNotFound)
-		return
-	} else {
-		resp.WriteHeader(http.StatusOK)
+	// newMetric, err := h.Service.View(metric) //here
+	// if err != nil {
+	// 	resp.WriteHeader(http.StatusNotFound)
+	// 	return
+	// }
+	switch metric.MType {
+	case "gauge":
+		value := fmt.Sprintf("%d", metric.Value)
 		resp.Write([]byte(value))
 		return
+	case "counter":
+		delta := fmt.Sprintf("%d", metric.Delta)
+		resp.Write([]byte(delta))
+		return
 	}
+
 }
 
 func (h *HTTPGateway) MainPage(resp http.ResponseWriter, req *http.Request) {
