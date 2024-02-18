@@ -1,8 +1,6 @@
 package mock
 
 import (
-	"fmt"
-
 	"github.com/imirjar/metrx/internal/models"
 )
 
@@ -63,7 +61,7 @@ func (m *MemStorage) ReadAll(mType string) ([]models.Metrics, error) {
 		for i, v := range gMap {
 			var metric = models.Metrics{ID: i, MType: mType, Value: &v}
 			metrics = append(metrics, metric)
-			fmt.Println(metric.ID, metric.Value)
+			// fmt.Println(metric.ID, metric.Value)
 		}
 		return metrics, nil
 	case "counter":

@@ -1,4 +1,4 @@
-package models
+package agent
 
 import (
 	"bytes"
@@ -6,14 +6,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/imirjar/metrx/internal/models"
 )
 
-type MetricsClient struct {
-	Client http.Client
-	Path   string
-}
-
-func (m *MetricsClient) SendJSON(metric *Metrics) {
+func (m *MetricsClient) POSTMetric(metric *models.Metrics) {
 	mm, err := json.Marshal(metric)
 	var buf bytes.Buffer
 
