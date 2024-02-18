@@ -4,6 +4,8 @@ import (
 	"math/rand"
 	"reflect"
 	"runtime"
+
+	"github.com/imirjar/metrx/internal/models"
 )
 
 func (a *AgentService) CollectMetrix() {
@@ -17,17 +19,72 @@ func (a *AgentService) CollectMetrix() {
 
 	for _, ms := range gaugeList {
 		value := reflect.ValueOf(a.MemStats).FieldByName(ms)
+		var metric = models.Metrics{
+			ID:    ms,
+			MType: "gauge",
+		}
 
 		if value.CanFloat() {
-			a.Storage.AddGauge(ms, value.Float())
+			val := value.Float()
+			metric.Value = &val
+			// a.Storage.AddGauge(ms, value.Float())
 		} else {
-			a.Storage.AddGauge(ms, float64(value.Uint()))
+			val := float64(value.Uint())
+			metric.Value = &val
+			// a.Storage.AddGauge(ms, float64(value.Uint()))
 		}
+
+		_, exists := a.Storage.ReadOne(metric)
+		if exists {
+			err := a.Storage.Update(metric)
+			if err != nil {
+				return
+			}
+		} else {
+			err := a.Storage.Create(metric)
+			if err != nil {
+				return
+			}
+		}
+
 		counter++
 	}
 
-	a.Storage.AddGauge("RandomValue", rand.Float64())
+	randV := rand.Float64()
+	var randMetric = models.Metrics{
+		ID:    "RandomValue",
+		MType: "gauge",
+		Value: &randV,
+	}
+	_, exists := a.Storage.ReadOne(randMetric)
+	if exists {
+		err := a.Storage.Update(randMetric)
+		if err != nil {
+			return
+		}
+	} else {
+		err := a.Storage.Create(randMetric)
+		if err != nil {
+			return
+		}
+	}
 	counter++
 
-	a.Storage.AddCounter("RandomValue", counter)
+	var cMetric = models.Metrics{
+		ID:    "RandomValue",
+		MType: "counter",
+		Delta: &counter,
+	}
+	_, exists = a.Storage.ReadOne(cMetric)
+	if exists {
+		err := a.Storage.Update(cMetric)
+		if err != nil {
+			return
+		}
+	} else {
+		err := a.Storage.Create(cMetric)
+		if err != nil {
+			return
+		}
+	}
 }

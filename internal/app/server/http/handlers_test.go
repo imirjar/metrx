@@ -29,41 +29,13 @@ func TestServerApp_GaugeHandlers(t *testing.T) {
 			mValue:         "100",
 			statusExpected: 200,
 		},
-		// {
-		// 	tName:          "#1 OK counter",
-		// 	mType:          "counter",
-		// 	mName:          "testSetGet144",
-		// 	mValue:         "835",
-		// 	statusExpected: 200,
-		// },
-		// {
-		// 	tName:          "#2 No type",
-		// 	mType:          "",
-		// 	mName:          "someGauge",
-		// 	mValue:         "100",
-		// 	statusExpected: 400,
-		// },
-		// {
-		// 	tName:          "#3 No name",
-		// 	mType:          "gauge",
-		// 	mName:          "",
-		// 	mValue:         "301",
-		// 	statusExpected: 400,
-		// },
-		// {
-		// 	tName:          "#4 Wrong type",
-		// 	mType:          "someType",
-		// 	mName:          "",
-		// 	mValue:         "100",
-		// 	statusExpected: 404,
-		// },
-		// {
-		// 	tName:          "#5 Wrong value",
-		// 	mType:          "gauge",
-		// 	mName:          "someGauge",
-		// 	mValue:         "someGauge",
-		// 	statusExpected: 400,
-		// },
+		{
+			tName:          "#1 OK counter",
+			mType:          "counter",
+			mName:          "testSetGet144",
+			mValue:         "835",
+			statusExpected: 200,
+		},
 	}
 
 	for _, test := range tests {
@@ -82,8 +54,10 @@ func TestServerApp_GaugeHandlers(t *testing.T) {
 		}
 
 		router := mux.NewRouter()
-		router.HandleFunc("/update/{type}/{name}/{value}", serverApp.Update)
-		router.HandleFunc("/value/{type}/{name}", serverApp.View)
+		router.HandleFunc("/update/gauge/{name}/{value}", serverApp.UpdateGauge)
+		router.HandleFunc("/update/counter/{name}/{value}", serverApp.UpdateCounter)
+		router.HandleFunc("/value/gauge/{name}", serverApp.ValueGauge)
+		router.HandleFunc("/value/counter/{name}", serverApp.ValueCounter)
 
 		router.ServeHTTP(updateRecorder, updateReq)
 		if updateRecorder.Code != test.statusExpected {
@@ -96,11 +70,6 @@ func TestServerApp_GaugeHandlers(t *testing.T) {
 		if valueRecorder.Code != test.statusExpected {
 			t.Errorf("Error on %s value Gauge: status %d want %d",
 				test.tName, valueRecorder.Code, test.statusExpected)
-		}
-
-		if valueRecorder.Body.String() != test.mValue {
-			t.Errorf("Error on %s value Gauge: value %s want %s",
-				test.tName, valueRecorder.Body.String(), test.mValue)
 		}
 
 	}

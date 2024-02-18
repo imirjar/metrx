@@ -3,6 +3,8 @@ package database
 import (
 	"fmt"
 	"strconv"
+
+	"github.com/imirjar/metrx/internal/models"
 )
 
 type gauge struct {
@@ -149,3 +151,9 @@ func (m *DB) ReadCounter(mName string) (int64, bool) {
 	}
 	return c.Value, true
 }
+
+func (m *DB) Create(metric models.Metrics) error                   { return nil }
+func (m *DB) ReadOne(metric models.Metrics) (models.Metrics, bool) { return models.Metrics{}, true }
+func (m *DB) ReadAll(mType string) ([]models.Metrics, error)       { return []models.Metrics{}, nil }
+func (m *DB) Update(metric models.Metrics) error                   { return nil }
+func (m *DB) Delete(metric models.Metrics) error                   { return nil }
