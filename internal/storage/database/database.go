@@ -1,23 +1,30 @@
 package database
 
 import (
-	"database/sql"
+	"context"
+	"log"
 
 	"github.com/imirjar/metrx/config"
-	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/jackc/pgx/v5"
 )
 
 type DB struct {
-	db *sql.DB
+	db *pgx.Conn
 }
 
 func NewDB(cfg config.ServerConfig) *DB {
-	conn, err := sql.Open("pgx", cfg.DBConn)
+	conn, err := pgx.Connect(context.Background(), cfg.DBConn)
+
 	if err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
 	storage := DB{
 		db: conn,
+	}
+
+	err = storage.Up()
+	if err != nil {
+		log.Fatalln(err)
 	}
 
 	// storage.configure(cfg)
@@ -25,18 +32,18 @@ func NewDB(cfg config.ServerConfig) *DB {
 	return &storage
 }
 
-// func (m *DB) up() error {
-// 	_, err := m.db.Exec(
-// 		`CREATE TABLE metrics (
-// 			"id" VARCHAR(50) NOT NULL
-// 			"type" VARCHAR(250) NOT NULL,
-// 			"delta" FLOAT,
-// 			"value" INTEGER
-// 		) `)
-// 	return err
-// }
+func (m *DB) Up() error {
+	_, err := m.db.Exec(context.Background(),
+		`CREATE TABLE IF NOT EXISTS metrics (
+			id varchar NOT NULL,
+			"type" varchar NOT NULL,
+			value float8 NULL,
+			CONSTRAINT metrics_pk PRIMARY KEY (id)
+		);`)
+	return err
+}
 
-// func (m *DB) down() error {
+// func (m *DB) Down() error {
 // 	_, err := m.db.Exec("DROP TABLE metrics")
 // 	return err
 // }

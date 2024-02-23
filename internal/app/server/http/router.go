@@ -7,7 +7,7 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi"
 	"github.com/imirjar/metrx/config"
 	"github.com/imirjar/metrx/internal/app/server/http/middleware/compressor"
 	"github.com/imirjar/metrx/internal/app/server/http/middleware/logger"
@@ -25,17 +25,16 @@ func NewGateway(cfg config.ServerConfig) *HTTPGateway {
 }
 
 type Service interface {
-	// ByteUpdate(bMetric []byte) ([]byte, error)
-	// ByteRead(bMetric []byte) ([]byte, error)
-	// Update(mName, mType, mValue string) error
-	// View(mName, mType string) (string, error)
-	Update(metric models.Metrics) error
+	BatchUpdate(metric []models.Metrics) error
+
+	Update(metric models.Metrics) (models.Metrics, error)
 	View(metric models.Metrics) (models.Metrics, error)
+
 	MetricPage() (string, error)
 
 	Backup() error
 	Restore() error
-	PingDB() error
+	// PingDB(ctx context.Context) (bool, error)
 }
 
 type HTTPGateway struct {
@@ -45,29 +44,28 @@ type HTTPGateway struct {
 
 func (h *HTTPGateway) Run() error {
 
-	router := mux.NewRouter()
-	// set metric value
-	update := router.PathPrefix("/update").Subrouter()
-	update.HandleFunc("/gauge/{name}/{value:[0-9]+[.]{0,1}[0-9]*}", h.UpdateGauge).Methods("POST")
-	update.HandleFunc("/counter/{name}/{value:[0-9]+}", h.UpdateCounter).Methods("POST")
-	update.HandleFunc("/{other}/{name}/{value}", h.BadParams).Methods("POST") //status 400
-	update.HandleFunc("/", h.UpdateJSON).Methods("POST").HeadersRegexp("Content-Type", "application/json")
-
-	// read metric value
-	value := router.PathPrefix("/value").Subrouter()
-	value.HandleFunc("/gauge/{name}", h.ValueGauge).Methods("GET")
-	value.HandleFunc("/counter/{name}", h.ValueCounter).Methods("GET")
-	value.HandleFunc("/{other}/{name}", h.BadParams).Methods("GET") //status 400
-	value.HandleFunc("/", h.ValueJSON).Methods("POST").HeadersRegexp("Content-Type", "application/json")
-
-	// all metric values as a html page
-	router.HandleFunc("/", h.MainPage).Methods("GET")
-
-	// DB connection test
-	router.HandleFunc("/ping", h.Ping).Methods("GET")
+	router := chi.NewRouter()
 
 	router.Use(compressor.Compressor)
 	router.Use(logger.Logger)
+
+	router.Route("/update", func(update chi.Router) {
+		update.Post("/{type}/{name}/{value}", h.UpdatePathHandler)
+		update.Post("/", h.UpdateJSONHandler)
+	})
+
+	router.Route("/value", func(value chi.Router) {
+		value.Get("/{type}/{name}", h.ValuePathHandler)
+		value.Post("/", h.ValueJSONHandler)
+	})
+
+	router.Route("/updates", func(value chi.Router) {
+		value.Post("/", h.BatchHandler)
+	})
+
+	router.Get("/ping", h.Ping)
+	router.Get("/", h.MainPage)
+
 	s := &http.Server{
 		Addr:    h.cfg.URL,
 		Handler: router,

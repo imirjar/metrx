@@ -1,43 +1,77 @@
 package agent
 
 import (
-	"math/rand"
-	"runtime"
+	"bytes"
+	"compress/gzip"
+	"encoding/json"
+	"log"
+	"net/http"
 
 	"github.com/imirjar/metrx/internal/models"
 )
 
-func (a *AgentService) SendMetrix(url string) {
-	var counter int64 = 0
-	for _, ms := range a.GaugeList {
-		value := a.ReadMemValue(ms)
+func (m *MetricsClient) POSTMetric(metric models.Metrics) error {
 
-		metric := models.Metrics{
-			ID:    ms,
-			MType: "gauge",
-			Value: &value,
-		}
-		a.MetricsClient.POSTMetric(metric)
-		counter++
+	mm, err := json.Marshal(metric)
+	if err != nil {
+		log.Fatal(err)
+		return err
 	}
 
-	randV := rand.Float64()
-	randMetric := models.Metrics{
-		ID:    "RandomValue",
-		MType: "gauge",
-		Value: &randV,
-	}
-	a.MetricsClient.POSTMetric(randMetric)
-	counter++
+	var buf bytes.Buffer
+	gz := gzip.NewWriter(&buf)
+	gz.Write(mm)
+	gz.Close()
 
-	cMetric := models.Metrics{
-		ID:    "PollCount",
-		MType: "counter",
-		Delta: &counter,
+	req, err := http.NewRequest(http.MethodPost, m.Path+"/update/", &buf)
+	if err != nil {
+		log.Fatal(err)
+		return err
 	}
-	a.MetricsClient.POSTMetric(cMetric)
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Content-Encoding", "gzip")
+
+	resp, err := m.Client.Do(req)
+
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+
+	resp.Body.Close()
+	return err
 }
 
-func (a *AgentService) CollectMetrix() {
-	runtime.ReadMemStats(&a.MemStats)
+func (m *MetricsClient) POSTMetrics(metric []models.Metrics) error {
+
+	mm, err := json.Marshal(metric)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+
+	var buf bytes.Buffer
+	gz := gzip.NewWriter(&buf)
+	gz.Write(mm)
+	gz.Close()
+
+	req, err := http.NewRequest(http.MethodPost, m.Path+"/updates/", &buf)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Content-Encoding", "gzip")
+
+	resp, err := m.Client.Do(req)
+
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+
+	resp.Body.Close()
+	return err
 }

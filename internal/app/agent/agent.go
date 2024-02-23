@@ -9,7 +9,8 @@ import (
 
 type Servicer interface {
 	CollectMetrix()
-	SendMetrix(url string)
+	SendMetrix() error
+	SendBatch() error
 }
 
 type AgentApp struct {
@@ -32,7 +33,7 @@ func (a *AgentApp) Run(path string, pollInterval, reportInterval time.Duration) 
 		case <-poll.C:
 			a.Service.CollectMetrix()
 		case <-report.C:
-			a.Service.SendMetrix(path)
+			a.Service.SendBatch()
 		}
 	}
 }

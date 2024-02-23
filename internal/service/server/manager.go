@@ -1,7 +1,6 @@
 package server
 
 import (
-	"database/sql"
 	"log"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -36,20 +35,4 @@ func (s *ServerService) Restore() error {
 		return err
 	}
 	return nil
-}
-
-func (s *ServerService) PingDB() error {
-	// s.cfg.DBConn
-	if s.cfg.DBConn == "" {
-		return errDBConnError
-	}
-
-	db, err := sql.Open("pgx", s.cfg.DBConn)
-	if err != nil {
-		// log.Fatalf(err.Error())
-		return err
-	}
-
-	return db.Ping()
-
 }

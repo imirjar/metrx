@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/imirjar/metrx/internal/models"
 )
@@ -34,25 +35,58 @@ func (s ServerService) MetricPage() (string, error) {
 	return form, nil
 }
 
-func (s ServerService) Update(metric models.Metrics) error {
+func (s ServerService) Update(metric models.Metrics) (models.Metrics, error) {
 
 	switch metric.MType {
 	case "gauge":
-		err := s.MemStorager.AddGauge(metric)
+		value, err := s.MemStorager.AddGauge(metric.ID, *metric.Value)
 		if err != nil {
-			return err
+			return metric, err
 		}
-		return nil
+		metric.Value = &value
+		return metric, nil
 
 	case "counter":
-		err := s.MemStorager.AddCounter(metric.ID, *metric.Delta)
+		delta, err := s.MemStorager.AddCounter(metric.ID, *metric.Delta)
 		if err != nil {
-			return err
+			return metric, err
 		}
-		return nil
+		metric.Delta = &delta
+		return metric, nil
 	default:
-		return errServiceError
+		return metric, errServiceError
 	}
+}
+
+func (s ServerService) BatchUpdate(metrics []models.Metrics) error {
+	var (
+		gauges   = map[string]float64{}
+		counters = map[string]int64{}
+	)
+
+	for _, metric := range metrics {
+		switch metric.MType {
+		case "gauge":
+			gauges[metric.ID] = *metric.Value
+		case "counter":
+			counters[metric.ID] = *metric.Delta
+		}
+	}
+
+	err := s.MemStorager.AddGauges(gauges)
+	if err != nil {
+		log.Fatalln(err)
+		return err
+	}
+
+	err = s.MemStorager.AddCounters(counters)
+	if err != nil {
+		log.Fatalln(err)
+		return err
+	}
+
+	return nil
+
 }
 
 func (s ServerService) View(metric models.Metrics) (models.Metrics, error) {
