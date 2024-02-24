@@ -33,7 +33,8 @@ func (h *HTTPGateway) UpdatePathHandler(resp http.ResponseWriter, req *http.Requ
 	mValue := chi.URLParam(req, "value")
 
 	var metric = models.Metrics{
-		ID: mName,
+		ID:    mName,
+		MType: mType,
 	}
 
 	switch mType {
@@ -59,14 +60,16 @@ func (h *HTTPGateway) UpdatePathHandler(resp http.ResponseWriter, req *http.Requ
 		metric.Delta = &delta
 
 	default:
-		resp.WriteHeader(http.StatusBadRequest)
+		http.Error(resp, errMetricTypeUnexpected.Error(), http.StatusBadRequest)
+		return
 	}
-
 	if _, err := h.Service.Update(metric); err != nil {
-		resp.WriteHeader(http.StatusBadRequest)
+		http.Error(resp, errMetricNameIncorrect.Error(), http.StatusBadRequest)
 		return
 	}
 	resp.WriteHeader(http.StatusOK)
+	resp.Write([]byte("ok"))
+
 }
 
 func (h *HTTPGateway) UpdateJSONHandler(resp http.ResponseWriter, req *http.Request) {
@@ -79,7 +82,7 @@ func (h *HTTPGateway) UpdateJSONHandler(resp http.ResponseWriter, req *http.Requ
 
 	newMetric, err := h.Service.Update(metric)
 	if err != nil {
-		http.Error(resp, err.Error(), http.StatusBadRequest)
+		http.Error(resp, err.Error(), http.StatusNotFound)
 		return
 	}
 
@@ -99,24 +102,34 @@ func (h *HTTPGateway) ValuePathHandler(resp http.ResponseWriter, req *http.Reque
 		MType: mType,
 	}
 
-	metric, err := h.Service.View(metric)
-	if err != nil {
+	if mName == "" {
 		http.Error(resp, errMetricNameIncorrect.Error(), http.StatusNotFound)
 		return
 	}
 
 	switch mType {
 	case "gauge":
-		// r := strconv.FormatFloat(float64(*metric.Value), 'f', -1, 64)
+		metric, err := h.Service.View(metric)
+		if err != nil {
+			http.Error(resp, errMetricNameIncorrect.Error(), http.StatusNotFound)
+			return
+		}
 		resp.WriteHeader(http.StatusOK)
-		resp.Write([]byte(fmt.Sprint(*metric.Value)))
+		resp.Write([]byte(fmt.Sprintf("%f", *metric.Value)))
+
 	case "counter":
+		metric, err := h.Service.View(metric)
+		if err != nil {
+			http.Error(resp, errMetricNameIncorrect.Error(), http.StatusNotFound)
+			return
+		}
 		resp.WriteHeader(http.StatusOK)
 		resp.Write([]byte(fmt.Sprintf("%d", *metric.Delta)))
 	default:
 		http.Error(resp, errMetricTypeUnexpected.Error(), http.StatusBadRequest)
 		return
 	}
+
 }
 
 func (h *HTTPGateway) ValueJSONHandler(resp http.ResponseWriter, req *http.Request) {
@@ -126,16 +139,20 @@ func (h *HTTPGateway) ValueJSONHandler(resp http.ResponseWriter, req *http.Reque
 		http.Error(resp, err.Error(), http.StatusBadRequest)
 		return
 	}
+	defer req.Body.Close()
 
 	newMetric, err := h.Service.View(metric)
 	if err != nil {
-		http.Error(resp, err.Error(), http.StatusNotFound)
+		http.Error(resp, errMetricNameIncorrect.Error(), http.StatusNotFound)
 		return
 	}
+	// var network bytes.Buffer
+	// json.NewEncoder(&network).Encode(newMetric)
 
 	resp.Header().Set("content-type", "application/json")
 	resp.WriteHeader(http.StatusOK)
 	json.NewEncoder(resp).Encode(newMetric)
+	// resp.Write([]byte(network.Bytes()))
 }
 
 // Batch ...
