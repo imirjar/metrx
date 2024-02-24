@@ -114,7 +114,7 @@ func (h *HTTPGateway) ValuePathHandler(resp http.ResponseWriter, req *http.Reque
 		resp.WriteHeader(http.StatusOK)
 		resp.Write([]byte(fmt.Sprintf("%d", *metric.Delta)))
 	default:
-		http.Error(resp, err.Error(), http.StatusBadRequest)
+		http.Error(resp, errMetricTypeUnexpected.Error(), http.StatusBadRequest)
 		return
 	}
 }

@@ -44,12 +44,11 @@ func (m *MemStorage) ReadGauge(metric models.Metrics) (float64, bool) {
 	defer m.mutex.Unlock()
 
 	if value, ok := m.Gauge[metric.ID]; ok {
-		metric.Value = &value
+		// metric.Value = &value
 		return value, true
 	} else {
-		return value, false
+		return 0, false
 	}
-
 }
 
 func (m *MemStorage) ReadCounter(metric models.Metrics) (int64, bool) {
@@ -57,10 +56,10 @@ func (m *MemStorage) ReadCounter(metric models.Metrics) (int64, bool) {
 	defer m.mutex.Unlock()
 
 	if delta, ok := m.Counter[metric.ID]; ok {
-		metric.Delta = &delta
+		// metric.Delta = &delta
 		return delta, true
 	} else {
-		return delta, false
+		return 0, false
 	}
 }
 
