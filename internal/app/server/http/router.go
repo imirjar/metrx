@@ -82,14 +82,9 @@ func (h *HTTPGateway) Run() error {
 	go func() {
 		defer wg.Done()
 
-		for {
-			select {
-			case <-ctx.Done():
-				s.Shutdown(ctx)
-				h.Service.Backup()
-				return
-			}
-		}
+		<-ctx.Done()
+		s.Shutdown(ctx)
+		h.Service.Backup()
 	}()
 
 	s.ListenAndServe()
