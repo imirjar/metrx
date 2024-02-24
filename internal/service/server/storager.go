@@ -97,15 +97,16 @@ func (s ServerService) View(metric models.Metrics) (models.Metrics, error) {
 			return metric, errServiceError
 		}
 		metric.Value = &value
+		return metric, nil
 	case "counter":
 		delta, ok := s.MemStorager.ReadCounter(metric)
 		if !ok {
 			return metric, errServiceError
 		}
 		metric.Delta = &delta
+		return metric, nil
 	default:
+		return metric, errServiceError
 	}
-
-	return metric, nil
 
 }

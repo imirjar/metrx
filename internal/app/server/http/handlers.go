@@ -101,7 +101,7 @@ func (h *HTTPGateway) ValuePathHandler(resp http.ResponseWriter, req *http.Reque
 
 	metric, err := h.Service.View(metric)
 	if err != nil {
-		http.Error(resp, err.Error(), http.StatusNotFound)
+		http.Error(resp, errMetricNameIncorrect.Error(), http.StatusNotFound)
 		return
 	}
 
