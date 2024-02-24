@@ -107,9 +107,9 @@ func (h *HTTPGateway) ValuePathHandler(resp http.ResponseWriter, req *http.Reque
 
 	switch mType {
 	case "gauge":
-		r := strconv.FormatFloat(float64(*metric.Value), 'f', -1, 64)
+		// r := strconv.FormatFloat(float64(*metric.Value), 'f', -1, 64)
 		resp.WriteHeader(http.StatusOK)
-		resp.Write([]byte(r))
+		resp.Write([]byte(fmt.Sprint(*metric.Value)))
 	case "counter":
 		resp.WriteHeader(http.StatusOK)
 		resp.Write([]byte(fmt.Sprintf("%d", *metric.Delta)))
@@ -162,7 +162,6 @@ func (h *HTTPGateway) BatchHandler(resp http.ResponseWriter, req *http.Request) 
 	}
 	resp.WriteHeader(http.StatusOK)
 	resp.Write([]byte("ok"))
-
 }
 
 // Check ...
