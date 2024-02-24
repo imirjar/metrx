@@ -127,7 +127,7 @@ func (h *HTTPGateway) ValueJSONHandler(resp http.ResponseWriter, req *http.Reque
 		return
 	}
 
-	metric, err := h.Service.View(metric)
+	newMetric, err := h.Service.View(metric)
 	if err != nil {
 		http.Error(resp, err.Error(), http.StatusNotFound)
 		return
@@ -135,7 +135,7 @@ func (h *HTTPGateway) ValueJSONHandler(resp http.ResponseWriter, req *http.Reque
 
 	resp.Header().Set("content-type", "application/json")
 	resp.WriteHeader(http.StatusOK)
-	json.NewEncoder(resp).Encode(metric)
+	json.NewEncoder(resp).Encode(newMetric)
 }
 
 // Batch ...
