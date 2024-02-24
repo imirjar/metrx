@@ -53,7 +53,8 @@ type Storager interface {
 	AddCounters(counters map[string]int64) error
 	AddGauge(name string, value float64) (float64, error)
 	AddCounter(name string, delta int64) (int64, error)
-	ReadOne(metric models.Metrics) (models.Metrics, bool)
+	ReadGauge(metric models.Metrics) (float64, bool)
+	ReadCounter(metric models.Metrics) (int64, bool)
 	ReadAllGauges() (map[string]float64, error)
 	ReadAllCounters() (map[string]int64, error)
 }

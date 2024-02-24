@@ -39,27 +39,28 @@ func (m *MemStorage) AddCounters(counters map[string]int64) error {
 	return nil
 }
 
-func (m *MemStorage) ReadOne(metric models.Metrics) (models.Metrics, bool) {
+func (m *MemStorage) ReadGauge(metric models.Metrics) (float64, bool) {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
-	switch metric.MType {
-	case "gauge":
-		if value, ok := m.Gauge[metric.ID]; ok {
-			metric.Value = &value
-			return metric, true
-		} else {
-			return metric, false
-		}
 
-	case "counter":
-		if delta, ok := m.Counter[metric.ID]; ok {
-			metric.Delta = &delta
-			return metric, true
-		} else {
-			return metric, false
-		}
-	default:
-		return metric, false
+	if value, ok := m.Gauge[metric.ID]; ok {
+		metric.Value = &value
+		return value, true
+	} else {
+		return value, false
+	}
+
+}
+
+func (m *MemStorage) ReadCounter(metric models.Metrics) (int64, bool) {
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+
+	if delta, ok := m.Counter[metric.ID]; ok {
+		metric.Delta = &delta
+		return delta, true
+	} else {
+		return delta, false
 	}
 }
 

@@ -90,11 +90,22 @@ func (s ServerService) BatchUpdate(metrics []models.Metrics) error {
 }
 
 func (s ServerService) View(metric models.Metrics) (models.Metrics, error) {
-
-	rMetric, ok := s.MemStorager.ReadOne(metric)
-	if !ok {
-		return metric, errServiceError
+	switch metric.MType {
+	case "gauge":
+		value, ok := s.MemStorager.ReadGauge(metric)
+		if !ok {
+			return metric, errServiceError
+		}
+		metric.Value = &value
+	case "counter":
+		delta, ok := s.MemStorager.ReadCounter(metric)
+		if !ok {
+			return metric, errServiceError
+		}
+		metric.Delta = &delta
+	default:
 	}
-	return rMetric, nil
+
+	return metric, nil
 
 }
