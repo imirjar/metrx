@@ -39,6 +39,35 @@ func (s ServerService) Update(metric models.Metrics) (models.Metrics, error) {
 
 	switch metric.MType {
 	case "gauge":
+		if metric.Value == nil {
+			return metric, errServiceError
+		}
+		value, err := s.MemStorager.AddGauge(metric.ID, *metric.Value)
+		if err != nil {
+			return metric, err
+		}
+		metric.Value = &value
+		return metric, nil
+
+	case "counter":
+		if metric.Delta == nil {
+			return metric, errServiceError
+		}
+		delta, err := s.MemStorager.AddCounter(metric.ID, *metric.Delta)
+		if err != nil {
+			return metric, err
+		}
+		metric.Delta = &delta
+		return metric, nil
+	default:
+		return metric, errServiceError
+	}
+}
+
+func (s ServerService) UpdateGauge(metric models.Metrics) (models.Metrics, error) {
+
+	switch metric.MType {
+	case "gauge":
 		value, err := s.MemStorager.AddGauge(metric.ID, *metric.Value)
 		if err != nil {
 			return metric, err
@@ -86,7 +115,6 @@ func (s ServerService) BatchUpdate(metrics []models.Metrics) error {
 	}
 
 	return nil
-
 }
 
 func (s ServerService) View(metric models.Metrics) (models.Metrics, error) {

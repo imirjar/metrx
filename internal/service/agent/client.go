@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -23,7 +24,8 @@ func (m *MetricsClient) POSTMetric(metric models.Metrics) error {
 	gz.Write(mm)
 	gz.Close()
 
-	req, err := http.NewRequest(http.MethodPost, m.Path+"/update/", &buf)
+	path := fmt.Sprintf(m.Path + "/update/")
+	req, err := http.NewRequest(http.MethodPost, path, &buf)
 	if err != nil {
 		log.Fatal(err)
 		return err

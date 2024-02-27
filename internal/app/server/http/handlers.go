@@ -27,10 +27,14 @@ func (h *HTTPGateway) MainPage(resp http.ResponseWriter, req *http.Request) {
 
 // UPDATE ...
 func (h *HTTPGateway) UpdatePathHandler(resp http.ResponseWriter, req *http.Request) {
-
 	mType := chi.URLParam(req, "type")
 	mName := chi.URLParam(req, "name")
 	mValue := chi.URLParam(req, "value")
+
+	if mType == "" || mName == "" || mValue == "" {
+		http.Error(resp, errMetricNameIncorrect.Error(), http.StatusBadRequest)
+		return
+	}
 
 	var metric = models.Metrics{
 		ID:    mName,
@@ -60,7 +64,7 @@ func (h *HTTPGateway) UpdatePathHandler(resp http.ResponseWriter, req *http.Requ
 		metric.Delta = &delta
 
 	default:
-		http.Error(resp, errMetricTypeUnexpected.Error(), http.StatusBadRequest)
+		http.Error(resp, errMetricTypeIncorrect.Error(), http.StatusBadRequest)
 		return
 	}
 	if _, err := h.Service.Update(metric); err != nil {
@@ -69,28 +73,42 @@ func (h *HTTPGateway) UpdatePathHandler(resp http.ResponseWriter, req *http.Requ
 	}
 	resp.WriteHeader(http.StatusOK)
 	resp.Write([]byte("ok"))
-
 }
 
 func (h *HTTPGateway) UpdateJSONHandler(resp http.ResponseWriter, req *http.Request) {
 	var metric models.Metrics
 
-	if err := json.NewDecoder(req.Body).Decode(&metric); err != nil {
+	err := json.NewDecoder(req.Body).Decode(&metric)
+	if err != nil {
 		http.Error(resp, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	if metric.MType == "" || metric.ID == "" {
+		http.Error(resp, "MType and ID must not be empty", http.StatusBadRequest)
+		return
+	}
+
+	if metric.MType == "gauge" && metric.Value == nil {
+		http.Error(resp, "Value must not be empty for gauge metric", http.StatusBadRequest)
+		return
+	} else if metric.MType == "counter" && metric.Delta == nil {
+		http.Error(resp, "Delta must not be empty for counter metric", http.StatusBadRequest)
+		return
+	}
+
 	defer req.Body.Close()
 
 	newMetric, err := h.Service.Update(metric)
 	if err != nil {
-		http.Error(resp, err.Error(), http.StatusNotFound)
+		http.Error(resp, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	resp.Header().Set("content-type", "application/json")
 	resp.WriteHeader(http.StatusOK)
-	err = json.NewEncoder(resp).Encode(newMetric)
-	if err != nil {
+
+	if err = json.NewEncoder(resp).Encode(newMetric); err != nil {
 		http.Error(resp, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -102,14 +120,14 @@ func (h *HTTPGateway) ValuePathHandler(resp http.ResponseWriter, req *http.Reque
 	mType := chi.URLParam(req, "type")
 	mName := chi.URLParam(req, "name")
 
+	if mType == "" || mName == "" {
+		http.Error(resp, errMetricNameIncorrect.Error(), http.StatusBadRequest)
+		return
+	}
+
 	var metric = models.Metrics{
 		ID:    mName,
 		MType: mType,
-	}
-
-	if mName == "" {
-		http.Error(resp, errMetricNameIncorrect.Error(), http.StatusNotFound)
-		return
 	}
 
 	switch mType {
@@ -131,16 +149,15 @@ func (h *HTTPGateway) ValuePathHandler(resp http.ResponseWriter, req *http.Reque
 		resp.WriteHeader(http.StatusOK)
 		resp.Write([]byte(fmt.Sprintf("%d", *metric.Delta)))
 	default:
-		http.Error(resp, errMetricTypeUnexpected.Error(), http.StatusBadRequest)
+		http.Error(resp, errMetricTypeIncorrect.Error(), http.StatusBadRequest)
 		return
 	}
-
 }
 
 func (h *HTTPGateway) ValueJSONHandler(resp http.ResponseWriter, req *http.Request) {
 	var metric models.Metrics
 
-	if err := json.NewDecoder(req.Body).Decode(&metric); err != nil {
+	if err := json.NewDecoder(req.Body).Decode(&metric); err != nil || metric.ID == "" || metric.MType == "" {
 		http.Error(resp, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -151,13 +168,14 @@ func (h *HTTPGateway) ValueJSONHandler(resp http.ResponseWriter, req *http.Reque
 		http.Error(resp, errMetricNameIncorrect.Error(), http.StatusNotFound)
 		return
 	}
-	// var network bytes.Buffer
-	// json.NewEncoder(&network).Encode(newMetric)
 
 	resp.Header().Set("content-type", "application/json")
 	resp.WriteHeader(http.StatusOK)
-	json.NewEncoder(resp).Encode(newMetric)
-	// resp.Write([]byte(network.Bytes()))
+
+	if err = json.NewEncoder(resp).Encode(newMetric); err != nil {
+		http.Error(resp, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 // Batch ...

@@ -1,14 +1,11 @@
 package server
 
 import (
-	"context"
 	"log"
 
 	"github.com/imirjar/metrx/config"
 	"github.com/imirjar/metrx/internal/models"
-	"github.com/imirjar/metrx/internal/storage/database"
 	"github.com/imirjar/metrx/internal/storage/mock"
-	"github.com/imirjar/metrx/pkg/ping"
 )
 
 func NewServerService(cfg config.ServerConfig) *ServerService {
@@ -17,20 +14,24 @@ func NewServerService(cfg config.ServerConfig) *ServerService {
 	}
 
 	log.Println(cfg.DBConn)
-	connIsValid := ping.PingPgx(context.Background(), cfg.DBConn)
+	// connIsValid := ping.PingPgx(context.Background(), cfg.DBConn)
 
-	if connIsValid {
-		db := database.NewDB(cfg)
-		backupService.MemStorager = db
-		backupService.Backuper = db
-		// fmt.Println("DB STORAGE")
+	mock := mock.NewMockStorage(cfg)
+	backupService.MemStorager = mock
+	backupService.Backuper = mock
 
-	} else {
-		mock := mock.NewMockStorage(cfg)
-		backupService.MemStorager = mock
-		backupService.Backuper = mock
-		// fmt.Println("MEMSTORAGE")
-	}
+	// if connIsValid {
+	// 	db := database.NewDB(cfg)
+	// 	backupService.MemStorager = db
+	// 	backupService.Backuper = db
+	// 	// fmt.Println("DB STORAGE")
+
+	// } else {
+	// 	mock := mock.NewMockStorage(cfg)
+	// 	backupService.MemStorager = mock
+	// 	backupService.Backuper = mock
+	// 	// fmt.Println("MEMSTORAGE")
+	// }
 
 	// store := mock.NewMockStorage(cfg)
 

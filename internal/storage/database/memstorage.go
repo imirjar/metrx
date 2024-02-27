@@ -53,11 +53,20 @@ func (m *DB) AddGauge(name string, value float64) (float64, error) {
 }
 
 func (m *DB) AddCounter(name string, delta int64) (int64, error) {
-	mDelta := strconv.FormatInt(delta, 10)
 
-	_, err := m.db.Exec(context.Background(),
+	var curDelta int64
+
+	rows := m.db.QueryRow(context.Background(), "SELECT value FROM metrics WHERE type=$1 AND id=$2", "counter", name)
+	err := rows.Scan(&curDelta)
+	if err != nil {
+		log.Println(err)
+	}
+	curDelta += delta
+	mDelta := strconv.FormatInt(curDelta, 10)
+
+	_, err = m.db.Exec(context.Background(),
 		`INSERT INTO metrics (id, type, value) VALUES($1, $2, $3)
-		ON CONFLICT (id) DO UPDATE SET value = EXCLUDED.value + metrics.value`, name, "counter", mDelta,
+		ON CONFLICT (id) DO UPDATE SET value = $3`, name, "counter", mDelta,
 	)
 
 	if err != nil {
@@ -65,7 +74,7 @@ func (m *DB) AddCounter(name string, delta int64) (int64, error) {
 		return 0, err
 	}
 
-	return delta, nil
+	return curDelta, nil
 }
 
 func (m *DB) ReadGauge(metric models.Metrics) (float64, bool) {
