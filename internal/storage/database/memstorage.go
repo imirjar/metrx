@@ -57,7 +57,7 @@ func (m *DB) AddCounter(name string, delta int64) (int64, error) {
 
 	_, err := m.db.Exec(context.Background(),
 		`INSERT INTO metrics (id, type, value) VALUES($1, $2, $3)
-		ON CONFLICT (id) DO UPDATE SET value = $3`, name, "counter", mDelta,
+		ON CONFLICT (id) DO UPDATE SET value = EXCLUDED.value + metrics.value`, name, "counter", mDelta,
 	)
 
 	if err != nil {

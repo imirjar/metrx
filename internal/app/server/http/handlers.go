@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -88,16 +87,13 @@ func (h *HTTPGateway) UpdateJSONHandler(resp http.ResponseWriter, req *http.Requ
 		return
 	}
 
-	err = json.NewEncoder(resp).Encode(newMetric)
-	if err != nil {
-		log.Println(err)
-		resp.WriteHeader(http.StatusInternalServerError)
-		// http.Error(resp, errMetricNameIncorrect.Error(), http.StatusNotFound)
-		resp.Write([]byte(err.Error()))
-	}
 	resp.Header().Set("content-type", "application/json")
 	resp.WriteHeader(http.StatusOK)
-	// resp.Write()
+	err = json.NewEncoder(resp).Encode(newMetric)
+	if err != nil {
+		http.Error(resp, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 // VALUE ...
