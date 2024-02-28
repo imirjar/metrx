@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strconv"
 
 	"github.com/go-chi/chi"
 	"github.com/imirjar/metrx/internal/models"
@@ -36,43 +35,13 @@ func (h *HTTPGateway) UpdatePathHandler(resp http.ResponseWriter, req *http.Requ
 		return
 	}
 
-	var metric = models.Metrics{
-		ID:    mName,
-		MType: mType,
-	}
-
-	switch mType {
-
-	case "gauge":
-		value, err := strconv.ParseFloat(mValue, 64)
-		if err != nil {
-			http.Error(resp, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		metric.MType = "gauge"
-		metric.Value = &value
-
-	case "counter":
-		delta, err := strconv.ParseInt(mValue, 10, 64)
-		if err != nil {
-			http.Error(resp, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		metric.MType = "counter"
-		metric.Delta = &delta
-
-	default:
-		http.Error(resp, errMetricTypeIncorrect.Error(), http.StatusBadRequest)
-		return
-	}
-	if _, err := h.Service.Update(metric); err != nil {
-		http.Error(resp, errMetricNameIncorrect.Error(), http.StatusBadRequest)
+	result, err := h.Service.UpdatePath(mName, mType, mValue)
+	if err != nil {
+		http.Error(resp, err.Error(), http.StatusBadRequest)
 		return
 	}
 	resp.WriteHeader(http.StatusOK)
-	resp.Write([]byte("ok"))
+	resp.Write([]byte(fmt.Sprint(result)))
 }
 
 func (h *HTTPGateway) UpdateJSONHandler(resp http.ResponseWriter, req *http.Request) {
@@ -116,7 +85,6 @@ func (h *HTTPGateway) UpdateJSONHandler(resp http.ResponseWriter, req *http.Requ
 
 // VALUE ...
 func (h *HTTPGateway) ValuePathHandler(resp http.ResponseWriter, req *http.Request) {
-
 	mType := chi.URLParam(req, "type")
 	mName := chi.URLParam(req, "name")
 
@@ -125,33 +93,13 @@ func (h *HTTPGateway) ValuePathHandler(resp http.ResponseWriter, req *http.Reque
 		return
 	}
 
-	var metric = models.Metrics{
-		ID:    mName,
-		MType: mType,
-	}
-
-	switch mType {
-	case "gauge":
-		metric, err := h.Service.View(metric)
-		if err != nil {
-			http.Error(resp, errMetricNameIncorrect.Error(), http.StatusNotFound)
-			return
-		}
-		resp.WriteHeader(http.StatusOK)
-		resp.Write([]byte(fmt.Sprint(*metric.Value)))
-
-	case "counter":
-		metric, err := h.Service.View(metric)
-		if err != nil {
-			http.Error(resp, errMetricNameIncorrect.Error(), http.StatusNotFound)
-			return
-		}
-		resp.WriteHeader(http.StatusOK)
-		resp.Write([]byte(fmt.Sprintf("%d", *metric.Delta)))
-	default:
-		http.Error(resp, errMetricTypeIncorrect.Error(), http.StatusBadRequest)
+	result, err := h.Service.ViewPath(mName, mType)
+	if err != nil {
+		http.Error(resp, err.Error(), http.StatusNotFound)
 		return
 	}
+	resp.WriteHeader(http.StatusOK)
+	resp.Write([]byte(fmt.Sprint(result)))
 }
 
 func (h *HTTPGateway) ValueJSONHandler(resp http.ResponseWriter, req *http.Request) {
@@ -206,13 +154,10 @@ func (h *HTTPGateway) BatchHandler(resp http.ResponseWriter, req *http.Request) 
 
 // Check ...
 func (h *HTTPGateway) Ping(resp http.ResponseWriter, req *http.Request) {
-	connIsValid := ping.PingPgx(req.Context(), h.cfg.DBConn)
-
-	if !connIsValid {
+	if err := ping.PingPgx(req.Context(), h.cfg.DBConn); err != nil {
 		resp.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
 	resp.WriteHeader(http.StatusOK)
 	resp.Write([]byte("ok"))
 }

@@ -1,11 +1,13 @@
 package server
 
 import (
+	"context"
 	"log"
 
 	"github.com/imirjar/metrx/config"
-	"github.com/imirjar/metrx/internal/models"
+	"github.com/imirjar/metrx/internal/storage/database"
 	"github.com/imirjar/metrx/internal/storage/mock"
+	"github.com/imirjar/metrx/pkg/ping"
 )
 
 func NewServerService(cfg config.ServerConfig) *ServerService {
@@ -14,38 +16,22 @@ func NewServerService(cfg config.ServerConfig) *ServerService {
 	}
 
 	log.Println(cfg.DBConn)
-	// connIsValid := ping.PingPgx(context.Background(), cfg.DBConn)
+	err := ping.PingPgx(context.Background(), cfg.DBConn)
 
-	mock := mock.NewMockStorage(cfg)
-	backupService.MemStorager = mock
-	backupService.Backuper = mock
+	if err != nil {
+		mock := mock.NewMockStorage(cfg)
+		backupService.MemStorager = mock
 
-	// if connIsValid {
-	// 	db := database.NewDB(cfg)
-	// 	backupService.MemStorager = db
-	// 	backupService.Backuper = db
-	// 	// fmt.Println("DB STORAGE")
-
-	// } else {
-	// 	mock := mock.NewMockStorage(cfg)
-	// 	backupService.MemStorager = mock
-	// 	backupService.Backuper = mock
-	// 	// fmt.Println("MEMSTORAGE")
-	// }
-
-	// store := mock.NewMockStorage(cfg)
-
-	// run dump auto-exporter
-	// if backupService.cfg.Interval > 0 {
-	// 	go backupService.PeriodicBackup(backupService.cfg.Interval)
-	// }
+	} else {
+		db := database.NewDB(cfg)
+		backupService.MemStorager = db
+	}
 
 	return &backupService
 }
 
 type ServerService struct {
 	MemStorager Storager
-	Backuper    DBManager
 	cfg         config.ServerConfig
 }
 
@@ -54,13 +40,8 @@ type Storager interface {
 	AddCounters(counters map[string]int64) error
 	AddGauge(name string, value float64) (float64, error)
 	AddCounter(name string, delta int64) (int64, error)
-	ReadGauge(metric models.Metrics) (float64, bool)
-	ReadCounter(metric models.Metrics) (int64, bool)
+	ReadGauge(name string) (float64, bool)
+	ReadCounter(name string) (int64, bool)
 	ReadAllGauges() (map[string]float64, error)
 	ReadAllCounters() (map[string]int64, error)
-}
-
-type DBManager interface {
-	Import(path string) error
-	Export(path string) error
 }

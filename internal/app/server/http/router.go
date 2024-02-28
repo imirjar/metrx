@@ -1,11 +1,7 @@
 package http
 
 import (
-	"context"
 	"net/http"
-	"os/signal"
-	"sync"
-	"syscall"
 
 	"github.com/go-chi/chi"
 	"github.com/imirjar/metrx/config"
@@ -28,13 +24,11 @@ type Service interface {
 	BatchUpdate(metric []models.Metrics) error
 
 	Update(metric models.Metrics) (models.Metrics, error)
+	UpdatePath(name, mType, mValue string) (string, error)
 	View(metric models.Metrics) (models.Metrics, error)
+	ViewPath(name, mType string) (string, error)
 
 	MetricPage() (string, error)
-
-	Backup() error
-	Restore() error
-	// PingDB(ctx context.Context) (bool, error)
 }
 
 type HTTPGateway struct {
@@ -73,21 +67,21 @@ func (h *HTTPGateway) Run() error {
 		// WriteTimeout: 1 * time.Second,
 	}
 
-	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT)
-	defer stop()
+	// ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT)
+	// defer stop()
 
-	var wg sync.WaitGroup
+	// var wg sync.WaitGroup
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	// wg.Add(1)
+	// go func() {
+	// 	defer wg.Done()
 
-		<-ctx.Done()
-		s.Shutdown(ctx)
-		h.Service.Backup()
-	}()
+	// 	<-ctx.Done()
+	// 	s.Shutdown(ctx)
+	// 	h.Service.Backup()
+	// }()
 
-	s.ListenAndServe()
-	wg.Wait()
-	return nil
+	return s.ListenAndServe()
+	// wg.Wait()
+	// return nil
 }

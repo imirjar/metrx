@@ -77,9 +77,9 @@ func (m *DB) AddCounter(name string, delta int64) (int64, error) {
 	return curDelta, nil
 }
 
-func (m *DB) ReadGauge(metric models.Metrics) (float64, bool) {
+func (m *DB) ReadGauge(name string) (float64, bool) {
 	var value float64
-	rows := m.db.QueryRow(context.Background(), "SELECT value FROM metrics WHERE type=$1 AND id=$2", metric.MType, metric.ID)
+	rows := m.db.QueryRow(context.Background(), "SELECT value FROM metrics WHERE type=$1 AND id=$2", "gauge", name)
 
 	err := rows.Scan(&value)
 
@@ -91,9 +91,9 @@ func (m *DB) ReadGauge(metric models.Metrics) (float64, bool) {
 	return value, true
 }
 
-func (m *DB) ReadCounter(metric models.Metrics) (int64, bool) {
+func (m *DB) ReadCounter(name string) (int64, bool) {
 	var delta int64
-	rows := m.db.QueryRow(context.Background(), "SELECT value FROM metrics WHERE type=$1 AND id=$2", metric.MType, metric.ID)
+	rows := m.db.QueryRow(context.Background(), "SELECT value FROM metrics WHERE type=$1 AND id=$2", "counter", name)
 
 	err := rows.Scan(&delta)
 

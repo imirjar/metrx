@@ -42,7 +42,7 @@ func NewAgentService(cfg config.AgentConfig) *AgentService {
 }
 
 func (a *AgentService) SendMetrix() error {
-	log.Println("Send")
+
 	var counter int64 = 0
 	for _, ms := range a.GaugeList {
 		value := a.ReadMemValue(ms)
@@ -54,7 +54,7 @@ func (a *AgentService) SendMetrix() error {
 		}
 		err := a.MetricsClient.POSTMetric(metric)
 		if err != nil {
-			log.Fatal(err)
+			log.Print(err)
 			return err
 		}
 		counter++
@@ -68,7 +68,7 @@ func (a *AgentService) SendMetrix() error {
 	}
 	err := a.MetricsClient.POSTMetric(randMetric)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 		return err
 	}
 
@@ -81,7 +81,7 @@ func (a *AgentService) SendMetrix() error {
 	}
 	err = a.MetricsClient.POSTMetric(cMetric)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 		return err
 	}
 	return err
