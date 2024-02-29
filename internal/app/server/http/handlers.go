@@ -49,8 +49,8 @@ func (h *HTTPGateway) UpdatePathHandler(resp http.ResponseWriter, req *http.Requ
 }
 
 func (h *HTTPGateway) UpdateJSONHandler(resp http.ResponseWriter, req *http.Request) {
-	ctx := req.Context()
 
+	ctx := req.Context()
 	var metric models.Metrics
 
 	err := json.NewDecoder(req.Body).Decode(&metric)
@@ -58,6 +58,20 @@ func (h *HTTPGateway) UpdateJSONHandler(resp http.ResponseWriter, req *http.Requ
 		http.Error(resp, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	if metric.MType == "" || metric.ID == "" {
+		http.Error(resp, "MType and ID must not be empty", http.StatusBadRequest)
+		return
+	}
+
+	if metric.MType == "gauge" && metric.Value == nil {
+		http.Error(resp, "Value must not be empty for gauge metric", http.StatusBadRequest)
+		return
+	} else if metric.MType == "counter" && metric.Delta == nil {
+		http.Error(resp, "Delta must not be empty for counter metric", http.StatusBadRequest)
+		return
+	}
+
 	defer req.Body.Close()
 
 	newMetric, err := h.Service.Update(ctx, metric)
@@ -66,16 +80,24 @@ func (h *HTTPGateway) UpdateJSONHandler(resp http.ResponseWriter, req *http.Requ
 		return
 	}
 
-	jsonResponse, err := json.Marshal(newMetric)
-	if err != nil {
-		// Если произошла ошибка при маршалинге JSON, отправляем ошибку "Internal Server Error"
-		http.Error(resp, "Error marshaling JSON", http.StatusInternalServerError)
-		return
-	}
-	// Устанавливаем заголовок Content-Type и отправляем JSON-ответ
-	resp.Header().Set("Content-Type", "application/json")
-	resp.Write(jsonResponse)
+	if newMetric.MType == "gauge" {
+		jsonResponse, err := json.Marshal(newMetric)
+		if err != nil {
+			http.Error(resp, "Error marshaling JSON", http.StatusInternalServerError)
+			return
+		}
 
+		resp.Header().Set("Content-Type", "application/json")
+		resp.Write(jsonResponse)
+	} else if newMetric.MType == "counter" {
+		resp.Header().Set("content-type", "application/json")
+		resp.WriteHeader(http.StatusOK)
+
+		if err = json.NewEncoder(resp).Encode(newMetric); err != nil {
+			http.Error(resp, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
 }
 
 // VALUE ...
