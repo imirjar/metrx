@@ -91,7 +91,7 @@ func (s ServerService) ViewPath(name, mType string) (string, error) {
 		if !ok {
 			return "", errServiceError
 		}
-		return fmt.Sprintf("%f", value), nil
+		return fmt.Sprint(value), nil
 	case "counter":
 		delta, ok := s.MemStorager.ReadCounter(name)
 		if !ok {
