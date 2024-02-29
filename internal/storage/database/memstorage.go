@@ -34,7 +34,6 @@ func (m *DB) AddCounters(ctx context.Context, counters map[string]int64) error {
 			VALUES($1, $2, $3)
 			ON CONFLICT (id) DO 
 			UPDATE SET value = EXCLUDED.value + metrics.value`, i, "counter", delta)
-		// fmt.Println(delta)
 	}
 	return m.db.SendBatch(ctx, batch).Close()
 }

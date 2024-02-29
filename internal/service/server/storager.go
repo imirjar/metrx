@@ -40,6 +40,7 @@ func (s ServerService) View(ctx context.Context, metric models.Metrics) (models.
 	case "gauge":
 		value, ok := s.MemStorager.ReadGauge(ctx, metric.ID)
 		log.Println("###GAUGE OUT--->", metric.ID, ":", value)
+		log.Printf("###GAUGE OUT F--->%f", value)
 		if !ok {
 			return metric, errServiceError
 		}
@@ -47,7 +48,7 @@ func (s ServerService) View(ctx context.Context, metric models.Metrics) (models.
 		return metric, nil
 	case "counter":
 		delta, ok := s.MemStorager.ReadCounter(ctx, metric.ID)
-		log.Println("###GAUGE OUT--->", metric.ID, ":", delta)
+		// log.Println("###COUNTER OUT--->", metric.ID, ":", delta)
 		if !ok {
 			return metric, errServiceError
 		}
@@ -91,14 +92,14 @@ func (s ServerService) ViewPath(ctx context.Context, name, mType string) (string
 	switch mType {
 	case "gauge":
 		value, ok := s.MemStorager.ReadGauge(ctx, name)
-		log.Println("###GAUGE OUT--->", name, ":", value)
+		// log.Println("###GAUGE OUT--->", name, ":", value)
 		if !ok {
 			return "", errServiceError
 		}
 		return fmt.Sprint(value), nil
 	case "counter":
 		delta, ok := s.MemStorager.ReadCounter(ctx, name)
-		log.Println("###GAUGE OUT--->", name, ":", delta)
+		// log.Println("###GAUGE OUT--->", name, ":", delta)
 		if !ok {
 			return "", errServiceError
 		}
@@ -147,10 +148,8 @@ func (s ServerService) BatchUpdate(ctx context.Context, metrics []models.Metrics
 	for _, metric := range metrics {
 		switch metric.MType {
 		case "gauge":
-			// log.Println("###GAUGE IN--->", metric.ID, ":", *metric.Value)
 			gauges[metric.ID] = *metric.Value
 		case "counter":
-			// log.Println("###COUNTER IN--->", metric.ID, ":", *metric.Delta)
 			if _, ok := counters[metric.ID]; ok {
 				counters[metric.ID] = counters[metric.ID] + *metric.Delta
 			} else {
@@ -159,17 +158,13 @@ func (s ServerService) BatchUpdate(ctx context.Context, metrics []models.Metrics
 
 		}
 	}
-	log.Println("###GAUGE IN--->", gauges)
-	log.Println("###COUNTER IN--->", counters)
 	err := s.MemStorager.AddGauges(ctx, gauges)
 	if err != nil {
-		// log.Println("###GAUGE ERR--->", err)
 		return err
 	}
 
 	err = s.MemStorager.AddCounters(ctx, counters)
 	if err != nil {
-		// log.Println("###COUNTER ERR--->", err)
 		return err
 	}
 

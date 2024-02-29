@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -27,6 +28,7 @@ func (h *HTTPGateway) MainPage(resp http.ResponseWriter, req *http.Request) {
 
 // UPDATE ...
 func (h *HTTPGateway) UpdatePathHandler(resp http.ResponseWriter, req *http.Request) {
+
 	ctx := req.Context()
 	mType := chi.URLParam(req, "type")
 	mName := chi.URLParam(req, "name")
@@ -47,6 +49,7 @@ func (h *HTTPGateway) UpdatePathHandler(resp http.ResponseWriter, req *http.Requ
 }
 
 func (h *HTTPGateway) UpdateJSONHandler(resp http.ResponseWriter, req *http.Request) {
+
 	ctx := req.Context()
 	var metric models.Metrics
 
@@ -77,17 +80,48 @@ func (h *HTTPGateway) UpdateJSONHandler(resp http.ResponseWriter, req *http.Requ
 		return
 	}
 
-	resp.Header().Set("content-type", "application/json")
-	resp.WriteHeader(http.StatusOK)
+	if newMetric.MType == "gauge" {
+		// if newMetric.Value != nil {
+		// 	log.Println("###UPDATE mValue--->", *newMetric.Value)
+		// }
+		jsonResponse, err := json.Marshal(newMetric)
+		if err != nil {
+			http.Error(resp, "Error marshaling JSON", http.StatusInternalServerError)
+			return
+		}
 
-	if err = json.NewEncoder(resp).Encode(newMetric); err != nil {
-		http.Error(resp, err.Error(), http.StatusInternalServerError)
-		return
+		resp.Header().Set("Content-Type", "application/json")
+		resp.Write(jsonResponse)
+	} else if newMetric.MType == "counter" {
+		resp.Header().Set("content-type", "application/json")
+		resp.WriteHeader(http.StatusOK)
+
+		if err = json.NewEncoder(resp).Encode(newMetric); err != nil {
+			http.Error(resp, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
+
+	// resp.Header().Set("content-type", "application/json")
+	// resp.WriteHeader(http.StatusOK)
+
+	// if err = json.NewEncoder(resp).Encode(newMetric); err != nil {
+	// 	http.Error(resp, err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
+	// jsonResponse, err := json.Marshal(newMetric)
+	// if err != nil {
+	// 	http.Error(resp, "Error marshaling JSON", http.StatusInternalServerError)
+	// 	return
+	// }
+
+	// resp.Header().Set("Content-Type", "application/json")
+	// resp.Write(jsonResponse)
 }
 
 // VALUE ...
 func (h *HTTPGateway) ValuePathHandler(resp http.ResponseWriter, req *http.Request) {
+	log.Print("###ValuePathHandler")
 	ctx := req.Context()
 	mType := chi.URLParam(req, "type")
 	mName := chi.URLParam(req, "name")
@@ -107,6 +141,7 @@ func (h *HTTPGateway) ValuePathHandler(resp http.ResponseWriter, req *http.Reque
 }
 
 func (h *HTTPGateway) ValueJSONHandler(resp http.ResponseWriter, req *http.Request) {
+
 	ctx := req.Context()
 	var metric models.Metrics
 
@@ -162,14 +197,12 @@ func (h *HTTPGateway) BatchHandler(resp http.ResponseWriter, req *http.Request) 
 func (h *HTTPGateway) Ping(resp http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 
-	db, err := ping.NewDBPool(req.Context(), h.cfg.DBConn)
+	db, err := ping.NewDBPool(ctx, h.cfg.DBConn)
 	if err != nil {
-		// log.Println("###ЕГОР->", err)
 		resp.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	if err = db.Ping(ctx); err != nil {
-		// log.Println("###ЕГОР->", err)
 		resp.WriteHeader(http.StatusInternalServerError)
 		return
 	}
