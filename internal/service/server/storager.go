@@ -133,7 +133,7 @@ func (s ServerService) UpdatePath(ctx context.Context, name, mType, mValue strin
 			return "", err
 		}
 
-		return fmt.Sprint(newDelta), nil
+		return fmt.Sprintf("%d", newDelta), nil
 	default:
 		return "", errServiceError
 	}

@@ -32,26 +32,5 @@ func Compressor(next http.Handler) http.Handler {
 
 		next.ServeHTTP(ow, req)
 
-		// for question
-
-		// encodingHeaders := req.Header.Values("Content-Encoding")
-		// if !slices.Contains(encodingHeaders, "gzip") {
-		// 	next.ServeHTTP(resp, req)
-		// 	return
-		// }
-
-		// cmpReader, err := gzip.NewReader(req.Body)
-		// if err != nil {
-		// 	http.Error(resp, err.Error(), http.StatusNotFound)
-		// 	return
-		// }
-		// defer cmpReader.Close()
-		// req.Body = cmpReader
-
-		// dcmpWriter := gzip.NewWriter(resp)
-		// defer dcmpWriter.Close()
-
-		// next.ServeHTTP(gzipWriter{ResponseWriter: resp, Writer: dcmpWriter}, req)
-
 	})
 }
