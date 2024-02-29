@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strconv"
@@ -9,12 +10,12 @@ import (
 )
 
 // get all metrics as html page
-func (s ServerService) MetricPage() (string, error) {
-	gauges, err := s.MemStorager.ReadAllGauges()
+func (s ServerService) MetricPage(ctx context.Context) (string, error) {
+	gauges, err := s.MemStorager.ReadAllGauges(ctx)
 	if err != nil {
 		return "", err
 	}
-	counters, err := s.MemStorager.ReadAllCounters()
+	counters, err := s.MemStorager.ReadAllCounters(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -34,10 +35,10 @@ func (s ServerService) MetricPage() (string, error) {
 	return form, nil
 }
 
-func (s ServerService) View(metric models.Metrics) (models.Metrics, error) {
+func (s ServerService) View(ctx context.Context, metric models.Metrics) (models.Metrics, error) {
 	switch metric.MType {
 	case "gauge":
-		value, ok := s.MemStorager.ReadGauge(metric.ID)
+		value, ok := s.MemStorager.ReadGauge(ctx, metric.ID)
 		log.Println("###GAUGE OUT--->", metric.ID, ":", value)
 		if !ok {
 			return metric, errServiceError
@@ -45,7 +46,7 @@ func (s ServerService) View(metric models.Metrics) (models.Metrics, error) {
 		metric.Value = &value
 		return metric, nil
 	case "counter":
-		delta, ok := s.MemStorager.ReadCounter(metric.ID)
+		delta, ok := s.MemStorager.ReadCounter(ctx, metric.ID)
 		log.Println("###GAUGE OUT--->", metric.ID, ":", delta)
 		if !ok {
 			return metric, errServiceError
@@ -57,14 +58,14 @@ func (s ServerService) View(metric models.Metrics) (models.Metrics, error) {
 	}
 }
 
-func (s ServerService) Update(metric models.Metrics) (models.Metrics, error) {
+func (s ServerService) Update(ctx context.Context, metric models.Metrics) (models.Metrics, error) {
 
 	switch metric.MType {
 	case "gauge":
 		if metric.Value == nil {
 			return metric, errServiceError
 		}
-		value, err := s.MemStorager.AddGauge(metric.ID, *metric.Value)
+		value, err := s.MemStorager.AddGauge(ctx, metric.ID, *metric.Value)
 		if err != nil {
 			return metric, err
 		}
@@ -75,7 +76,7 @@ func (s ServerService) Update(metric models.Metrics) (models.Metrics, error) {
 		if metric.Delta == nil {
 			return metric, errServiceError
 		}
-		delta, err := s.MemStorager.AddCounter(metric.ID, *metric.Delta)
+		delta, err := s.MemStorager.AddCounter(ctx, metric.ID, *metric.Delta)
 		if err != nil {
 			return metric, err
 		}
@@ -86,17 +87,17 @@ func (s ServerService) Update(metric models.Metrics) (models.Metrics, error) {
 	}
 }
 
-func (s ServerService) ViewPath(name, mType string) (string, error) {
+func (s ServerService) ViewPath(ctx context.Context, name, mType string) (string, error) {
 	switch mType {
 	case "gauge":
-		value, ok := s.MemStorager.ReadGauge(name)
+		value, ok := s.MemStorager.ReadGauge(ctx, name)
 		log.Println("###GAUGE OUT--->", name, ":", value)
 		if !ok {
 			return "", errServiceError
 		}
 		return fmt.Sprint(value), nil
 	case "counter":
-		delta, ok := s.MemStorager.ReadCounter(name)
+		delta, ok := s.MemStorager.ReadCounter(ctx, name)
 		log.Println("###GAUGE OUT--->", name, ":", delta)
 		if !ok {
 			return "", errServiceError
@@ -107,7 +108,7 @@ func (s ServerService) ViewPath(name, mType string) (string, error) {
 	}
 }
 
-func (s ServerService) UpdatePath(name, mType, mValue string) (string, error) {
+func (s ServerService) UpdatePath(ctx context.Context, name, mType, mValue string) (string, error) {
 
 	switch mType {
 	case "gauge":
@@ -115,7 +116,7 @@ func (s ServerService) UpdatePath(name, mType, mValue string) (string, error) {
 		if err != nil {
 			return "", errServiceError
 		}
-		_, err = s.MemStorager.AddGauge(name, value)
+		_, err = s.MemStorager.AddGauge(ctx, name, value)
 		if err != nil {
 			return "", err
 		}
@@ -126,7 +127,7 @@ func (s ServerService) UpdatePath(name, mType, mValue string) (string, error) {
 		if err != nil {
 			return "", errServiceError
 		}
-		newDelta, err := s.MemStorager.AddCounter(name, delta)
+		newDelta, err := s.MemStorager.AddCounter(ctx, name, delta)
 		if err != nil {
 			return "", err
 		}
@@ -137,7 +138,7 @@ func (s ServerService) UpdatePath(name, mType, mValue string) (string, error) {
 	}
 }
 
-func (s ServerService) BatchUpdate(metrics []models.Metrics) error {
+func (s ServerService) BatchUpdate(ctx context.Context, metrics []models.Metrics) error {
 	var (
 		gauges   = map[string]float64{}
 		counters = map[string]int64{}
@@ -160,13 +161,13 @@ func (s ServerService) BatchUpdate(metrics []models.Metrics) error {
 	}
 	log.Println("###GAUGE IN--->", gauges)
 	log.Println("###COUNTER IN--->", counters)
-	err := s.MemStorager.AddGauges(gauges)
+	err := s.MemStorager.AddGauges(ctx, gauges)
 	if err != nil {
 		// log.Println("###GAUGE ERR--->", err)
 		return err
 	}
 
-	err = s.MemStorager.AddCounters(counters)
+	err = s.MemStorager.AddCounters(ctx, counters)
 	if err != nil {
 		// log.Println("###COUNTER ERR--->", err)
 		return err

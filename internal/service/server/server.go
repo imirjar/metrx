@@ -37,12 +37,12 @@ type ServerService struct {
 }
 
 type Storager interface {
-	AddGauges(gauges map[string]float64) error
-	AddCounters(counters map[string]int64) error
-	AddGauge(name string, value float64) (float64, error)
-	AddCounter(name string, delta int64) (int64, error)
-	ReadGauge(name string) (float64, bool)
-	ReadCounter(name string) (int64, bool)
-	ReadAllGauges() (map[string]float64, error)
-	ReadAllCounters() (map[string]int64, error)
+	AddGauges(ctx context.Context, gauges map[string]float64) error
+	AddCounters(ctx context.Context, counters map[string]int64) error
+	AddGauge(ctx context.Context, name string, value float64) (float64, error)
+	AddCounter(ctx context.Context, name string, delta int64) (int64, error)
+	ReadGauge(ctx context.Context, name string) (float64, bool)
+	ReadCounter(ctx context.Context, name string) (int64, bool)
+	ReadAllGauges(ctx context.Context) (map[string]float64, error)
+	ReadAllCounters(ctx context.Context) (map[string]int64, error)
 }

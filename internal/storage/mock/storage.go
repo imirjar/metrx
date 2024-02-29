@@ -1,6 +1,7 @@
 package mock
 
 import (
+	"context"
 	"log"
 	"time"
 
@@ -35,7 +36,7 @@ func (s *Storage) configure(cfg config.ServerConfig) {
 
 }
 
-func (s *Storage) AddGauge(name string, value float64) (float64, error) {
+func (s *Storage) AddGauge(ctx context.Context, name string, value float64) (float64, error) {
 	s.MemStorage.Gauge[name] = value
 
 	if s.AutoExport {
@@ -44,7 +45,7 @@ func (s *Storage) AddGauge(name string, value float64) (float64, error) {
 	return value, nil
 }
 
-func (s *Storage) AddCounter(name string, delta int64) (int64, error) {
+func (s *Storage) AddCounter(ctx context.Context, name string, delta int64) (int64, error) {
 	log.Println("###Я ТОПОВОЕ ХРАНИЛИЩЕ МЕТРИК")
 	newDelta := s.MemStorage.Counter[name] + delta
 	s.MemStorage.Counter[name] = newDelta
@@ -55,7 +56,7 @@ func (s *Storage) AddCounter(name string, delta int64) (int64, error) {
 	return newDelta, nil
 }
 
-func (s *Storage) AddGauges(gauges map[string]float64) error {
+func (s *Storage) AddGauges(ctx context.Context, gauges map[string]float64) error {
 
 	for i, v := range gauges {
 		s.MemStorage.Gauge[i] = v
@@ -67,7 +68,7 @@ func (s *Storage) AddGauges(gauges map[string]float64) error {
 	return nil
 }
 
-func (s *Storage) AddCounters(counters map[string]int64) error {
+func (s *Storage) AddCounters(ctx context.Context, counters map[string]int64) error {
 
 	for i, d := range counters {
 		// fmt.Println(metric)
@@ -81,7 +82,7 @@ func (s *Storage) AddCounters(counters map[string]int64) error {
 	return nil
 }
 
-func (s *Storage) ReadGauge(name string) (float64, bool) {
+func (s *Storage) ReadGauge(ctx context.Context, name string) (float64, bool) {
 	if value, ok := s.MemStorage.Gauge[name]; ok {
 		// metric.Value = &value
 		return value, true
@@ -90,7 +91,7 @@ func (s *Storage) ReadGauge(name string) (float64, bool) {
 	}
 }
 
-func (s *Storage) ReadCounter(name string) (int64, bool) {
+func (s *Storage) ReadCounter(ctx context.Context, name string) (int64, bool) {
 	if delta, ok := s.MemStorage.Counter[name]; ok {
 		// metric.Delta = &delta
 		return delta, true
@@ -99,10 +100,10 @@ func (s *Storage) ReadCounter(name string) (int64, bool) {
 	}
 }
 
-func (s *Storage) ReadAllGauges() (map[string]float64, error) {
+func (s *Storage) ReadAllGauges(ctx context.Context) (map[string]float64, error) {
 	return s.MemStorage.Gauge, nil
 }
 
-func (s *Storage) ReadAllCounters() (map[string]int64, error) {
+func (s *Storage) ReadAllCounters(ctx context.Context) (map[string]int64, error) {
 	return s.MemStorage.Counter, nil
 }

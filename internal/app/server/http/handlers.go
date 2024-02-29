@@ -14,7 +14,8 @@ import (
 
 // MainPage ...
 func (h *HTTPGateway) MainPage(resp http.ResponseWriter, req *http.Request) {
-	page, err := h.Service.MetricPage()
+	ctx := req.Context()
+	page, err := h.Service.MetricPage(ctx)
 	if err != nil {
 		http.Error(resp, err.Error(), http.StatusBadRequest)
 		return
@@ -26,6 +27,7 @@ func (h *HTTPGateway) MainPage(resp http.ResponseWriter, req *http.Request) {
 
 // UPDATE ...
 func (h *HTTPGateway) UpdatePathHandler(resp http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
 	mType := chi.URLParam(req, "type")
 	mName := chi.URLParam(req, "name")
 	mValue := chi.URLParam(req, "value")
@@ -35,7 +37,7 @@ func (h *HTTPGateway) UpdatePathHandler(resp http.ResponseWriter, req *http.Requ
 		return
 	}
 
-	result, err := h.Service.UpdatePath(mName, mType, mValue)
+	result, err := h.Service.UpdatePath(ctx, mName, mType, mValue)
 	if err != nil {
 		http.Error(resp, err.Error(), http.StatusBadRequest)
 		return
@@ -45,6 +47,7 @@ func (h *HTTPGateway) UpdatePathHandler(resp http.ResponseWriter, req *http.Requ
 }
 
 func (h *HTTPGateway) UpdateJSONHandler(resp http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
 	var metric models.Metrics
 
 	err := json.NewDecoder(req.Body).Decode(&metric)
@@ -68,7 +71,7 @@ func (h *HTTPGateway) UpdateJSONHandler(resp http.ResponseWriter, req *http.Requ
 
 	defer req.Body.Close()
 
-	newMetric, err := h.Service.Update(metric)
+	newMetric, err := h.Service.Update(ctx, metric)
 	if err != nil {
 		http.Error(resp, err.Error(), http.StatusBadRequest)
 		return
@@ -85,6 +88,7 @@ func (h *HTTPGateway) UpdateJSONHandler(resp http.ResponseWriter, req *http.Requ
 
 // VALUE ...
 func (h *HTTPGateway) ValuePathHandler(resp http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
 	mType := chi.URLParam(req, "type")
 	mName := chi.URLParam(req, "name")
 
@@ -93,7 +97,7 @@ func (h *HTTPGateway) ValuePathHandler(resp http.ResponseWriter, req *http.Reque
 		return
 	}
 
-	result, err := h.Service.ViewPath(mName, mType)
+	result, err := h.Service.ViewPath(ctx, mName, mType)
 	if err != nil {
 		http.Error(resp, err.Error(), http.StatusNotFound)
 		return
@@ -103,6 +107,7 @@ func (h *HTTPGateway) ValuePathHandler(resp http.ResponseWriter, req *http.Reque
 }
 
 func (h *HTTPGateway) ValueJSONHandler(resp http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
 	var metric models.Metrics
 
 	if err := json.NewDecoder(req.Body).Decode(&metric); err != nil || metric.ID == "" || metric.MType == "" {
@@ -111,7 +116,7 @@ func (h *HTTPGateway) ValueJSONHandler(resp http.ResponseWriter, req *http.Reque
 	}
 	defer req.Body.Close()
 
-	newMetric, err := h.Service.View(metric)
+	newMetric, err := h.Service.View(ctx, metric)
 	if err != nil {
 		http.Error(resp, errMetricNameIncorrect.Error(), http.StatusNotFound)
 		return
@@ -128,6 +133,7 @@ func (h *HTTPGateway) ValueJSONHandler(resp http.ResponseWriter, req *http.Reque
 
 // Batch ...
 func (h *HTTPGateway) BatchHandler(resp http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
 	var metrics []models.Metrics
 
 	body, err := io.ReadAll(req.Body)
@@ -143,7 +149,7 @@ func (h *HTTPGateway) BatchHandler(resp http.ResponseWriter, req *http.Request) 
 		return
 	}
 
-	err = h.Service.BatchUpdate(metrics)
+	err = h.Service.BatchUpdate(ctx, metrics)
 	if err != nil {
 		resp.WriteHeader(http.StatusInternalServerError)
 		return
@@ -154,6 +160,7 @@ func (h *HTTPGateway) BatchHandler(resp http.ResponseWriter, req *http.Request) 
 
 // Check ...
 func (h *HTTPGateway) Ping(resp http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
 
 	db, err := ping.NewDBPool(req.Context(), h.cfg.DBConn)
 	if err != nil {
@@ -161,7 +168,7 @@ func (h *HTTPGateway) Ping(resp http.ResponseWriter, req *http.Request) {
 		resp.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	if err = db.Ping(req.Context()); err != nil {
+	if err = db.Ping(ctx); err != nil {
 		// log.Println("###ЕГОР->", err)
 		resp.WriteHeader(http.StatusInternalServerError)
 		return

@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -20,14 +21,14 @@ func NewGateway(cfg config.ServerConfig) *HTTPGateway {
 }
 
 type Service interface {
-	BatchUpdate(metric []models.Metrics) error
+	BatchUpdate(ctx context.Context, metrics []models.Metrics) error
 
-	Update(metric models.Metrics) (models.Metrics, error)
-	UpdatePath(name, mType, mValue string) (string, error)
-	View(metric models.Metrics) (models.Metrics, error)
-	ViewPath(name, mType string) (string, error)
+	Update(ctx context.Context, metric models.Metrics) (models.Metrics, error)
+	UpdatePath(ctx context.Context, name, mType, mValue string) (string, error)
+	View(ctx context.Context, metric models.Metrics) (models.Metrics, error)
+	ViewPath(ctx context.Context, name, mType string) (string, error)
 
-	MetricPage() (string, error)
+	MetricPage(ctx context.Context) (string, error)
 }
 
 type HTTPGateway struct {

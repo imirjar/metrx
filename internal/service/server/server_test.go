@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"math/rand"
 	"testing"
 
@@ -40,12 +41,12 @@ func TestServerGauge(t *testing.T) {
 	for _, test := range tests {
 		value = rand.Float64()
 		t.Run(test.name, func(t *testing.T) {
-			update, err := server.Update(test.metric)
+			update, err := server.Update(context.Background(), test.metric)
 			if err != nil {
 				return
 			}
 
-			view, err := server.View(test.metric)
+			view, err := server.View(context.Background(), test.metric)
 			if err != nil {
 				return
 			}

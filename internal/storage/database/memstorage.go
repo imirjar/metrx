@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func (m *DB) AddGauges(gauges map[string]float64) error {
+func (m *DB) AddGauges(ctx context.Context, gauges map[string]float64) error {
 	batch := &pgx.Batch{}
 	for i, v := range gauges {
 		// value := strconv.FormatFloat(v, 'f', 6, 64)
@@ -21,10 +21,10 @@ func (m *DB) AddGauges(gauges map[string]float64) error {
 			ON CONFLICT (id) DO 
 			UPDATE SET value = $3`, i, "gauge", value)
 	}
-	return m.db.SendBatch(context.Background(), batch).Close()
+	return m.db.SendBatch(ctx, batch).Close()
 }
 
-func (m *DB) AddCounters(counters map[string]int64) error {
+func (m *DB) AddCounters(ctx context.Context, counters map[string]int64) error {
 	batch := &pgx.Batch{}
 
 	for i, d := range counters {
@@ -36,13 +36,13 @@ func (m *DB) AddCounters(counters map[string]int64) error {
 			UPDATE SET value = EXCLUDED.value + metrics.value`, i, "counter", delta)
 		// fmt.Println(delta)
 	}
-	return m.db.SendBatch(context.Background(), batch).Close()
+	return m.db.SendBatch(ctx, batch).Close()
 }
 
-func (m *DB) AddGauge(name string, value float64) (float64, error) {
+func (m *DB) AddGauge(ctx context.Context, name string, value float64) (float64, error) {
 	mValue := strconv.FormatFloat(value, 'f', 6, 64)
 
-	_, err := m.db.Exec(context.Background(),
+	_, err := m.db.Exec(ctx,
 		`INSERT INTO metrics (id, type, value) VALUES($1, $2, $3)
 		ON CONFLICT (id) DO UPDATE SET value = $3`, name, "gauge", mValue,
 	)
@@ -55,21 +55,13 @@ func (m *DB) AddGauge(name string, value float64) (float64, error) {
 	return value, nil
 }
 
-func (m *DB) AddCounter(name string, delta int64) (int64, error) {
+func (m *DB) AddCounter(ctx context.Context, name string, delta int64) (int64, error) {
 
-	var curDelta int64
+	mDelta := strconv.FormatInt(delta, 10)
 
-	rows := m.db.QueryRow(context.Background(), "SELECT value FROM metrics WHERE type=$1 AND id=$2", "counter", name)
-	err := rows.Scan(&curDelta)
-	if err != nil {
-		log.Println(err)
-	}
-	curDelta += delta
-	mDelta := strconv.FormatInt(curDelta, 10)
-
-	_, err = m.db.Exec(context.Background(),
+	_, err := m.db.Exec(ctx,
 		`INSERT INTO metrics (id, type, value) VALUES($1, $2, $3)
-		ON CONFLICT (id) DO UPDATE SET value = $3`, name, "counter", mDelta,
+		ON CONFLICT (id) DO UPDATE SET value = EXCLUDED.value + metrics.value`, name, "counter", mDelta,
 	)
 
 	if err != nil {
@@ -77,12 +69,12 @@ func (m *DB) AddCounter(name string, delta int64) (int64, error) {
 		return 0, err
 	}
 
-	return curDelta, nil
+	return delta, nil //old value
 }
 
-func (m *DB) ReadGauge(name string) (float64, bool) {
+func (m *DB) ReadGauge(ctx context.Context, name string) (float64, bool) {
 	var value float64
-	rows := m.db.QueryRow(context.Background(), "SELECT value FROM metrics WHERE type=$1 AND id=$2", "gauge", name)
+	rows := m.db.QueryRow(ctx, "SELECT value FROM metrics WHERE type=$1 AND id=$2", "gauge", name)
 
 	err := rows.Scan(&value)
 
@@ -94,9 +86,9 @@ func (m *DB) ReadGauge(name string) (float64, bool) {
 	return value, true
 }
 
-func (m *DB) ReadCounter(name string) (int64, bool) {
+func (m *DB) ReadCounter(ctx context.Context, name string) (int64, bool) {
 	var delta int64
-	rows := m.db.QueryRow(context.Background(), "SELECT value FROM metrics WHERE type=$1 AND id=$2", "counter", name)
+	rows := m.db.QueryRow(ctx, "SELECT value FROM metrics WHERE type=$1 AND id=$2", "counter", name)
 
 	err := rows.Scan(&delta)
 
@@ -108,10 +100,10 @@ func (m *DB) ReadCounter(name string) (int64, bool) {
 	return delta, true
 }
 
-func (m *DB) ReadAllGauges() (map[string]float64, error) {
+func (m *DB) ReadAllGauges(ctx context.Context) (map[string]float64, error) {
 	gauges := make(map[string]float64)
 
-	rows, err := m.db.Query(context.Background(), `SELECT id, value FROM metrics WHERE type = $1`, "gauge")
+	rows, err := m.db.Query(ctx, `SELECT id, value FROM metrics WHERE type = $1`, "gauge")
 	if err != nil {
 		log.Println(err)
 		panic(err)
@@ -141,10 +133,10 @@ func (m *DB) ReadAllGauges() (map[string]float64, error) {
 	return gauges, nil
 }
 
-func (m *DB) ReadAllCounters() (map[string]int64, error) {
+func (m *DB) ReadAllCounters(ctx context.Context) (map[string]int64, error) {
 	counters := make(map[string]int64)
 
-	rows, err := m.db.Query(context.Background(), `SELECT id, value FROM metrics WHERE type = $1`, "counter")
+	rows, err := m.db.Query(ctx, `SELECT id, value FROM metrics WHERE type = $1`, "counter")
 	if err != nil {
 		log.Println(err)
 		panic(err)

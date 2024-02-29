@@ -20,8 +20,12 @@ cmd/server/server
 # Dependency directories (remove the comment below to include it)
 vendor/
 
+
 # IDEs directories
 .idea
 .vscode
 metricstest
 cmd/test/*
+
+
+.github/
