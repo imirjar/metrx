@@ -154,12 +154,15 @@ func (h *HTTPGateway) BatchHandler(resp http.ResponseWriter, req *http.Request) 
 
 // Check ...
 func (h *HTTPGateway) Ping(resp http.ResponseWriter, req *http.Request) {
+
 	db, err := ping.NewDBPool(req.Context(), h.cfg.DBConn)
 	if err != nil {
+		// log.Println("###ЕГОР->", err)
 		resp.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	if err = db.Ping(req.Context()); err != nil {
+		// log.Println("###ЕГОР->", err)
 		resp.WriteHeader(http.StatusInternalServerError)
 		return
 	}

@@ -38,6 +38,7 @@ func (s ServerService) View(metric models.Metrics) (models.Metrics, error) {
 	switch metric.MType {
 	case "gauge":
 		value, ok := s.MemStorager.ReadGauge(metric.ID)
+		log.Println("###GAUGE OUT--->", metric.ID, ":", value)
 		if !ok {
 			return metric, errServiceError
 		}
@@ -45,6 +46,7 @@ func (s ServerService) View(metric models.Metrics) (models.Metrics, error) {
 		return metric, nil
 	case "counter":
 		delta, ok := s.MemStorager.ReadCounter(metric.ID)
+		log.Println("###GAUGE OUT--->", metric.ID, ":", delta)
 		if !ok {
 			return metric, errServiceError
 		}
@@ -88,12 +90,14 @@ func (s ServerService) ViewPath(name, mType string) (string, error) {
 	switch mType {
 	case "gauge":
 		value, ok := s.MemStorager.ReadGauge(name)
+		log.Println("###GAUGE OUT--->", name, ":", value)
 		if !ok {
 			return "", errServiceError
 		}
 		return fmt.Sprint(value), nil
 	case "counter":
 		delta, ok := s.MemStorager.ReadCounter(name)
+		log.Println("###GAUGE OUT--->", name, ":", delta)
 		if !ok {
 			return "", errServiceError
 		}
@@ -142,21 +146,29 @@ func (s ServerService) BatchUpdate(metrics []models.Metrics) error {
 	for _, metric := range metrics {
 		switch metric.MType {
 		case "gauge":
+			// log.Println("###GAUGE IN--->", metric.ID, ":", *metric.Value)
 			gauges[metric.ID] = *metric.Value
 		case "counter":
-			counters[metric.ID] = *metric.Delta
+			// log.Println("###COUNTER IN--->", metric.ID, ":", *metric.Delta)
+			if _, ok := counters[metric.ID]; ok {
+				counters[metric.ID] = counters[metric.ID] + *metric.Delta
+			} else {
+				counters[metric.ID] = *metric.Delta
+			}
+
 		}
 	}
-
+	log.Println("###GAUGE IN--->", gauges)
+	log.Println("###COUNTER IN--->", counters)
 	err := s.MemStorager.AddGauges(gauges)
 	if err != nil {
-		log.Fatalln(err)
+		// log.Println("###GAUGE ERR--->", err)
 		return err
 	}
 
 	err = s.MemStorager.AddCounters(counters)
 	if err != nil {
-		log.Fatalln(err)
+		// log.Println("###COUNTER ERR--->", err)
 		return err
 	}
 

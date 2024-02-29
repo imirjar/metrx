@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"strconv"
 
@@ -12,7 +13,8 @@ import (
 func (m *DB) AddGauges(gauges map[string]float64) error {
 	batch := &pgx.Batch{}
 	for i, v := range gauges {
-		value := strconv.FormatFloat(v, 'f', 6, 64)
+		// value := strconv.FormatFloat(v, 'f', 6, 64)
+		value := fmt.Sprint(v)
 		batch.Queue(`
 			INSERT INTO metrics (id, type, value)
 			VALUES($1, $2, $3)
@@ -24,6 +26,7 @@ func (m *DB) AddGauges(gauges map[string]float64) error {
 
 func (m *DB) AddCounters(counters map[string]int64) error {
 	batch := &pgx.Batch{}
+
 	for i, d := range counters {
 		delta := strconv.FormatFloat(float64(d), 'f', 6, 64)
 		batch.Queue(`

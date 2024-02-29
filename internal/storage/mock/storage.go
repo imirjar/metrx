@@ -45,7 +45,7 @@ func (s *Storage) AddGauge(name string, value float64) (float64, error) {
 }
 
 func (s *Storage) AddCounter(name string, delta int64) (int64, error) {
-
+	log.Println("###Я ТОПОВОЕ ХРАНИЛИЩЕ МЕТРИК")
 	newDelta := s.MemStorage.Counter[name] + delta
 	s.MemStorage.Counter[name] = newDelta
 
