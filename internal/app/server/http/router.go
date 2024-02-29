@@ -62,25 +62,7 @@ func (h *HTTPGateway) Run() error {
 	s := &http.Server{
 		Addr:    h.cfg.URL,
 		Handler: router,
-		// ReadTimeout:  1 * time.Second,
-		// WriteTimeout: 1 * time.Second,
 	}
 
-	// ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT)
-	// defer stop()
-
-	// var wg sync.WaitGroup
-
-	// wg.Add(1)
-	// go func() {
-	// 	defer wg.Done()
-
-	// 	<-ctx.Done()
-	// 	s.Shutdown(ctx)
-	// 	h.Service.Backup()
-	// }()
-
 	return s.ListenAndServe()
-	// wg.Wait()
-	// return nil
 }

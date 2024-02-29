@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -133,7 +132,6 @@ func (h *HTTPGateway) BatchHandler(resp http.ResponseWriter, req *http.Request) 
 
 	body, err := io.ReadAll(req.Body)
 	if err != nil {
-		log.Println(err, "#####BODY ERR")
 		resp.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -141,14 +139,12 @@ func (h *HTTPGateway) BatchHandler(resp http.ResponseWriter, req *http.Request) 
 
 	err = json.Unmarshal(body, &metrics)
 	if err != nil {
-		log.Println(err, "#####JSON ERR")
 		resp.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	err = h.Service.BatchUpdate(metrics)
 	if err != nil {
-		log.Println(err, "#####Service ERR")
 		resp.WriteHeader(http.StatusInternalServerError)
 		return
 	}
