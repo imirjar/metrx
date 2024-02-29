@@ -2,24 +2,29 @@ package ping
 
 import (
 	"context"
-	"database/sql"
 	"log"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
-func PingPgx(ctx context.Context, conn string) error {
-	if conn == "" {
-		log.Println(errConnectionString)
-		return errConnectionString
-	}
+type DB struct {
+	pool *pgxpool.Pool
+}
 
-	db, err := sql.Open("pgx", conn)
+func NewDBPool(ctx context.Context, connString string) (*DB, error) {
+	connPool, err := pgxpool.New(ctx, connString)
 	if err != nil {
-		log.Print(errConnectionParams)
-		return errConnectionParams
+		log.Print(err.Error())
+		return nil, err
 	}
-	defer db.Close()
+	return &DB{pool: connPool}, nil
+}
 
-	return db.PingContext(ctx)
+func (db *DB) Ping(ctx context.Context) error {
+	err := db.pool.Ping(ctx)
+	if err != nil {
+		return err
+	}
+	return nil
 }

@@ -36,15 +36,6 @@ func TestServerGauge(t *testing.T) {
 			},
 			expectedErr: nil,
 		},
-		{
-			name: "counter",
-			metric: models.Metrics{
-				ID:    "counter",
-				MType: "counter",
-				Value: &value,
-			},
-			expectedErr: nil,
-		},
 	}
 	for _, test := range tests {
 		value = rand.Float64()

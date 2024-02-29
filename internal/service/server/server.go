@@ -15,10 +15,11 @@ func NewServerService(cfg config.ServerConfig) *ServerService {
 		cfg: cfg,
 	}
 
-	log.Println(cfg.DBConn)
-	err := ping.PingPgx(context.Background(), cfg.DBConn)
-
+	db, err := ping.NewDBPool(context.Background(), cfg.DBConn)
 	if err != nil {
+		log.Print(err)
+	}
+	if err = db.Ping(context.Background()); err != nil {
 		mock := mock.NewMockStorage(cfg)
 		backupService.MemStorager = mock
 

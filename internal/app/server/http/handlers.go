@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -132,6 +133,7 @@ func (h *HTTPGateway) BatchHandler(resp http.ResponseWriter, req *http.Request) 
 
 	body, err := io.ReadAll(req.Body)
 	if err != nil {
+		log.Println(err, "#####BODY ERR")
 		resp.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -139,12 +141,14 @@ func (h *HTTPGateway) BatchHandler(resp http.ResponseWriter, req *http.Request) 
 
 	err = json.Unmarshal(body, &metrics)
 	if err != nil {
+		log.Println(err, "#####JSON ERR")
 		resp.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	err = h.Service.BatchUpdate(metrics)
 	if err != nil {
+		log.Println(err, "#####Service ERR")
 		resp.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -154,10 +158,16 @@ func (h *HTTPGateway) BatchHandler(resp http.ResponseWriter, req *http.Request) 
 
 // Check ...
 func (h *HTTPGateway) Ping(resp http.ResponseWriter, req *http.Request) {
-	if err := ping.PingPgx(req.Context(), h.cfg.DBConn); err != nil {
+	db, err := ping.NewDBPool(req.Context(), h.cfg.DBConn)
+	if err != nil {
 		resp.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	if err = db.Ping(req.Context()); err != nil {
+		resp.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	resp.WriteHeader(http.StatusOK)
 	resp.Write([]byte("ok"))
 }

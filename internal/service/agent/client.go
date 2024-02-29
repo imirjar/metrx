@@ -46,7 +46,15 @@ func (m *MetricsClient) POSTMetric(metric models.Metrics) error {
 }
 
 func (m *MetricsClient) POSTMetrics(metric []models.Metrics) error {
+	for me := range metric {
+		mem := metric[me]
+		if mem.MType == "gauge" {
+			log.Println(mem.MType, mem.ID, *mem.Value)
+		} else {
+			log.Println(mem.MType, mem.ID, *mem.Delta)
+		}
 
+	}
 	mm, err := json.Marshal(metric)
 	if err != nil {
 		log.Fatal(err)
@@ -60,7 +68,6 @@ func (m *MetricsClient) POSTMetrics(metric []models.Metrics) error {
 
 	req, err := http.NewRequest(http.MethodPost, m.Path+"/updates/", &buf)
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 
@@ -70,7 +77,6 @@ func (m *MetricsClient) POSTMetrics(metric []models.Metrics) error {
 	resp, err := m.Client.Do(req)
 
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 
