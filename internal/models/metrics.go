@@ -1,8 +1,6 @@
 package models
 
 import (
-	"encoding/json"
-	"fmt"
 	"math/rand"
 )
 
@@ -16,23 +14,4 @@ type Metrics struct {
 func (m *Metrics) SetRandomValue() {
 	randV := rand.Float64()
 	m.Value = &randV
-}
-
-func stringValue(f *float64) *string {
-	if f != nil {
-		strValue := fmt.Sprint(*f)
-		return &strValue
-	}
-	return nil
-}
-
-func (m *Metrics) MarshalJSON() ([]byte, error) {
-	type Alias Metrics
-	return json.Marshal(&struct {
-		*Alias
-		Value *string `json:"value,omitempty"`
-	}{
-		Alias: (*Alias)(m),
-		Value: stringValue(m.Value),
-	})
 }

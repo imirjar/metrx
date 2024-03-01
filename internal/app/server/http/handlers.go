@@ -1,6 +1,7 @@
 package http
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -121,15 +122,18 @@ func (h *HTTPGateway) UpdateJSONHandler(resp http.ResponseWriter, req *http.Requ
 	}
 
 	if newMetric.MType == "gauge" {
-		jsonResponse, err := json.Marshal(newMetric)
-		if err != nil {
+		var buf bytes.Buffer
+
+		jsonEncoder := json.NewEncoder(&buf)
+		// jsonResponse, err := json.Marshal(newMetric)
+		if err := jsonEncoder.Encode(newMetric); err != nil {
 			http.Error(resp, "Error marshaling JSON", http.StatusInternalServerError)
 			return
 		}
 
 		resp.Header().Set("Content-Type", "application/json")
 		log.Println("##&&#&#&#", *newMetric.Value)
-		resp.Write(jsonResponse)
+		buf.WriteTo(resp)
 	} else if newMetric.MType == "counter" {
 		resp.Header().Set("content-type", "application/json")
 		resp.WriteHeader(http.StatusOK)
