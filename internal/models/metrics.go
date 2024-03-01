@@ -1,6 +1,8 @@
 package models
 
 import (
+	"encoding/json"
+	"fmt"
 	"math/rand"
 )
 
@@ -14,4 +16,20 @@ type Metrics struct {
 func (m *Metrics) SetRandomValue() {
 	randV := rand.Float64()
 	m.Value = &randV
+}
+
+func (m *Metrics) MarshalJSON() ([]byte, error) {
+	if m.MType == "gauge" {
+		return json.Marshal(&struct {
+			ID    string `json:"id"`   // имя метрики
+			MType string `json:"type"` // параметр, принимающий значение gauge или counter
+			Value string `json:"value,omitempty"`
+		}{
+			ID:    m.ID,
+			MType: m.MType,
+			Value: fmt.Sprint(*m.Value),
+		})
+	} else {
+		return json.Marshal(&m)
+	}
 }
