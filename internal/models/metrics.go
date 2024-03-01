@@ -3,6 +3,7 @@ package models
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"math/rand"
 )
 
@@ -21,7 +22,8 @@ func (m *Metrics) SetRandomValue() {
 func (m *Metrics) MarshalGauge() ([]byte, error) {
 	if m.MType == "gauge" {
 		// val := strconv.FormatFloat(*m.Value, 'f', -1, 64)
-		return json.Marshal(&struct {
+		log.Println("#######MarshalGauge+++++++++++", *m.Value)
+		nnVal := &struct {
 			ID    string `json:"id"`
 			MType string `json:"type"`
 			Value string `json:"value,omitempty"`
@@ -29,7 +31,9 @@ func (m *Metrics) MarshalGauge() ([]byte, error) {
 			ID:    m.ID,
 			MType: m.MType,
 			Value: fmt.Sprintln(*m.Value),
-		})
+		}
+		log.Println("#######AS_YOBANIY_RESULT+++++++++++", nnVal.Value)
+		return json.Marshal(nnVal)
 	} else {
 		return json.Marshal(&m)
 	}

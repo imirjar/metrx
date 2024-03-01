@@ -115,18 +115,22 @@ func (h *HTTPGateway) UpdateJSONHandler(resp http.ResponseWriter, req *http.Requ
 	}
 
 	newMetric, err := h.Service.Update(ctx, metric)
+
 	if err != nil {
 		http.Error(resp, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	if newMetric.MType == "gauge" {
+		log.Println("#######NEW_METRIC+++++++++++", *metric.Value)
+		log.Println("#######METRIC+++++++++++", *newMetric.Value)
 		jsonResponse, err := newMetric.MarshalGauge()
 		if err != nil {
 			http.Error(resp, "Error marshaling JSON", http.StatusInternalServerError)
 			return
 		}
 		resp.Header().Set("Content-Type", "application/json")
+		resp.WriteHeader(http.StatusOK)
 		// log.Println("##--->", *newMetric.Value)
 		resp.Write(jsonResponse)
 	} else if newMetric.MType == "counter" {
