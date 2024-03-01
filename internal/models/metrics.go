@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/rand"
 )
@@ -17,8 +18,21 @@ func (m *Metrics) SetRandomValue() {
 	m.Value = &randV
 }
 
-func (m *Metrics) MarshalGauge() ([]byte, error) {
+func stringValue(f *float64) *string {
+	if f != nil {
+		strValue := fmt.Sprint(*f)
+		return &strValue
+	}
+	return nil
+}
 
-	return []byte(fmt.Sprintf(`{"ID":%s,"MType":%s,"Value":%f}`, m.ID, m.MType, *m.Value)), nil
-
+func (m *Metrics) MarshalJSON() ([]byte, error) {
+	type Alias Metrics
+	return json.Marshal(&struct {
+		*Alias
+		Value *string `json:"value,omitempty"`
+	}{
+		Alias: (*Alias)(m),
+		Value: stringValue(m.Value),
+	})
 }
