@@ -28,7 +28,7 @@ func (m *Metrics) MarshalGauge() ([]byte, error) {
 		}{
 			ID:    m.ID,
 			MType: m.MType,
-			Value: fmt.Sprintf("%f", m.Value),
+			Value: fmt.Sprintf("%f", *m.Value),
 		})
 	} else {
 		return json.Marshal(&m)
