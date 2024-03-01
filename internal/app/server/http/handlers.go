@@ -58,6 +58,48 @@ func (h *HTTPGateway) UpdateJSONHandler(resp http.ResponseWriter, req *http.Requ
 		http.Error(resp, err.Error(), http.StatusBadRequest)
 		return
 	}
+	defer req.Body.Close()
+
+	//
+	// var val string
+	// switch metric.MType {
+	// case "gauge":
+	// 	val = fmt.Sprint(metric.Value)
+	// 	result, err := h.Service.UpdatePath(ctx, metric.ID, metric.MType, val)
+	// 	if err != nil {
+	// 		http.Error(resp, err.Error(), http.StatusBadRequest)
+	// 		return
+	// 	}
+	// 	value, err := strconv.ParseFloat(result, 64)
+	// 	if err != nil {
+	// 		http.Error(resp, err.Error(), http.StatusBadRequest)
+	// 		return
+	// 	}
+	// 	metric.Value = &value
+	// case "counter":
+	// 	val = fmt.Sprint(metric.Delta)
+	// 	result, err := h.Service.UpdatePath(ctx, metric.ID, metric.MType, val)
+	// 	if err != nil {
+	// 		http.Error(resp, err.Error(), http.StatusBadRequest)
+	// 		return
+	// 	}
+	// 	delta, err := strconv.ParseInt(result, 10, 64)
+	// 	if err != nil {
+	// 		http.Error(resp, err.Error(), http.StatusBadRequest)
+	// 		return
+	// 	}
+	// 	metric.Delta = &delta
+	// default:
+	// 	http.Error(resp, err.Error(), http.StatusBadRequest)
+	// 	return
+	// }
+	// resp.Header().Set("content-type", "application/json")
+	// resp.WriteHeader(http.StatusOK)
+
+	// if err = json.NewEncoder(resp).Encode(metric); err != nil {
+	// 	http.Error(resp, err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
 
 	if metric.MType == "" || metric.ID == "" {
 		http.Error(resp, "MType and ID must not be empty", http.StatusBadRequest)
@@ -71,8 +113,6 @@ func (h *HTTPGateway) UpdateJSONHandler(resp http.ResponseWriter, req *http.Requ
 		http.Error(resp, "Delta must not be empty for counter metric", http.StatusBadRequest)
 		return
 	}
-
-	defer req.Body.Close()
 
 	newMetric, err := h.Service.Update(ctx, metric)
 	if err != nil {
@@ -88,6 +128,7 @@ func (h *HTTPGateway) UpdateJSONHandler(resp http.ResponseWriter, req *http.Requ
 		}
 
 		resp.Header().Set("Content-Type", "application/json")
+		log.Println("##&&#&#&#", *newMetric.Value)
 		resp.Write(jsonResponse)
 	} else if newMetric.MType == "counter" {
 		resp.Header().Set("content-type", "application/json")
