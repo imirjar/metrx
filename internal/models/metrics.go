@@ -2,7 +2,6 @@ package models
 
 import (
 	"encoding/json"
-	"fmt"
 	"math/rand"
 	"strconv"
 )
@@ -29,7 +28,7 @@ func (m *Metrics) MarshalGauge() ([]byte, error) {
 		}{
 			ID:    m.ID,
 			MType: m.MType,
-			Value: fmt.Sprintf("%v", val),
+			Value: val,
 		})
 	} else {
 		return json.Marshal(&m)
