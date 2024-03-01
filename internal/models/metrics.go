@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
+	"strconv"
 )
 
 type Metrics struct {
@@ -20,6 +21,7 @@ func (m *Metrics) SetRandomValue() {
 
 func (m *Metrics) MarshalGauge() ([]byte, error) {
 	if m.MType == "gauge" {
+		val := strconv.FormatFloat(float64(*m.Value), 'f', -1, 64)
 		return json.Marshal(&struct {
 			ID    string `json:"id"`
 			MType string `json:"type"`
@@ -27,7 +29,7 @@ func (m *Metrics) MarshalGauge() ([]byte, error) {
 		}{
 			ID:    m.ID,
 			MType: m.MType,
-			Value: fmt.Sprint(*m.Value),
+			Value: fmt.Sprint(val),
 		})
 	} else {
 		return json.Marshal(&m)
