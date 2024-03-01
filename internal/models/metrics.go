@@ -27,7 +27,7 @@ func (m *Metrics) MarshalJSON() ([]byte, error) {
 		}{
 			ID:    m.ID,
 			MType: m.MType,
-			Value: fmt.Sprint(*m.Value),
+			Value: fmt.Sprintf("%f", *m.Value),
 		})
 	} else {
 		return json.Marshal(&m)
