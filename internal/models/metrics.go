@@ -21,7 +21,7 @@ func (m *Metrics) SetRandomValue() {
 
 func (m *Metrics) MarshalGauge() ([]byte, error) {
 	if m.MType == "gauge" {
-		val := strconv.FormatFloat(float64(*m.Value), 'f', -1, 64)
+		val := strconv.FormatFloat(float64(*m.Value), 'g', -1, 64)
 		return json.Marshal(&struct {
 			ID    string `json:"id"`
 			MType string `json:"type"`
