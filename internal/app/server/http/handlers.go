@@ -122,17 +122,23 @@ func (h *HTTPGateway) UpdateJSONHandler(resp http.ResponseWriter, req *http.Requ
 	}
 
 	if newMetric.MType == "gauge" {
-		log.Println("#######NEW_METRIC+++++++++++", *metric.Value)
-		log.Println("#######METRIC+++++++++++", *newMetric.Value)
-		jsonResponse, err := newMetric.MarshalGauge()
-		if err != nil {
-			http.Error(resp, "Error marshaling JSON", http.StatusInternalServerError)
+		// log.Println("#######NEW_METRIC+++++++++++", *metric.Value)
+		// log.Println("#######METRIC+++++++++++", *newMetric.Value)
+		// jsonResponse, err := newMetric.MarshalGauge()
+		// if err != nil {
+		// 	http.Error(resp, "Error marshaling JSON", http.StatusInternalServerError)
+		// 	return
+		// }
+		// resp.Header().Set("Content-Type", "application/json")
+		// resp.WriteHeader(http.StatusOK)
+		// resp.Write(jsonResponse)
+		resp.Header().Set("content-type", "application/json")
+		resp.WriteHeader(http.StatusOK)
+
+		if err = json.NewEncoder(resp).Encode(metric); err != nil {
+			http.Error(resp, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		resp.Header().Set("Content-Type", "application/json")
-		resp.WriteHeader(http.StatusOK)
-		// log.Println("##--->", *newMetric.Value)
-		resp.Write(jsonResponse)
 	} else if newMetric.MType == "counter" {
 		resp.Header().Set("content-type", "application/json")
 		resp.WriteHeader(http.StatusOK)
