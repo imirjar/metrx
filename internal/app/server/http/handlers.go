@@ -121,7 +121,7 @@ func (h *HTTPGateway) UpdateJSONHandler(resp http.ResponseWriter, req *http.Requ
 	}
 
 	if newMetric.MType == "gauge" {
-		jsonResponse, err := json.Marshal(newMetric)
+		jsonResponse, err := newMetric.MarshalGauge()
 		if err != nil {
 			http.Error(resp, "Error marshaling JSON", http.StatusInternalServerError)
 			return
