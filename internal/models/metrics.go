@@ -24,6 +24,6 @@ func (m *Metrics) MarshalJSON() ([]byte, error) {
 	case "counter":
 		return []byte(fmt.Sprintf(`{"ID":%s,"MType":%s,"Delta":%d}`, m.ID, m.MType, *m.Delta)), nil
 	default:
-		return []byte{}, nil
+		return []byte{}, fmt.Errorf("asdasd")
 	}
 }
