@@ -18,11 +18,11 @@ func (m *Metrics) SetRandomValue() {
 	m.Value = &randV
 }
 
-func (m *Metrics) MarshalJSON() ([]byte, error) {
+func (m *Metrics) MarshalGauge() ([]byte, error) {
 	if m.MType == "gauge" {
 		return json.Marshal(&struct {
-			ID    string `json:"id"`   // имя метрики
-			MType string `json:"type"` // параметр, принимающий значение gauge или counter
+			ID    string `json:"id"`
+			MType string `json:"type"`
 			Value string `json:"value,omitempty"`
 		}{
 			ID:    m.ID,
