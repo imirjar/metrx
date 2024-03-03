@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"strconv"
 )
 
 type Metrics struct {
@@ -19,7 +20,41 @@ func (m *Metrics) SetRandomValue() {
 	m.Value = &randV
 }
 
-func (m *Metrics) MarshalGauge() ([]byte, error) {
+func (m *Metrics) GetVal() (string, error) {
+	switch m.MType {
+	case "gauge":
+		value := fmt.Sprint(*m.Value)
+		return value, nil
+	case "counter":
+		delta := fmt.Sprint(*m.Delta)
+		return delta, nil
+	default:
+		return "", fmt.Errorf("error incorrect metric type")
+	}
+}
+
+func (m *Metrics) SetVal(strVal string) error {
+	switch m.MType {
+	case "gauge":
+		value, err := strconv.ParseFloat(strVal, 64)
+		if err != nil {
+			return fmt.Errorf("error metric isn't float64")
+		}
+		m.Value = &value
+		return nil
+	case "counter":
+		delta, err := strconv.ParseInt(strVal, 10, 64)
+		if err != nil {
+			return fmt.Errorf("error metric isn't float64")
+		}
+		m.Delta = &delta
+		return nil
+	default:
+		return fmt.Errorf("error incorrect metric type")
+	}
+}
+
+func (m *Metrics) Marshal() ([]byte, error) {
 	if m.MType == "gauge" {
 		// val := strconv.FormatFloat(*m.Value, 'f', -1, 64)
 		log.Println("#######MarshalGauge+++++++++++", *m.Value)

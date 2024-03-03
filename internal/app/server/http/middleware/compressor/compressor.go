@@ -8,29 +8,29 @@ import (
 func Compressor(next http.Handler) http.Handler {
 
 	return http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
-		ow := resp
+
 		acceptEncoding := req.Header.Get("Accept-Encoding")
+		contentEncoding := req.Header.Get("Content-Encoding")
+
 		supportsGzip := strings.Contains(acceptEncoding, "gzip")
+		sendsGzip := strings.Contains(contentEncoding, "gzip")
+
 		if supportsGzip {
-			cw := newCompressWriter(resp)
-			ow = cw
-			defer cw.Close()
+			cResp := newCompressWriter(resp)
+			defer cResp.Close()
+			resp = cResp
 		}
 
-		contentEncoding := req.Header.Get("Content-Encoding")
-		sendsGzip := strings.Contains(contentEncoding, "gzip")
 		if sendsGzip {
 			cr, err := newCompressReader(req.Body)
 			if err != nil {
 				resp.WriteHeader(http.StatusInternalServerError)
 				return
 			}
-
-			req.Body = cr
 			defer cr.Close()
+			req.Body = cr
 		}
 
-		next.ServeHTTP(ow, req)
-
+		next.ServeHTTP(resp, req)
 	})
 }

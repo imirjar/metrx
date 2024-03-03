@@ -23,12 +23,8 @@ func NewGateway(cfg config.ServerConfig) *HTTPGateway {
 
 type Service interface {
 	BatchUpdate(ctx context.Context, metrics []models.Metrics) error
-
-	Update(ctx context.Context, metric models.Metrics) (models.Metrics, error)
 	UpdatePath(ctx context.Context, name, mType, mValue string) (string, error)
-	View(ctx context.Context, metric models.Metrics) (models.Metrics, error)
 	ViewPath(ctx context.Context, name, mType string) (string, error)
-
 	MetricPage(ctx context.Context) (string, error)
 }
 
