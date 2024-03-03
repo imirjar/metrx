@@ -16,10 +16,12 @@ import (
 func (h *HTTPGateway) MainPage(resp http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	page, err := h.Service.MetricPage(ctx)
+
 	if err != nil {
 		http.Error(resp, err.Error(), http.StatusBadRequest)
 		return
 	}
+
 	resp.Header().Set("content-type", "text/html")
 	resp.WriteHeader(http.StatusOK)
 	io.WriteString(resp, page)
@@ -85,12 +87,11 @@ func (h *HTTPGateway) UpdateJSONHandler(resp http.ResponseWriter, req *http.Requ
 
 	resp.Header().Set("content-type", "application/json")
 	resp.WriteHeader(http.StatusOK)
-	resp.Write(response)
-
 	// if err = json.NewEncoder(resp).Encode(metric); err != nil {
 	// 	http.Error(resp, err.Error(), http.StatusInternalServerError)
 	// 	return
-	// }
+	//
+	resp.Write(response)
 }
 
 // VALUE ...

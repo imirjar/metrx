@@ -53,9 +53,6 @@ func (s ServerService) ViewPath(ctx context.Context, name, mType string) (string
 }
 
 func (s ServerService) UpdatePath(ctx context.Context, name, mType, mValue string) (string, error) {
-	//sprintf do not
-	//sprint ok
-	//sprintln ok
 	switch mType {
 	case "gauge":
 		value, err := strconv.ParseFloat(mValue, 64)
