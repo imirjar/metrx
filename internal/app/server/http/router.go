@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/imirjar/metrx/config"
 	"github.com/imirjar/metrx/internal/app/server/http/middleware/compressor"
+	"github.com/imirjar/metrx/internal/app/server/http/middleware/encryptor"
 	"github.com/imirjar/metrx/internal/app/server/http/middleware/logger"
 	"github.com/imirjar/metrx/internal/models"
 	"github.com/imirjar/metrx/internal/service/server"
@@ -39,6 +40,7 @@ func (h *HTTPGateway) Run() error {
 
 	router.Use(compressor.Compressor)
 	router.Use(logger.Logger)
+	router.Use(encryptor.Encryptor)
 
 	router.Route("/update", func(update chi.Router) {
 		update.Post("/{type}/{name}/{value}", h.UpdatePathHandler)

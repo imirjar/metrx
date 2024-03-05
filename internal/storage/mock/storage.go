@@ -33,7 +33,6 @@ func (s *Storage) configure(cfg config.ServerConfig) {
 			}
 		}()
 	}
-
 }
 
 func (s *Storage) AddGauge(ctx context.Context, name string, value float64) (float64, error) {
