@@ -12,16 +12,31 @@ type ServerConfig struct {
 	ServiceConfig
 }
 
+type AppConfig struct {
+	Key string
+	URL string
+}
+
+type ServiceConfig struct {
+	Key        string
+	Interval   time.Duration
+	FilePath   string
+	AutoImport bool
+	DBConn     string
+}
+
 func (s *ServerConfig) setEnv() {
-	//if address in env
+	//APP START ON ADDRESS
 	if a := os.Getenv("ADDRESS"); a != "" {
 		s.AppConfig.URL = a
 	}
 
+	//BACKUP DATA WHEN MOCK STORAGE
 	if f := os.Getenv("FILE_STORAGE_PATH"); f != "" {
 		s.ServiceConfig.FilePath = f
 	}
 
+	//AUTO RESTORE FROM BACKUP
 	if r := os.Getenv("RESTORE"); r != "" {
 		rf, err := strconv.ParseBool(r)
 		if err != nil {
@@ -30,6 +45,7 @@ func (s *ServerConfig) setEnv() {
 		s.ServiceConfig.AutoImport = rf
 	}
 
+	//AUTO RESTORE FROM BACKUP
 	if i := os.Getenv("STORE_INTERVAL"); i != "" {
 		intI, err := strconv.ParseInt(i, 10, 64)
 		if err != nil {
@@ -37,9 +53,13 @@ func (s *ServerConfig) setEnv() {
 		}
 		s.ServiceConfig.Interval = time.Duration(1_000_000_000 * intI)
 	}
-
+	//DATABASE CONNECTION STRING
 	if d := os.Getenv("DATABASE_DSN"); d != "" {
 		s.ServiceConfig.DBConn = d
+	}
+
+	if k := os.Getenv("DATABASE_DSN"); k != "" {
+		s.ServiceConfig.DBConn = k
 	}
 }
 
@@ -68,15 +88,4 @@ func (s *ServerConfig) setFlags() {
 	if *d != "" {
 		s.ServiceConfig.DBConn = *d
 	}
-}
-
-type AppConfig struct {
-	URL string
-}
-
-type ServiceConfig struct {
-	Interval   time.Duration
-	FilePath   string
-	AutoImport bool
-	DBConn     string
 }

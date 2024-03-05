@@ -18,17 +18,22 @@ func Encryptor(next http.Handler) http.Handler {
 			defer req.Body.Close()
 			if err != nil {
 				log.Print("####ERROR BODY")
+				resp.WriteHeader(http.StatusInternalServerError)
+				return
 			}
 
 			hash, err := encrypt.EncryptSHA256(body, "HashSHA256")
 			if err != nil {
 				log.Print("####ERROR CRYPTO")
+				resp.WriteHeader(http.StatusInternalServerError)
+				return
 			}
 			bodyHash := hex.EncodeToString(hash)
 
 			if bodyHash != headerHash {
-				//to
 				log.Printf("%s", bodyHash)
+				resp.WriteHeader(http.StatusInternalServerError)
+				return
 			} else {
 				log.Print("ХЭШ равен")
 				next.ServeHTTP(resp, req)
