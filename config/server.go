@@ -10,7 +10,6 @@ import (
 type ServerConfig struct {
 	AppConfig
 	ServiceConfig
-	StorageConfig
 }
 
 func (s *ServerConfig) setEnv() {
@@ -20,7 +19,7 @@ func (s *ServerConfig) setEnv() {
 	}
 
 	if f := os.Getenv("FILE_STORAGE_PATH"); f != "" {
-		s.StorageConfig.FilePath = f
+		s.ServiceConfig.FilePath = f
 	}
 
 	if r := os.Getenv("RESTORE"); r != "" {
@@ -28,7 +27,7 @@ func (s *ServerConfig) setEnv() {
 		if err != nil {
 			panic(err)
 		}
-		s.StorageConfig.AutoImport = rf
+		s.ServiceConfig.AutoImport = rf
 	}
 
 	if i := os.Getenv("STORE_INTERVAL"); i != "" {
@@ -38,6 +37,10 @@ func (s *ServerConfig) setEnv() {
 		}
 		s.ServiceConfig.Interval = time.Duration(1_000_000_000 * intI)
 	}
+
+	if d := os.Getenv("DATABASE_DSN"); d != "" {
+		s.ServiceConfig.DBConn = d
+	}
 }
 
 // set params from os.Args[]
@@ -46,6 +49,7 @@ func (s *ServerConfig) setFlags() {
 	f := flag.String("f", "", "path to the file where the data should be saved")
 	r := flag.Bool("r", s.AutoImport, "if true -> load data from the backup File into storage automatically at startup")
 	i := flag.Int("i", -1, "frequency at which data should be saved")
+	d := flag.String("d", "", "string postgresql connection")
 
 	flag.Parse()
 
@@ -53,13 +57,16 @@ func (s *ServerConfig) setFlags() {
 		s.AppConfig.URL = *a
 	}
 	if *f != "" {
-		s.StorageConfig.FilePath = *f
+		s.ServiceConfig.FilePath = *f
 	}
 	if *r != s.AutoImport {
-		s.StorageConfig.AutoImport = *r
+		s.ServiceConfig.AutoImport = *r
 	}
 	if *i != -1 {
 		s.ServiceConfig.Interval = time.Duration(1_000_000_000 * *i)
+	}
+	if *d != "" {
+		s.ServiceConfig.DBConn = *d
 	}
 }
 
@@ -67,11 +74,9 @@ type AppConfig struct {
 	URL string
 }
 
-type StorageConfig struct {
+type ServiceConfig struct {
+	Interval   time.Duration
 	FilePath   string
 	AutoImport bool
-}
-
-type ServiceConfig struct {
-	Interval time.Duration
+	DBConn     string
 }

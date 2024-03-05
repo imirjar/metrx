@@ -6,8 +6,8 @@ import (
 )
 
 type compressReader struct {
-	r  io.ReadCloser
-	zr *gzip.Reader
+	req   io.ReadCloser
+	gzReq *gzip.Reader
 }
 
 func newCompressReader(r io.ReadCloser) (*compressReader, error) {
@@ -17,7 +17,7 @@ func newCompressReader(r io.ReadCloser) (*compressReader, error) {
 	}
 
 	return &compressReader{
-		r:  r,
-		zr: zr,
+		req:   r,
+		gzReq: zr,
 	}, nil
 }

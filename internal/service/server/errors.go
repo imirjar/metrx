@@ -3,8 +3,8 @@ package server
 import "errors"
 
 var (
-	errServiceError        = errors.New("service error")
-	errStorageError        = errors.New("storage error")
-	errConvertationError   = errors.New("string covertation error")
-	errMetricNameIncorrect = errors.New("metric name is incorrect")
+	errCounterDoesNotMatched = errors.New("no counter has been matched")
+	errGaugeDoesNotMatched   = errors.New("no gauge has been matched")
+	errMetricTypeError       = errors.New("there is no such metric type")
+	errConvertationError     = errors.New("covertation error")
 )
