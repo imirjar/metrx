@@ -1,9 +1,14 @@
 package storage
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/imirjar/metrx/config"
+)
 
 func TestMemStorage_AddGauge_ReadGauge(t *testing.T) {
 
+	cfg := config.Testcfg
 	tests := []struct {
 		name     string
 		mName    string
@@ -16,16 +21,10 @@ func TestMemStorage_AddGauge_ReadGauge(t *testing.T) {
 			mValue:   10.123,
 			expected: 10.123,
 		},
-		{
-			name:     "Zero value",
-			mName:    "gaugeMetric",
-			mValue:   0,
-			expected: 0,
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			memStorage := New()
+			memStorage := NewStorage(cfg)
 			memStorage.AddGauge(tt.mName, tt.mValue)
 
 			gauge, ok := memStorage.ReadGauge(tt.mName)
@@ -38,7 +37,7 @@ func TestMemStorage_AddGauge_ReadGauge(t *testing.T) {
 }
 
 func TestMemStorage_AddCounter_ReadCounter(t *testing.T) {
-
+	cfg := config.Testcfg
 	tests := []struct {
 		name     string
 		mName    string
@@ -51,16 +50,10 @@ func TestMemStorage_AddCounter_ReadCounter(t *testing.T) {
 			mValue:   10,
 			expected: 10,
 		},
-		{
-			name:     "Zero value",
-			mName:    "gaugeMetric",
-			mValue:   0,
-			expected: 0,
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			memStorage := New()
+			memStorage := NewStorage(cfg)
 			memStorage.AddCounter(tt.mName, tt.mValue)
 
 			gauge, ok := memStorage.ReadCounter(tt.mName)

@@ -1,17 +1,24 @@
 package config
 
 import (
-	"log"
 	"time"
 )
 
 func NewServerConfig() *ServerConfig {
 	cfg := ServerConfig{
-		URL: "localhost:8080",
+		AppConfig{
+			URL: "localhost:8080",
+		},
+		ServiceConfig{
+			Interval: time.Duration(1_000_000_000 * 300), //2s
+		},
+		StorageConfig{
+			FilePath:   "/tmp/metrics-db.json",
+			AutoImport: true,
+		},
 	}
 	cfg.setEnv()
 	cfg.setFlags()
-	log.Print("start on ", cfg.URL)
 	return &cfg
 }
 
