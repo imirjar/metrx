@@ -15,18 +15,21 @@ type Servicer interface {
 
 type AgentApp struct {
 	Service Servicer
+	cfg     config.AgentConfig
 }
 
-func NewAgentApp(cfg config.AgentConfig) *AgentApp {
+func NewAgentApp() *AgentApp {
+	cfg := config.NewAgentConfig()
 	return &AgentApp{
-		Service: agent.NewAgentService(cfg),
+		Service: agent.NewAgentService(*cfg),
+		cfg:     *cfg,
 	}
 }
 
-func (a *AgentApp) Run(path string, pollInterval, reportInterval time.Duration) error {
+func (a *AgentApp) Run() error {
 
-	poll := time.NewTicker(pollInterval)
-	report := time.NewTicker(reportInterval)
+	poll := time.NewTicker(a.cfg.PollInterval)
+	report := time.NewTicker(a.cfg.ReportInterval)
 
 	for {
 		select {

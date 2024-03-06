@@ -28,16 +28,20 @@ func Encryptor(next http.Handler) http.Handler {
 				resp.WriteHeader(http.StatusInternalServerError)
 				return
 			}
-			bodyHash := hex.EncodeToString(hash)
 
+			bodyHash := hex.EncodeToString(hash)
 			if bodyHash != headerHash {
 				log.Printf("%s", bodyHash)
 				resp.WriteHeader(http.StatusInternalServerError)
 				return
-			} else {
-				log.Print("ХЭШ равен")
-				next.ServeHTTP(resp, req)
 			}
+
+			log.Print("ХЭШ равен")
+			next.ServeHTTP(resp, req)
+
+		} else {
+			log.Print("Небезопасный запрос")
+			next.ServeHTTP(resp, req)
 		}
 	})
 }

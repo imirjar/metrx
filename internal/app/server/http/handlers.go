@@ -13,173 +13,187 @@ import (
 )
 
 // MainPage ...
-func (h *HTTPGateway) MainPage(resp http.ResponseWriter, req *http.Request) {
-	ctx := req.Context()
-	page, err := h.Service.MetricPage(ctx)
+func (h *HTTPGateway) MainPage() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		page, err := h.Service.MetricPage(ctx)
 
-	if err != nil {
-		http.Error(resp, err.Error(), http.StatusBadRequest)
-		return
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		w.Header().Set("content-type", "text/html")
+		w.WriteHeader(http.StatusOK)
+		io.WriteString(w, page)
 	}
-
-	resp.Header().Set("content-type", "text/html")
-	resp.WriteHeader(http.StatusOK)
-	io.WriteString(resp, page)
 }
 
 // UPDATE ...
-func (h *HTTPGateway) UpdatePathHandler(resp http.ResponseWriter, req *http.Request) {
+func (h *HTTPGateway) UpdatePathHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 
-	ctx := req.Context()
-	mType := chi.URLParam(req, "type")
-	mName := chi.URLParam(req, "name")
-	mValue := chi.URLParam(req, "value")
+		ctx := r.Context()
+		mType := chi.URLParam(r, "type")
+		mName := chi.URLParam(r, "name")
+		mValue := chi.URLParam(r, "value")
 
-	if mType == "" || mName == "" || mValue == "" {
-		http.Error(resp, errMetricNameIncorrect.Error(), http.StatusBadRequest)
-		return
+		if mType == "" || mName == "" || mValue == "" {
+			http.Error(w, errMetricNameIncorrect.Error(), http.StatusBadRequest)
+			return
+		}
+
+		result, err := h.Service.UpdatePath(ctx, mName, mType, mValue)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(fmt.Sprint(result)))
 	}
-
-	result, err := h.Service.UpdatePath(ctx, mName, mType, mValue)
-	if err != nil {
-		http.Error(resp, err.Error(), http.StatusBadRequest)
-		return
-	}
-	resp.WriteHeader(http.StatusOK)
-	resp.Write([]byte(fmt.Sprint(result)))
 }
 
-func (h *HTTPGateway) UpdateJSONHandler(resp http.ResponseWriter, req *http.Request) {
+func (h *HTTPGateway) UpdateJSONHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 
-	ctx := req.Context()
-	var metric models.Metrics
+		ctx := r.Context()
+		var metric models.Metrics
 
-	err := json.NewDecoder(req.Body).Decode(&metric)
-	if err != nil {
-		http.Error(resp, err.Error(), http.StatusBadRequest)
-		return
+		err := json.NewDecoder(r.Body).Decode(&metric)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		defer r.Body.Close()
+
+		value, err := metric.GetVal()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		result, err := h.Service.UpdatePath(ctx, metric.ID, metric.MType, value)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		err = metric.SetVal(result)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		response, err := metric.Marshal()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		w.Header().Set("content-type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		// if err = json.NewEncoder(resp).Encode(metric); err != nil {
+		// 	http.Error(resp, err.Error(), http.StatusInternalServerError)
+		// 	return
+		//
+		w.Write(response)
 	}
-	defer req.Body.Close()
-
-	value, err := metric.GetVal()
-	if err != nil {
-		http.Error(resp, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	result, err := h.Service.UpdatePath(ctx, metric.ID, metric.MType, value)
-	if err != nil {
-		http.Error(resp, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	err = metric.SetVal(result)
-	if err != nil {
-		http.Error(resp, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	response, err := metric.Marshal()
-	if err != nil {
-		http.Error(resp, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	resp.Header().Set("content-type", "application/json")
-	resp.WriteHeader(http.StatusOK)
-	// if err = json.NewEncoder(resp).Encode(metric); err != nil {
-	// 	http.Error(resp, err.Error(), http.StatusInternalServerError)
-	// 	return
-	//
-	resp.Write(response)
 }
 
 // VALUE ...
-func (h *HTTPGateway) ValuePathHandler(resp http.ResponseWriter, req *http.Request) {
+func (h *HTTPGateway) ValuePathHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 
-	ctx := req.Context()
-	mType := chi.URLParam(req, "type")
-	mName := chi.URLParam(req, "name")
+		ctx := r.Context()
+		mType := chi.URLParam(r, "type")
+		mName := chi.URLParam(r, "name")
 
-	result, err := h.Service.ViewPath(ctx, mName, mType)
-	if err != nil {
-		http.Error(resp, errParamsIncorrect.Error(), http.StatusNotFound)
-		return
+		result, err := h.Service.ViewPath(ctx, mName, mType)
+		if err != nil {
+			http.Error(w, errParamsIncorrect.Error(), http.StatusNotFound)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(fmt.Sprint(result)))
 	}
-
-	resp.WriteHeader(http.StatusOK)
-	resp.Write([]byte(fmt.Sprint(result)))
 }
 
-func (h *HTTPGateway) ValueJSONHandler(resp http.ResponseWriter, req *http.Request) {
+func (h *HTTPGateway) ValueJSONHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 
-	ctx := req.Context()
-	var metric models.Metrics
+		ctx := r.Context()
+		var metric models.Metrics
 
-	if err := json.NewDecoder(req.Body).Decode(&metric); err != nil {
-		http.Error(resp, err.Error(), http.StatusBadRequest)
-		return
-	}
-	defer req.Body.Close()
+		if err := json.NewDecoder(r.Body).Decode(&metric); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		defer r.Body.Close()
 
-	val, err := h.Service.ViewPath(ctx, metric.ID, metric.MType)
-	metric.SetVal(val)
+		val, err := h.Service.ViewPath(ctx, metric.ID, metric.MType)
+		metric.SetVal(val)
 
-	if err != nil {
-		http.Error(resp, errMetricNameIncorrect.Error(), http.StatusNotFound)
-		return
-	}
+		if err != nil {
+			http.Error(w, errMetricNameIncorrect.Error(), http.StatusNotFound)
+			return
+		}
 
-	resp.Header().Set("content-type", "application/json")
-	resp.WriteHeader(http.StatusOK)
+		w.Header().Set("content-type", "application/json")
+		w.WriteHeader(http.StatusOK)
 
-	if err = json.NewEncoder(resp).Encode(metric); err != nil {
-		http.Error(resp, err.Error(), http.StatusInternalServerError)
-		return
+		if err = json.NewEncoder(w).Encode(metric); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 }
 
 // Batch ...
-func (h *HTTPGateway) BatchHandler(resp http.ResponseWriter, req *http.Request) {
-	ctx := req.Context()
-	var metrics []models.Metrics
+func (h *HTTPGateway) BatchHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		var metrics []models.Metrics
 
-	body, err := io.ReadAll(req.Body)
-	if err != nil {
-		resp.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	defer req.Body.Close()
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		defer r.Body.Close()
 
-	err = json.Unmarshal(body, &metrics)
-	if err != nil {
-		resp.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+		err = json.Unmarshal(body, &metrics)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 
-	err = h.Service.BatchUpdate(ctx, metrics)
-	if err != nil {
-		resp.WriteHeader(http.StatusInternalServerError)
-		return
+		err = h.Service.BatchUpdate(ctx, metrics)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("ok"))
 	}
-	resp.WriteHeader(http.StatusOK)
-	resp.Write([]byte("ok"))
 }
 
 // Check ...
-func (h *HTTPGateway) Ping(resp http.ResponseWriter, req *http.Request) {
-	ctx := req.Context()
+func (h *HTTPGateway) Ping(path string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
 
-	db, err := ping.NewDBPool(ctx, h.cfg.DBConn)
-	if err != nil {
-		resp.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	if err = db.Ping(ctx); err != nil {
-		resp.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+		db, err := ping.NewDBPool(ctx, path)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		if err = db.Ping(ctx); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 
-	resp.WriteHeader(http.StatusOK)
-	resp.Write([]byte("ok"))
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("ok"))
+	}
 }

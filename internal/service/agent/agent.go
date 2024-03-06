@@ -11,13 +11,18 @@ import (
 	"github.com/imirjar/metrx/internal/models"
 )
 
-type MetricsClient struct {
-	Client http.Client
-	Path   string
+type Sender interface {
+	POSTMetric(metric models.Metrics) error
+	POSTMetrics(metric []models.Metrics) error
+}
+
+type Collector interface {
+	CollectMetrix()
+	ReadMemValue(ms string) float64
 }
 
 type AgentService struct {
-	MetricsClient MetricsClient
+	MetricsClient Sender
 	MemStats      runtime.MemStats
 	GaugeList     []string
 }

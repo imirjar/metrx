@@ -13,12 +13,11 @@ type ServerConfig struct {
 }
 
 type AppConfig struct {
-	Key string
-	URL string
+	SECRET string
+	URL    string
 }
 
 type ServiceConfig struct {
-	Key        string
 	Interval   time.Duration
 	FilePath   string
 	AutoImport bool
@@ -58,8 +57,8 @@ func (s *ServerConfig) setEnv() {
 		s.ServiceConfig.DBConn = d
 	}
 
-	if k := os.Getenv("DATABASE_DSN"); k != "" {
-		s.ServiceConfig.DBConn = k
+	if k := os.Getenv("SECRET"); k != "" {
+		s.AppConfig.SECRET = k
 	}
 }
 
@@ -70,6 +69,7 @@ func (s *ServerConfig) setFlags() {
 	r := flag.Bool("r", s.AutoImport, "if true -> load data from the backup File into storage automatically at startup")
 	i := flag.Int("i", -1, "frequency at which data should be saved")
 	d := flag.String("d", "", "string postgresql connection")
+	k := flag.String("k", "", "SHA-256 hash key")
 
 	flag.Parse()
 
@@ -87,5 +87,8 @@ func (s *ServerConfig) setFlags() {
 	}
 	if *d != "" {
 		s.ServiceConfig.DBConn = *d
+	}
+	if *k != "" {
+		s.AppConfig.SECRET = *k
 	}
 }

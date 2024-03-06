@@ -3,15 +3,22 @@ package agent
 import (
 	"bytes"
 	"compress/gzip"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/imirjar/metrx/internal/models"
+	"github.com/imirjar/metrx/pkg/encrypt"
 )
 
-func (m *MetricsClient) POSTMetric(metric models.Metrics) error {
+type MetricsClient struct {
+	Client http.Client
+	Path   string
+}
+
+func (m MetricsClient) POSTMetric(metric models.Metrics) error {
 
 	mm, err := json.Marshal(metric)
 	if err != nil {
@@ -45,7 +52,7 @@ func (m *MetricsClient) POSTMetric(metric models.Metrics) error {
 	return err
 }
 
-func (m *MetricsClient) POSTMetrics(metric []models.Metrics) error {
+func (m MetricsClient) POSTMetrics(metric []models.Metrics) error {
 	// for me := range metric {
 	// 	mem := metric[me]
 	// 	if mem.MType == "gauge" {
@@ -61,6 +68,11 @@ func (m *MetricsClient) POSTMetrics(metric []models.Metrics) error {
 		return err
 	}
 
+	hash, err := encrypt.EncryptSHA256(mm, "HashSHA256")
+	if err != nil {
+		log.Print("####ERROR CRYPTO")
+	}
+
 	var buf bytes.Buffer
 	gz := gzip.NewWriter(&buf)
 	gz.Write(mm)
@@ -71,7 +83,9 @@ func (m *MetricsClient) POSTMetrics(metric []models.Metrics) error {
 		return err
 	}
 
-	// req.Header.Add("HashSHA256", "asd")
+	bodyHash := hex.EncodeToString(hash)
+
+	req.Header.Add("HashSHA256", bodyHash)
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Content-Encoding", "gzip")
 

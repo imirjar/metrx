@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"log"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -17,7 +18,6 @@ func NewGateway(cfg config.ServerConfig) *HTTPGateway {
 	service := server.NewServerService(cfg)
 	app := HTTPGateway{
 		Service: service,
-		cfg:     cfg,
 	}
 	return &app
 }
@@ -31,36 +31,38 @@ type Service interface {
 
 type HTTPGateway struct {
 	Service Service
-	cfg     config.ServerConfig
 }
 
-func (h *HTTPGateway) Run() error {
+func (h *HTTPGateway) Start(path, conn, secret string) error {
 
 	router := chi.NewRouter()
 
 	router.Use(compressor.Compressor)
 	router.Use(logger.Logger)
-	router.Use(encryptor.Encryptor)
 
 	router.Route("/update", func(update chi.Router) {
-		update.Post("/{type}/{name}/{value}", h.UpdatePathHandler)
-		update.Post("/", h.UpdateJSONHandler)
+		if secret != "" {
+			log.Println("ECRYPTOR")
+			update.Use(encryptor.Encryptor)
+		}
+		update.Post("/{type}/{name}/{value}", h.UpdatePathHandler())
+		update.Post("/", h.UpdateJSONHandler())
 	})
 
 	router.Route("/value", func(value chi.Router) {
-		value.Get("/{type}/{name}", h.ValuePathHandler)
-		value.Post("/", h.ValueJSONHandler)
+		value.Get("/{type}/{name}", h.ValuePathHandler())
+		value.Post("/", h.ValueJSONHandler())
 	})
 
 	router.Route("/updates", func(value chi.Router) {
-		value.Post("/", h.BatchHandler)
+		value.Post("/", h.BatchHandler())
 	})
 
-	router.Get("/ping", h.Ping)
-	router.Get("/", h.MainPage)
+	router.Get("/ping", h.Ping(conn))
+	router.Get("/", h.MainPage())
 
 	s := &http.Server{
-		Addr:    h.cfg.URL,
+		Addr:    path,
 		Handler: router,
 	}
 
