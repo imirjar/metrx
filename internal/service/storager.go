@@ -1,4 +1,4 @@
-package server
+package service
 
 import (
 	"context"
@@ -88,19 +88,21 @@ func (s ServerService) BatchUpdate(ctx context.Context, metrics []models.Metrics
 		counters = map[string]int64{}
 	)
 
-	for _, metric := range metrics {
-		switch metric.MType {
-		case "gauge":
-			gauges[metric.ID] = *metric.Value
-		case "counter":
-			if _, ok := counters[metric.ID]; ok {
-				counters[metric.ID] = counters[metric.ID] + *metric.Delta
-			} else {
-				counters[metric.ID] = *metric.Delta
-			}
+	// for _, metric := range metrics {
+	// 	switch metric.MType {
+	// 	case "gauge":
+	// 		log.Println("Metric value", metric.Value)
+	// 		gauges[metric.ID] = *metric.Value
+	// 	case "counter":
+	// 		log.Println("Metric delta", metric.Delta)
+	// 		if _, ok := counters[metric.ID]; ok {
+	// 			counters[metric.ID] = counters[metric.ID] + *metric.Delta
+	// 		} else {
+	// 			counters[metric.ID] = *metric.Delta
+	// 		}
 
-		}
-	}
+	// 	}
+	// }
 	err := s.MemStorager.AddGauges(ctx, gauges)
 	if err != nil {
 		return err

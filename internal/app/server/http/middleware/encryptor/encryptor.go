@@ -14,17 +14,16 @@ func Encryptor(next http.Handler) http.Handler {
 		headerHash := req.Header.Get("HashSHA256")
 
 		if headerHash != "" {
+			log.Print("Безопасный запрос")
 			body, err := io.ReadAll(req.Body)
 			defer req.Body.Close()
 			if err != nil {
-				log.Print("####ERROR BODY")
 				resp.WriteHeader(http.StatusInternalServerError)
 				return
 			}
 
 			hash, err := encrypt.EncryptSHA256(body, "HashSHA256")
 			if err != nil {
-				log.Print("####ERROR CRYPTO")
 				resp.WriteHeader(http.StatusInternalServerError)
 				return
 			}

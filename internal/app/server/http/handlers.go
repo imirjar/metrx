@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -114,8 +115,9 @@ func (h *HTTPGateway) ValuePathHandler() http.HandlerFunc {
 			return
 		}
 
+		log.Println("RESULT VALUE PATH HANDLER--->", result)
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(fmt.Sprint(result)))
+		w.Write([]byte(result))
 	}
 }
 
@@ -166,6 +168,14 @@ func (h *HTTPGateway) BatchHandler() http.HandlerFunc {
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
+		}
+
+		for _, m := range metrics {
+			if m.MType == "gauge" {
+				log.Println("handlers.go batch metric ===>", *m.Value)
+			} else {
+				log.Println("handlers.go batch metric ===>", *m.Delta)
+			}
 		}
 
 		err = h.Service.BatchUpdate(ctx, metrics)
