@@ -13,6 +13,8 @@ func Encryptor(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 		headerHash := req.Header.Get("HashSHA256")
 
+		// log.Println("ECRYPTOR MIDDLEWARE")
+
 		if headerHash != "" {
 			log.Print("Безопасный запрос")
 			body, err := io.ReadAll(req.Body)
@@ -39,7 +41,7 @@ func Encryptor(next http.Handler) http.Handler {
 			next.ServeHTTP(resp, req)
 
 		} else {
-			log.Print("Небезопасный запрос")
+			// log.Print("Небезопасный запрос")
 			next.ServeHTTP(resp, req)
 		}
 	})

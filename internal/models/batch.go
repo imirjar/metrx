@@ -1,7 +1,5 @@
 package models
 
-import "log"
-
 type Batch struct {
 	Metrics []Metrics
 }
@@ -12,7 +10,7 @@ func (b *Batch) AddGauge(name string, value float64) {
 		MType: "gauge",
 		Value: &value,
 	}
-	log.Println("#####batch.go value-->", value)
+	// log.Println("#####batch.go value-->", value)
 	b.Metrics = append(b.Metrics, metric)
 }
 
@@ -22,6 +20,6 @@ func (b *Batch) AddCounter(name string, delta int64) {
 		MType: "counter",
 		Delta: &delta,
 	}
-	log.Println("#####batch.go delta-->", delta)
+	// log.Println("#####batch.go delta-->", delta)
 	b.Metrics = append(b.Metrics, metric)
 }

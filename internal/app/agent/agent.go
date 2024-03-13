@@ -12,6 +12,7 @@ import (
 
 	"github.com/imirjar/metrx/config"
 	"github.com/imirjar/metrx/internal/models"
+	"github.com/imirjar/metrx/pkg/encrypt"
 )
 
 type AgentApp struct {
@@ -45,7 +46,7 @@ func (a *AgentApp) SendMetrics() {
 
 	for _, ms := range gaugeList {
 		value := a.Collector.ReadMemStatsValue(ms)
-		log.Println("#####agent.go MemValue-->", value)
+		// log.Println("#####agent.go MemValue-->", value)
 		batch.AddGauge(ms, value)
 		counter++
 	}
@@ -67,7 +68,15 @@ func (a *AgentApp) SendMetrics() {
 	gz.Write(mm)
 	gz.Close()
 
-	a.Client.POST(a.cfg.URL+"/updates/", mm)
+	if a.cfg.SECRET != "" {
+		hash, err := encrypt.EncryptSHA256(mm, "HashSHA256")
+		if err != nil {
+			log.Fatal(err)
+		}
+		a.Client.POST(a.cfg.URL+"/updates/", mm, hash)
+	} else {
+		a.Client.POST(a.cfg.URL+"/updates/", mm)
+	}
 
 }
 
