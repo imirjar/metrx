@@ -85,19 +85,19 @@ func (h *HTTPGateway) UpdateJSONHandler() http.HandlerFunc {
 			return
 		}
 
-		response, err := metric.Marshal()
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
+		// response, err := metric.Marshal()
+		// if err != nil {
+		// 	http.Error(w, err.Error(), http.StatusBadRequest)
+		// 	return
+		// }
 
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		// if err = json.NewEncoder(resp).Encode(metric); err != nil {
-		// 	http.Error(resp, err.Error(), http.StatusInternalServerError)
-		// 	return
-		//
-		w.Write(response)
+		if err = json.NewEncoder(w).Encode(metric); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		// w.Write(response)
 	}
 }
 
@@ -141,14 +141,6 @@ func (h *HTTPGateway) ValueJSONHandler() http.HandlerFunc {
 			return
 		}
 
-		if metric.MType == "gauge" {
-			log.Println("VALUE", val)
-			log.Println("VALUE JSON HANDLER", *metric.Value)
-		} else {
-			log.Println("VALUE", val)
-			log.Println("VALUE JSON HANDLER", *metric.Delta)
-		}
-
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusOK)
 
@@ -178,13 +170,13 @@ func (h *HTTPGateway) BatchHandler() http.HandlerFunc {
 			return
 		}
 
-		// for _, m := range metrics {
-		// 	if m.MType == "gauge" {
-		// 		log.Println("handlers.go batch metric ===>", *m.Value)
-		// 	} else {
-		// 		log.Println("handlers.go batch metric ===>", *m.Delta)
-		// 	}
-		// }
+		for _, m := range metrics {
+			if m.MType == "gauge" {
+				log.Println("handlers.go batch metric ===>", *m.Value)
+			} else {
+				log.Println("handlers.go batch metric ===>", *m.Delta)
+			}
+		}
 
 		err = h.Service.BatchUpdate(ctx, metrics)
 		if err != nil {

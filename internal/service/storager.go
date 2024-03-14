@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"log"
 	"strconv"
 
 	"github.com/imirjar/metrx/internal/models"
@@ -38,18 +37,15 @@ func (s ServerService) ViewPath(ctx context.Context, name, mType string) (string
 	switch mType {
 	case "gauge":
 		value, ok := s.MemStorager.ReadGauge(ctx, name)
-
 		if !ok {
 			return "", errGaugeDoesNotMatched
 		}
-		log.Println("ViewPath ---> VALUE", value)
 		return fmt.Sprint(value), nil
 	case "counter":
 		delta, ok := s.MemStorager.ReadCounter(ctx, name)
 		if !ok {
 			return "", errCounterDoesNotMatched
 		}
-		log.Println("ViewPath ---> VALUE", delta)
 		return fmt.Sprint(delta), nil
 	default:
 		return "", errMetricTypeError
@@ -91,6 +87,20 @@ func (s ServerService) BatchUpdate(ctx context.Context, metrics []models.Metrics
 		gauges   = map[string]float64{}
 		counters = map[string]int64{}
 	)
+
+	for _, metric := range metrics {
+		switch metric.MType {
+		case "gauge":
+			gauges[metric.ID] = *metric.Value
+		case "counter":
+			if _, ok := counters[metric.ID]; ok {
+				counters[metric.ID] = counters[metric.ID] + *metric.Delta
+			} else {
+				counters[metric.ID] = *metric.Delta
+			}
+
+		}
+	}
 
 	err := s.MemStorager.AddGauges(ctx, gauges)
 	if err != nil {
