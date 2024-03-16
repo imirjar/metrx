@@ -36,9 +36,9 @@ func (h *HTTPGateway) Start(path, conn, secret string) error {
 
 	router := chi.NewRouter()
 
+	router.Use(encryptor.Encryptor)
 	router.Use(compressor.Compressor)
 	router.Use(logger.Logger)
-	router.Use(encryptor.Encryptor)
 
 	router.Route("/update", func(update chi.Router) {
 		update.Post("/{type}/{name}/{value}", h.UpdatePathHandler())

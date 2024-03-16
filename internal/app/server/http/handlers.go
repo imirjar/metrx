@@ -62,6 +62,8 @@ func (h *HTTPGateway) UpdateJSONHandler() http.HandlerFunc {
 
 		err := json.NewDecoder(r.Body).Decode(&metric)
 		if err != nil {
+			log.Print("Что-то с докодером")
+			log.Print(err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -69,18 +71,21 @@ func (h *HTTPGateway) UpdateJSONHandler() http.HandlerFunc {
 
 		value, err := metric.GetVal()
 		if err != nil {
+			log.Print("Что-то не вычленилось значение")
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
 		result, err := h.Service.UpdatePath(ctx, metric.ID, metric.MType, value)
 		if err != nil {
+			log.Print("Что-то не обновляется")
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
 		err = metric.SetVal(result)
 		if err != nil {
+			log.Print("Что-то не присваевается новое значение")
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}

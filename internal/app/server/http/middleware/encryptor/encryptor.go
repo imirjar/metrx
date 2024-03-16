@@ -1,6 +1,7 @@
 package encryptor
 
 import (
+	"bytes"
 	"encoding/hex"
 	"io"
 	"log"
@@ -10,39 +11,40 @@ import (
 )
 
 func Encryptor(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
-		headerHash := req.Header.Get("HashSHA256")
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		headerHash := r.Header.Get("HashSHA256")
 
-		// log.Println("ECRYPTOR MIDDLEWARE")
+		log.Println("Header Hash===>", headerHash)
 
 		if headerHash != "" {
 			log.Print("Безопасный запрос")
-			body, err := io.ReadAll(req.Body)
-			defer req.Body.Close()
+			body, err := io.ReadAll(r.Body)
+			defer r.Body.Close()
 			if err != nil {
-				resp.WriteHeader(http.StatusInternalServerError)
+				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
 
-			hash, err := encrypt.EncryptSHA256(body, "HashSHA256")
+			hash, err := encrypt.EncryptSHA256(body, []byte(headerHash))
 			if err != nil {
-				resp.WriteHeader(http.StatusInternalServerError)
+				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
 
 			bodyHash := hex.EncodeToString(hash)
 			if bodyHash != headerHash {
 				log.Printf("%s", bodyHash)
-				resp.WriteHeader(http.StatusInternalServerError)
+				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
+			r.Body = io.NopCloser(bytes.NewBuffer(body))
 
 			log.Print("ХЭШ равен")
-			next.ServeHTTP(resp, req)
+			next.ServeHTTP(w, r)
 
 		} else {
 			// log.Print("Небезопасный запрос")
-			next.ServeHTTP(resp, req)
+			next.ServeHTTP(w, r)
 		}
 	})
 }

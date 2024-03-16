@@ -69,7 +69,7 @@ func (a *AgentApp) SendMetrics() {
 	gz.Close()
 
 	if a.cfg.SECRET != "" {
-		hash, err := encrypt.EncryptSHA256(mm, "HashSHA256")
+		hash, err := encrypt.EncryptSHA256(mm, []byte(a.cfg.SECRET))
 		if err != nil {
 			log.Fatal(err)
 		}
