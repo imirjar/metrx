@@ -1,4 +1,4 @@
-package encryptor
+package http
 
 import (
 	"bytes"
@@ -12,7 +12,7 @@ import (
 
 type Encryptor struct{}
 
-func Encrypting(next http.Handler) http.Handler {
+func (h *HTTPGateway) Encrypting(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		headerHash := r.Header.Get("HashSHA256")
 

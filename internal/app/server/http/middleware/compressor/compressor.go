@@ -5,7 +5,9 @@ import (
 	"strings"
 )
 
-func Compressor(next http.Handler) http.Handler {
+type Compressor struct{}
+
+func Compressing(next http.Handler) http.Handler {
 
 	return http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 

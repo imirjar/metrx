@@ -6,8 +6,8 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/imirjar/metrx/config"
+	"github.com/imirjar/metrx/internal/app/server/http/middleware"
 	"github.com/imirjar/metrx/internal/app/server/http/middleware/compressor"
-	"github.com/imirjar/metrx/internal/app/server/http/middleware/encryptor"
 	"github.com/imirjar/metrx/internal/app/server/http/middleware/logger"
 	"github.com/imirjar/metrx/internal/models"
 	"github.com/imirjar/metrx/internal/service"
@@ -15,8 +15,10 @@ import (
 
 func NewGateway(cfg config.ServerConfig) *HTTPGateway {
 	service := service.NewServerService(cfg)
+	middleware := middleware.New()
 	app := HTTPGateway{
-		Service: service,
+		Service:    service,
+		Middleware: middleware,
 	}
 	return &app
 }
@@ -28,17 +30,25 @@ type Service interface {
 	MetricPage(ctx context.Context) (string, error)
 }
 
+type Middleware interface {
+	Encrypting(key string) func(next http.Handler) http.Handler
+	Logging() func(next http.Handler) http.Handler
+	Compressing() func(next http.Handler) http.Handler
+}
+
 type HTTPGateway struct {
-	Service Service
+	Service    Service
+	Middleware Middleware
 }
 
 func (h *HTTPGateway) Start(path, conn, secret string) error {
 
 	router := chi.NewRouter()
 
-	router.Use(encryptor.Encryptor)
-	router.Use(compressor.Compressor)
-	router.Use(logger.Logger)
+	router.Use(compressor.Compressing)
+	router.Use(h.Middleware.Encrypting(secret))
+
+	router.Use(logger.Logging)
 
 	router.Route("/update", func(update chi.Router) {
 		update.Post("/{type}/{name}/{value}", h.UpdatePathHandler())

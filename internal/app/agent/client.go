@@ -13,7 +13,7 @@ type Client struct {
 }
 
 func (c *Client) POST(path string, body []byte, hash ...[]byte) error {
-	log.Print("POST")
+	// log.Print("POST")
 	var buf bytes.Buffer
 	gz := gzip.NewWriter(&buf)
 	gz.Write(body)
@@ -27,7 +27,9 @@ func (c *Client) POST(path string, body []byte, hash ...[]byte) error {
 
 	if len(hash) > 0 {
 		log.Print("IS HASH")
-		req.Header.Add("HashSHA256", hex.EncodeToString(hash[0]))
+		secret := hex.EncodeToString(hash[0])
+		log.Print(secret)
+		req.Header.Add("HashSHA256", secret)
 	}
 
 	req.Header.Add("Content-Type", "application/json")

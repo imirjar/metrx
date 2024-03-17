@@ -7,6 +7,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+type Logger struct{}
+
 type (
 	// берём структуру для хранения сведений об ответе
 	responseData struct {
@@ -21,7 +23,7 @@ type (
 	}
 )
 
-func Logger(next http.Handler) http.Handler {
+func Logging(next http.Handler) http.Handler {
 
 	loggedFunc := func(resp http.ResponseWriter, req *http.Request) {
 		start := time.Now()
