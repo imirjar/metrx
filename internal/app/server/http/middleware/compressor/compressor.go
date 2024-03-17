@@ -18,13 +18,13 @@ func Compressing(next http.Handler) http.Handler {
 		sendsGzip := strings.Contains(contentEncoding, "gzip")
 
 		if supportsGzip {
-			cResp := newCompressWriter(resp)
+			cResp := NewCompressWriter(resp)
 			defer cResp.Close()
 			resp = cResp
 		}
 
 		if sendsGzip {
-			cr, err := newCompressReader(req.Body)
+			cr, err := NewCompressReader(req.Body)
 			if err != nil {
 				resp.WriteHeader(http.StatusInternalServerError)
 				return

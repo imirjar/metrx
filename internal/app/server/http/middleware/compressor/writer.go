@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func newCompressWriter(w http.ResponseWriter) *compressWriter {
+func NewCompressWriter(w http.ResponseWriter) *compressWriter {
 	return &compressWriter{
 		resp:   w,
 		gzResp: gzip.NewWriter(w),

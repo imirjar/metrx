@@ -10,7 +10,7 @@ type compressReader struct {
 	gzReq *gzip.Reader
 }
 
-func newCompressReader(req io.ReadCloser) (*compressReader, error) {
+func NewCompressReader(req io.ReadCloser) (*compressReader, error) {
 	gzReq, err := gzip.NewReader(req)
 	if err != nil {
 		return nil, err
