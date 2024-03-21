@@ -47,8 +47,8 @@ func (h *HTTPGateway) Start(path, conn, secret string) error {
 
 	router.Use(h.Middleware.Compressing())
 
-	router.Use(h.Middleware.CheckReqestHashHeader(secret))
-	router.Use(h.Middleware.ResposeHeaderWithHash(secret))
+	// router.Use(h.Middleware.CheckReqestHashHeader(secret))
+	// router.Use(h.Middleware.ResposeHeaderWithHash(secret))
 
 	// if secret != "" {
 	// 	router.Use(h.Middleware.Encrypting(secret))
