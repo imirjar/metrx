@@ -4,16 +4,20 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/hex"
+	"io"
 	"log"
 	"net/http"
+
+	"github.com/imirjar/metrx/pkg/encrypt"
 )
 
 type Client struct {
 	Client http.Client
 }
 
-func (c *Client) POST(path string, body []byte, hash ...[]byte) error {
-	// log.Print("POST")
+func (c *Client) POST(path, secret string, body []byte) error {
+	log.Println("client.go SECRET", secret)
+
 	var buf bytes.Buffer
 	gz := gzip.NewWriter(&buf)
 	gz.Write(body)
@@ -25,11 +29,13 @@ func (c *Client) POST(path string, body []byte, hash ...[]byte) error {
 		return err
 	}
 
-	if len(hash) > 0 {
-		log.Print("IS HASH")
-		secret := hex.EncodeToString(hash[0])
-		log.Print(secret)
-		req.Header.Add("HashSHA256", secret)
+	if secret != "" {
+		hash, err := encrypt.EncryptSHA256(body, []byte(secret))
+		log.Println("client.go hash", hex.EncodeToString(hash))
+		if err != nil {
+			log.Fatal(err)
+		}
+		req.Header.Add("HashSHA256", hex.EncodeToString(hash))
 	}
 
 	req.Header.Add("Content-Type", "application/json")
@@ -42,6 +48,14 @@ func (c *Client) POST(path string, body []byte, hash ...[]byte) error {
 		return err
 	}
 
+	log.Print(resp.Status)
+	log.Print(resp.Header.Get("HashSHA256"))
+	nn, _ := io.ReadAll(resp.Body)
+	nhash, err := encrypt.EncryptSHA256(nn, []byte(secret))
+	log.Println("client.go server hash", hex.EncodeToString(nhash))
+	if err != nil {
+		log.Fatal(err)
+	}
 	resp.Body.Close()
 	return err
 }

@@ -12,7 +12,6 @@ import (
 
 	"github.com/imirjar/metrx/config"
 	"github.com/imirjar/metrx/internal/models"
-	"github.com/imirjar/metrx/pkg/encrypt"
 )
 
 type AgentApp struct {
@@ -68,16 +67,7 @@ func (a *AgentApp) SendMetrics() {
 	gz.Write(mm)
 	gz.Close()
 
-	if a.cfg.SECRET != "" {
-		hash, err := encrypt.EncryptSHA256(mm, []byte(a.cfg.SECRET))
-		if err != nil {
-			log.Fatal(err)
-		}
-		a.Client.POST(a.cfg.URL+"/updates/", mm, hash)
-	} else {
-		a.Client.POST(a.cfg.URL+"/updates/", mm)
-	}
-
+	a.Client.POST(a.cfg.URL+"/updates/", a.cfg.SECRET, mm)
 }
 
 func (a *AgentApp) Run() error {

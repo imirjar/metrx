@@ -177,9 +177,9 @@ func (h *HTTPGateway) BatchHandler() http.HandlerFunc {
 
 		for _, m := range metrics {
 			if m.MType == "gauge" {
-				log.Println("handlers.go batch metric ===>", *m.Value)
+				log.Println("handlers.go batch metric ===>", m.ID, *m.Value)
 			} else {
-				log.Println("handlers.go batch metric ===>", *m.Delta)
+				log.Println("handlers.go batch metric ===>", m.ID, *m.Delta)
 			}
 		}
 
