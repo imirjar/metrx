@@ -93,19 +93,19 @@ func (m *Middleware) Encrypting(key string) func(next http.Handler) http.Handler
 				}
 				r.Body = io.NopCloser(bytes.NewBuffer(body))
 
-				wr := w
-				hw := EncryptWriter{
-					ResponseWriter: w,
-					w:              w,
-					key:            key,
-				}
+				// wr := w
+				// hw := EncryptWriter{
+				// 	ResponseWriter: w,
+				// 	w:              w,
+				// 	key:            key,
+				// }
 
-				wr = hw
-				defer hw.Close()
-				next.ServeHTTP(wr, r)
+				// wr = hw
+				// defer hw.Close()
+				// next.ServeHTTP(wr, r)
 				// log.Print("ХЭШ равен")
 
-				// next.ServeHTTP(w, r)
+				next.ServeHTTP(w, r)
 			} else {
 				next.ServeHTTP(w, r)
 			}
