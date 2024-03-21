@@ -3,7 +3,6 @@ package middleware
 import (
 	"bytes"
 	"encoding/hex"
-	"errors"
 	"io"
 	"net/http"
 	"strings"
@@ -93,18 +92,6 @@ func (m *Middleware) Encrypting(key string) func(next http.Handler) http.Handler
 				}
 				r.Body = io.NopCloser(bytes.NewBuffer(body))
 
-				// wr := w
-				// hw := EncryptWriter{
-				// 	ResponseWriter: w,
-				// 	w:              w,
-				// 	key:            key,
-				// }
-
-				// wr = hw
-				// defer hw.Close()
-				// next.ServeHTTP(wr, r)
-				// log.Print("ХЭШ равен")
-
 				next.ServeHTTP(w, r)
 			} else {
 				next.ServeHTTP(w, r)
@@ -148,26 +135,4 @@ func (m *Middleware) Logging() func(next http.Handler) http.Handler {
 			respLog.Info("response")
 		})
 	}
-}
-
-type EncryptWriter struct {
-	http.ResponseWriter
-	w   io.Writer
-	key string
-}
-
-func (hw EncryptWriter) Write(b []byte) (int, error) {
-	hash, err := encrypt.EncryptSHA256(b, []byte(hw.key))
-	if err != nil {
-		return 0, err
-	}
-	log.Print(hex.EncodeToString(hash))
-	hw.Header().Add("HashSHA256", hex.EncodeToString(hash))
-	return hw.w.Write(b)
-}
-func (hw *EncryptWriter) Close() error {
-	if c, ok := hw.w.(io.WriteCloser); ok {
-		return c.Close()
-	}
-	return errors.New("middlewares: io.WriteCloser is unavailable on the writer")
 }
