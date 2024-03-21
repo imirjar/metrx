@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/hex"
-	"io"
 	"log"
 	"net/http"
 
@@ -42,21 +41,20 @@ func (c *Client) POST(path, secret string, body []byte) error {
 	req.Header.Add("Content-Encoding", "gzip")
 
 	resp, err := c.Client.Do(req)
-
 	if err != nil {
 		log.Print("CLIENT ERROR")
 		return err
 	}
 
-	log.Print(resp.Status)
-	log.Print(resp.Header.Get("HashSHA256"))
-	nn, _ := io.ReadAll(resp.Body)
+	// log.Print(resp.Status)
+	// log.Print(resp.Header.Get("HashSHA256"))
+	// nn, _ := io.ReadAll(resp.Body)
 
-	nhash, err := encrypt.EncryptSHA256(nn, []byte(secret))
-	log.Println("client.go server hash", hex.EncodeToString(nhash))
-	if err != nil {
-		log.Fatal(err)
-	}
+	// nhash, err := encrypt.EncryptSHA256(nn, []byte(secret))
+	// log.Println("client.go server hash", hex.EncodeToString(nhash))
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 	resp.Body.Close()
 	return err
 }

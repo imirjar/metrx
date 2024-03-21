@@ -46,9 +46,11 @@ func (m *Middleware) Compressing() func(next http.Handler) http.Handler {
 				}
 				defer cr.Close()
 				m.Request.Body = cr
+				next.ServeHTTP(m.ResponseWriter, m.Request)
+				return
 			}
+			next.ServeHTTP(w, r)
 
-			next.ServeHTTP(m.ResponseWriter, m.Request)
 		})
 	}
 }

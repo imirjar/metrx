@@ -42,13 +42,10 @@ type HTTPGateway struct {
 func (h *HTTPGateway) Start(path, conn, secret string) error {
 
 	router := chi.NewRouter()
-
 	router.Use(h.Middleware.Compressing())
-
 	if secret != "" {
 		router.Use(h.Middleware.Encrypting(secret))
 	}
-
 	router.Use(h.Middleware.Logging())
 
 	router.Route("/update", func(update chi.Router) {
