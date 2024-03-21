@@ -45,11 +45,11 @@ func (h *HTTPGateway) Start(path, conn, secret string) error {
 
 	router.Use(h.Middleware.Compressing())
 
-	if secret != "" {
-		router.Use(h.Middleware.Encrypting(secret))
-	}
+	// if secret != "" {
+	// 	router.Use(h.Middleware.Encrypting(secret))
+	// }
 	//
-	// router.Use(h.Middleware.Logging())
+	router.Use(h.Middleware.Logging())
 
 	router.Route("/update", func(update chi.Router) {
 		update.Post("/{type}/{name}/{value}", h.UpdatePathHandler())
