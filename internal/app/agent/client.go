@@ -49,9 +49,6 @@ func (c *Client) POST(path, secret string, body []byte) error {
 	// log.Print(resp.Status)
 	// log.Print(resp.Header.Get("HashSHA256"))
 	// nn, _ := io.ReadAll(resp.Body)
-
-	// nhash, err := encrypt.EncryptSHA256(nn, []byte(secret))
-	// log.Println("client.go server hash", hex.EncodeToString(nhash))
 	// if err != nil {
 	// 	log.Fatal(err)
 	// }

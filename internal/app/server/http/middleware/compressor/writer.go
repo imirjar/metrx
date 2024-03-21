@@ -3,49 +3,57 @@ package compressor
 import (
 	"compress/gzip"
 	"net/http"
+	"strings"
 )
 
-func NewCompressWriter(w http.ResponseWriter) *compressWriter {
-	return &compressWriter{
-		resp:   w,
-		gzResp: gzip.NewWriter(w),
+func NewCompressWriter(w http.ResponseWriter, r *http.Request) http.ResponseWriter {
+	wMustBeZip := strings.Contains(r.Header.Get("Accept-Encoding"), "gzip")
+	if wMustBeZip {
+		cw := &compressWriter{
+			w:    w,
+			zipW: gzip.NewWriter(w),
+		}
+		defer cw.Close()
+		return cw
 	}
+	return w
+
 }
 
 // compressWriter реализует интерфейс http.ResponseWriter и позволяет прозрачно для сервера
 // сжимать передаваемые данные и выставлять правильные HTTP-заголовки
 type compressWriter struct {
-	resp   http.ResponseWriter
-	gzResp *gzip.Writer
+	w    http.ResponseWriter
+	zipW *gzip.Writer
 }
 
 func (c *compressWriter) Header() http.Header {
-	return c.resp.Header()
+	return c.w.Header()
 }
 
 func (c *compressWriter) Write(p []byte) (int, error) {
-	return c.gzResp.Write(p)
+	return c.zipW.Write(p)
 }
 
 func (c *compressWriter) WriteHeader(statusCode int) {
 	if statusCode < 300 {
-		c.resp.Header().Set("Content-Encoding", "gzip")
+		c.w.Header().Set("Content-Encoding", "gzip")
 	}
-	c.resp.WriteHeader(statusCode)
+	c.w.WriteHeader(statusCode)
 }
 
 // Close закрывает gzip.Writer и досылает все данные из буфера.
 func (c *compressWriter) Close() error {
-	return c.gzResp.Close()
+	return c.zipW.Close()
 }
 
-func (c compressReader) Read(p []byte) (n int, err error) {
-	return c.gzReq.Read(p)
-}
+// func (c compressReader) Read(p []byte) (n int, err error) {
+// 	return c.gzReq.Read(p)
+// }
 
-func (c *compressReader) Close() error {
-	if err := c.req.Close(); err != nil {
-		return err
-	}
-	return c.gzReq.Close()
-}
+// func (c *compressReader) Close() error {
+// 	if err := c.req.Close(); err != nil {
+// 		return err
+// 	}
+// 	return c.gzReq.Close()
+// }
