@@ -9,19 +9,22 @@ import (
 
 func NewCompressReader(req *http.Request) (*http.Request, error) {
 	log.Println("reader.go", req.Method)
-	reqIsZipped := strings.Contains(req.Header.Get("Content-Encoding"), "gzip")
-	if reqIsZipped {
-		unzipR := req
-		zipBody, err := gzip.NewReader(req.Body)
-		if err != nil {
-			return nil, err
+	if req.Method == "POST" {
+		reqIsZipped := strings.Contains(req.Header.Get("Content-Encoding"), "gzip")
+		if reqIsZipped {
+			unzipR := req
+			zipBody, err := gzip.NewReader(req.Body)
+			if err != nil {
+				return nil, err
+			}
+
+			unzipR.Body = zipBody
+
+			return unzipR, nil
+		} else {
+			return req, nil
 		}
-
-		unzipR.Body = zipBody
-
-		return unzipR, nil
 	}
-
 	return req, nil
 
 }

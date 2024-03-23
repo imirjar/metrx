@@ -18,17 +18,15 @@ func NewCompressWriter(w http.ResponseWriter, r *http.Request) http.ResponseWrit
 			}
 			defer cw.Close()
 			return cw
+		} else {
+			return w
 		}
 	} else {
 		log.Println("writer.go False", r.Method)
+		return w
 	}
-
-	return w
-
 }
 
-// compressWriter реализует интерфейс http.ResponseWriter и позволяет прозрачно для сервера
-// сжимать передаваемые данные и выставлять правильные HTTP-заголовки
 type compressWriter struct {
 	w    http.ResponseWriter
 	zipW *gzip.Writer
@@ -49,18 +47,6 @@ func (c *compressWriter) WriteHeader(statusCode int) {
 	c.w.WriteHeader(statusCode)
 }
 
-// Close закрывает gzip.Writer и досылает все данные из буфера.
 func (c *compressWriter) Close() error {
 	return c.zipW.Close()
 }
-
-// func (c compressReader) Read(p []byte) (n int, err error) {
-// 	return c.gzReq.Read(p)
-// }
-
-// func (c *compressReader) Close() error {
-// 	if err := c.req.Close(); err != nil {
-// 		return err
-// 	}
-// 	return c.gzReq.Close()
-// }
