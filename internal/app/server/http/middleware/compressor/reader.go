@@ -7,24 +7,19 @@ import (
 	"strings"
 )
 
-func NewCompressReader(req *http.Request) (*http.Request, error) {
-	log.Println("reader.go", req.Method)
-	if req.Method == "POST" {
-		reqIsZipped := strings.Contains(req.Header.Get("Content-Encoding"), "gzip")
+func NewCompressReader(r *http.Request) (*http.Request, error) {
+	log.Println("reader.go", r.Method)
+	if r.Method == "POST" {
+		reqIsZipped := strings.Contains(r.Header.Get("Content-Encoding"), "gzip")
 		if reqIsZipped {
-			unzipR := req
-			zipBody, err := gzip.NewReader(req.Body)
+			log.Println("reader.go reqIsZipped", r.Method)
+			zipBody, err := gzip.NewReader(r.Body)
 			if err != nil {
 				return nil, err
 			}
-
-			unzipR.Body = zipBody
-
-			return unzipR, nil
-		} else {
-			return req, nil
+			r.Body = zipBody
 		}
 	}
-	return req, nil
+	return r, nil
 
 }

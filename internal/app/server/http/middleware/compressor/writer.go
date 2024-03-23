@@ -8,23 +8,18 @@ import (
 )
 
 func NewCompressWriter(w http.ResponseWriter, r *http.Request) http.ResponseWriter {
-	if r.Method == "POST" {
-		log.Println("writer.go True", r.Method)
-		wMustBeZip := strings.Contains(r.Header.Get("Accept-Encoding"), "gzip")
-		if wMustBeZip {
-			cw := &compressWriter{
-				w:    w,
-				zipW: gzip.NewWriter(w),
-			}
-			defer cw.Close()
-			return cw
-		} else {
-			return w
+
+	log.Println("writer.go True", r.Method)
+	wMustBeZip := strings.Contains(r.Header.Get("Content-Encoding"), "gzip")
+	if wMustBeZip {
+		cw := &compressWriter{
+			w:    w,
+			zipW: gzip.NewWriter(w),
 		}
-	} else {
-		log.Println("writer.go False", r.Method)
-		return w
+		defer cw.Close()
+		return cw
 	}
+	return w
 }
 
 type compressWriter struct {
@@ -42,7 +37,7 @@ func (c *compressWriter) Write(p []byte) (int, error) {
 
 func (c *compressWriter) WriteHeader(statusCode int) {
 	if statusCode < 300 {
-		c.w.Header().Set("Content-Encoding", "gzip")
+		c.w.Header().Add("Content-Encoding", "gzip")
 	}
 	c.w.WriteHeader(statusCode)
 }
