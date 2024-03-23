@@ -2,20 +2,27 @@ package compressor
 
 import (
 	"compress/gzip"
+	"log"
 	"net/http"
 	"strings"
 )
 
 func NewCompressWriter(w http.ResponseWriter, r *http.Request) http.ResponseWriter {
-	wMustBeZip := strings.Contains(r.Header.Get("Accept-Encoding"), "gzip")
-	if wMustBeZip {
-		cw := &compressWriter{
-			w:    w,
-			zipW: gzip.NewWriter(w),
+	if r.Method == "POST" {
+		log.Println("writer.go True", r.Method)
+		wMustBeZip := strings.Contains(r.Header.Get("Accept-Encoding"), "gzip")
+		if wMustBeZip {
+			cw := &compressWriter{
+				w:    w,
+				zipW: gzip.NewWriter(w),
+			}
+			defer cw.Close()
+			return cw
 		}
-		defer cw.Close()
-		return cw
+	} else {
+		log.Println("writer.go False", r.Method)
 	}
+
 	return w
 
 }
