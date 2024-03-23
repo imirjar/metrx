@@ -2,24 +2,22 @@ package compressor
 
 import (
 	"compress/gzip"
-	"log"
-	"net/http"
-	"strings"
+	"io"
 )
 
-func NewCompressReader(r *http.Request) (*http.Request, error) {
-	log.Println("reader.go", r.Method)
-	if r.Method == "POST" {
-		reqIsZipped := strings.Contains(r.Header.Get("Content-Encoding"), "gzip")
-		if reqIsZipped {
-			log.Println("reader.go reqIsZipped", r.Method)
-			zipBody, err := gzip.NewReader(r.Body)
-			if err != nil {
-				return nil, err
-			}
-			r.Body = zipBody
-		}
-	}
-	return r, nil
+type CompressReader struct {
+	Req   io.ReadCloser
+	GzReq *gzip.Reader
+}
 
+func NewCompressReader(r io.ReadCloser) (*CompressReader, error) {
+	zr, err := gzip.NewReader(r)
+	if err != nil {
+		return nil, err
+	}
+
+	return &CompressReader{
+		Req:   r,
+		GzReq: zr,
+	}, nil
 }

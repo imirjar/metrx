@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -25,37 +26,31 @@ func New() *Middleware {
 
 func (m *Middleware) Compressing() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		return http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 
-			zipR, err := compressor.NewCompressReader(r)
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				return
+			acceptEncoding := req.Header.Get("Accept-Encoding")
+			contentEncoding := req.Header.Get("Content-Encoding")
+
+			supportsGzip := strings.Contains(acceptEncoding, "gzip")
+			sendsGzip := strings.Contains(contentEncoding, "gzip")
+
+			if supportsGzip {
+				cResp := compressor.NewCompressWriter(resp)
+				defer cResp.Close()
+				resp = cResp
 			}
 
-			zipW := compressor.NewCompressWriter(w, r)
+			if sendsGzip {
+				cr, err := compressor.NewCompressReader(req.Body)
+				if err != nil {
+					resp.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+				defer cr.Close()
+				req.Body = cr
+			}
 
-			next.ServeHTTP(zipW, zipR)
-			// supportsGzip := strings.Contains(r.Header.Get("Accept-Encoding"), "gzip")
-			// sendsGzip := strings.Contains(r.Header.Get("Content-Encoding"), "gzip")
-
-			// if supportsGzip {
-			// 	cResp := compressor.NewCompressWriter(w)
-			// 	defer cResp.Close()
-			// 	w = cResp
-			// }
-
-			// if sendsGzip {
-			// 	cr, err := compressor.NewCompressReader(r.Body)
-			// 	if err != nil {
-			// 		w.WriteHeader(http.StatusInternalServerError)
-			// 		return
-			// 	}
-			// 	defer cr.Close()
-			// 	m.Request.Body = cr
-			// }
-
-			// next.ServeHTTP(w, r)
+			next.ServeHTTP(resp, req)
 
 		})
 	}
