@@ -3,6 +3,7 @@ package middleware
 import (
 	"bytes"
 	"encoding/hex"
+	"errors"
 	"io"
 	"net/http"
 	"strings"
@@ -60,45 +61,28 @@ func (m *Middleware) Encrypting(key string) func(next http.Handler) http.Handler
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-			// log.Print(r.URL.Path)
-
-			// if strings.Contains(r.URL.Path, "/update") {
-			if r.Method == "POST" {
-				headerHash := r.Header.Get("HashSHA256")
-				if headerHash == "" {
-					w.WriteHeader(http.StatusInternalServerError)
-					return
-				}
-				// log.Print("router.go ", key)
-				// log.Println("router.go headerHash", headerHash)
-
-				body, err := io.ReadAll(r.Body)
-				defer r.Body.Close()
-				if err != nil {
-					w.WriteHeader(http.StatusInternalServerError)
-					return
-				}
-
+			body, err := io.ReadAll(r.Body)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			hashHeader := r.Header.Get("HashSHA256")
+			if key != "" && hashHeader != "" {
+				// hash := util.Hash(body, key)
 				hash, err := encrypt.EncryptSHA256(body, []byte(key)) //h.cfg.SECRET
 				if err != nil {
 					w.WriteHeader(http.StatusInternalServerError)
 					return
 				}
-
-				bodyHash := hex.EncodeToString(hash)
-				w.Header().Set("HashSHA256", bodyHash)
-				if bodyHash != headerHash {
-					log.Printf("Заголовк%s", headerHash)
-					log.Printf("Тело зап%s", bodyHash)
-					w.WriteHeader(http.StatusInternalServerError)
+				if hashHeader != hex.EncodeToString(hash) {
+					w.WriteHeader(http.StatusBadRequest)
+					// logger.Log.Infof("key %s hashHeader: %s hash: %s", key, hashHeader, hash)
 					return
 				}
-				r.Body = io.NopCloser(bytes.NewBuffer(body))
-
-				next.ServeHTTP(w, r)
-			} else {
-				next.ServeHTTP(w, r)
 			}
+			r.Body = io.NopCloser(bytes.NewBuffer(body))
+			next.ServeHTTP(w, r)
+
 		})
 	}
 }
@@ -136,6 +120,47 @@ func (m *Middleware) Logging() func(next http.Handler) http.Handler {
 				"size":   responseData.Size,
 			})
 			respLog.Info("response")
+		})
+	}
+}
+
+type hashWriter struct {
+	http.ResponseWriter
+	w   io.Writer
+	key string
+}
+
+func (hw hashWriter) Write(b []byte) (int, error) {
+	hash, err := encrypt.EncryptSHA256(b, []byte(hw.key)) //h.cfg.SECRET
+	if err != nil {
+		return 0, err
+	}
+	hw.Header().Add("HashSHA256", hex.EncodeToString(hash))
+	return hw.w.Write(b)
+}
+func (hw *hashWriter) Close() error {
+	if c, ok := hw.w.(io.WriteCloser); ok {
+		return c.Close()
+	}
+	return errors.New("middlewares: io.WriteCloser is unavailable on the writer")
+}
+
+func (m *Middleware) ResposeHeaderWithHash(key string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			wr := w
+			if key != "" {
+				hw := hashWriter{
+					ResponseWriter: w,
+					w:              w,
+					key:            key,
+				}
+
+				wr = hw
+				defer hw.Close()
+
+			}
+			next.ServeHTTP(wr, r)
 		})
 	}
 }
