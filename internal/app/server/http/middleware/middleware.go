@@ -61,14 +61,15 @@ func (m *Middleware) Encrypting(key string) func(next http.Handler) http.Handler
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 			if r.Method == "POST" && strings.Contains(r.URL.Path, "/updates") {
+				req := r
 				if key != "" {
-					body, err := io.ReadAll(r.Body)
+					body, err := io.ReadAll(req.Body)
 					if err != nil {
 						w.WriteHeader(http.StatusInternalServerError)
 						return
 					}
 
-					headerHash := r.Header.Get("HashSHA256")
+					headerHash := req.Header.Get("HashSHA256")
 					hashByte, err := encrypt.EncryptSHA256(body, []byte(key)) //h.cfg.SECRET
 
 					if err != nil {
@@ -81,7 +82,7 @@ func (m *Middleware) Encrypting(key string) func(next http.Handler) http.Handler
 						w.WriteHeader(http.StatusInternalServerError)
 						return
 					}
-					r.Body = io.NopCloser(bytes.NewReader(body))
+					req.Body = io.NopCloser(bytes.NewReader(body))
 				}
 			}
 
