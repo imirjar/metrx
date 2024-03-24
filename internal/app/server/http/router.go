@@ -32,7 +32,6 @@ type Middleware interface {
 	Encrypting(key string) func(next http.Handler) http.Handler
 	Logging() func(next http.Handler) http.Handler
 	Compressing() func(next http.Handler) http.Handler
-	ResposeHeaderWithHash(key string) func(http.Handler) http.Handler
 }
 
 type HTTPGateway struct {
@@ -46,9 +45,7 @@ func (h *HTTPGateway) Start(path, conn, secret string) error {
 
 	router.Use(h.Middleware.Encrypting(secret))
 	router.Use(h.Middleware.Compressing())
-
 	router.Use(h.Middleware.Logging())
-	router.Use(h.Middleware.ResposeHeaderWithHash(secret))
 
 	router.Route("/update", func(update chi.Router) {
 		update.Post("/{type}/{name}/{value}", h.UpdatePathHandler())
