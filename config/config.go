@@ -23,6 +23,7 @@ func NewServerConfig() *ServerConfig {
 
 func NewAgentConfig() *AgentConfig {
 	cfg := AgentConfig{
+
 		URL:            "http://localhost:8080",
 		PollInterval:   time.Duration(1_000_000_000 * 2),  //2s
 		ReportInterval: time.Duration(1_000_000_000 * 10), //10s

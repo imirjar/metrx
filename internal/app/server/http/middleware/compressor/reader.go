@@ -5,19 +5,19 @@ import (
 	"io"
 )
 
-type compressReader struct {
-	req   io.ReadCloser
-	gzReq *gzip.Reader
+type CompressReader struct {
+	Req   io.ReadCloser
+	GzReq *gzip.Reader
 }
 
-func newCompressReader(r io.ReadCloser) (*compressReader, error) {
+func NewCompressReader(r io.ReadCloser) (*CompressReader, error) {
 	zr, err := gzip.NewReader(r)
 	if err != nil {
 		return nil, err
 	}
 
-	return &compressReader{
-		req:   r,
-		gzReq: zr,
+	return &CompressReader{
+		Req:   r,
+		GzReq: zr,
 	}, nil
 }

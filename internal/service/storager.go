@@ -1,4 +1,4 @@
-package server
+package service
 
 import (
 	"context"
@@ -101,6 +101,7 @@ func (s ServerService) BatchUpdate(ctx context.Context, metrics []models.Metrics
 
 		}
 	}
+
 	err := s.MemStorager.AddGauges(ctx, gauges)
 	if err != nil {
 		return err

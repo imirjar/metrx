@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strconv"
 
 	"github.com/imirjar/metrx/internal/models"
 	"github.com/jackc/pgx/v5"
@@ -13,8 +12,11 @@ import (
 func (m *DB) AddGauges(ctx context.Context, gauges map[string]float64) error {
 	batch := &pgx.Batch{}
 	for i, v := range gauges {
-		// value := strconv.FormatFloat(v, 'f', 6, 64)
+		log.Println("AddGauges-->", i)
+		log.Println("AddGauges v -->", v)
 		value := fmt.Sprint(v)
+		log.Println("AddGauges value -->", value)
+		// value := fmt.Sprintln(v)
 		batch.Queue(`
 			INSERT INTO metrics (id, type, value)
 			VALUES($1, $2, $3)
@@ -28,7 +30,10 @@ func (m *DB) AddCounters(ctx context.Context, counters map[string]int64) error {
 	batch := &pgx.Batch{}
 
 	for i, d := range counters {
-		delta := strconv.FormatFloat(float64(d), 'f', 6, 64)
+		log.Println("AddCounters-->", i)
+		log.Println("AddGaAddCountersuges d -->", d)
+		delta := fmt.Sprint(d)
+		log.Println("AddGauges delta -->", delta)
 		batch.Queue(`
 			INSERT INTO metrics (id, type, value)
 			VALUES($1, $2, $3)
@@ -39,8 +44,10 @@ func (m *DB) AddCounters(ctx context.Context, counters map[string]int64) error {
 }
 
 func (m *DB) AddGauge(ctx context.Context, name string, value float64) (float64, error) {
-	mValue := strconv.FormatFloat(value, 'f', 6, 64)
-
+	mValue := fmt.Sprint(value)
+	log.Println("AddGauge-->", name)
+	log.Println("AddGauge value -->", value)
+	log.Println("AddGauge mValue -->", mValue)
 	_, err := m.db.Exec(ctx,
 		`INSERT INTO metrics (id, type, value) VALUES($1, $2, $3)
 		ON CONFLICT (id) DO UPDATE SET value = $3`, name, "gauge", mValue,
@@ -55,8 +62,10 @@ func (m *DB) AddGauge(ctx context.Context, name string, value float64) (float64,
 }
 
 func (m *DB) AddCounter(ctx context.Context, name string, delta int64) (int64, error) {
-	mDelta := strconv.FormatInt(delta, 10)
-
+	mDelta := fmt.Sprint(delta)
+	log.Println("AddGauge-->", name)
+	log.Println("AddGauge value -->", delta)
+	log.Println("AddGauge mValue -->", mDelta)
 	_, err := m.db.Exec(ctx,
 		`INSERT INTO metrics (id, type, value) VALUES($1, $2, $3)
 		ON CONFLICT (id) DO UPDATE SET value = EXCLUDED.value + metrics.value`, name, "counter", mDelta,
