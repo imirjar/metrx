@@ -1,16 +1,15 @@
 package models
 
 import (
-	"encoding/json"
 	"fmt"
 	"strconv"
 )
 
 type Metrics struct {
-	ID    string   `json:"id"`              // имя метрики
-	MType string   `json:"type"`            // параметр, принимающий значение gauge или counter
-	Delta *int64   `json:"delta,omitempty"` // значение метрики в случае передачи counter
-	Value *float64 `json:"value,omitempty"` // значение метрики в случае передачи gauge
+	ID    string   `json:"id" schema:"memberId"` // имя метрики
+	MType string   `json:"type"`                 // параметр, принимающий значение gauge или counter
+	Delta *int64   `json:"delta,omitempty"`      // значение метрики в случае передачи counter
+	Value *float64 `json:"value,omitempty"`      // значение метрики в случае передачи gauge
 }
 
 func (m *Metrics) GetVal() (string, error) {
@@ -44,22 +43,5 @@ func (m *Metrics) SetVal(strVal string) error {
 		return nil
 	default:
 		return fmt.Errorf("error incorrect metric type")
-	}
-}
-
-func (m *Metrics) Marshal() ([]byte, error) {
-	if m.MType == "gauge" {
-		nnVal := &struct {
-			ID    string `json:"id"`
-			MType string `json:"type"`
-			Value string `json:"value,omitempty"`
-		}{
-			ID:    m.ID,
-			MType: m.MType,
-			Value: fmt.Sprint(*m.Value),
-		}
-		return json.Marshal(nnVal)
-	} else {
-		return json.Marshal(&m)
 	}
 }
