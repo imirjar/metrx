@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"log"
 	"strconv"
 
 	"github.com/imirjar/metrx/internal/models"
@@ -89,6 +90,7 @@ func (s ServerService) BatchUpdate(ctx context.Context, metrics []models.Metrics
 	)
 
 	for _, metric := range metrics {
+		log.Println(metric.ID)
 		switch metric.MType {
 		case "gauge":
 			gauges[metric.ID] = *metric.Value
