@@ -43,8 +43,9 @@ func (h *HTTPGateway) Start(path, conn, secret string) error {
 
 	router := chi.NewRouter()
 
-	router.Use(h.Middleware.Encrypting(secret))
+	// compression then encrypting its matter!
 	router.Use(h.Middleware.Compressing())
+	router.Use(h.Middleware.Encrypting(secret))
 	// router.Use(h.Middleware.Logging())
 
 	router.Route("/update", func(update chi.Router) {

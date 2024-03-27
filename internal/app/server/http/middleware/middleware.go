@@ -60,18 +60,50 @@ func (m *Middleware) Encrypting(key string) func(next http.Handler) http.Handler
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-			if r.Method == "POST" && strings.Contains(r.URL.Path, "/updates") {
-				req := r
-				if key != "" {
-					body, err := io.ReadAll(req.Body)
+			// if r.Method == "POST" && strings.Contains(r.URL.Path, "/updates") {
+			// 	// log.Print("POST")
+			// 	if key != "" {
+			// 		log.Println("SECRET", key)
+			// 		// log.Print("Key")
+			// 		body, err := io.ReadAll(r.Body)
+			// 		// log.Print(body)
+			// 		if err != nil {
+			// 			w.WriteHeader(http.StatusInternalServerError)
+			// 			return
+			// 		}
+
+			// 		headerHash := r.Header.Get("HashSHA256")
+			// 		hashByte, err := encrypt.EncryptSHA256(body, []byte(key)) //h.cfg.SECRET
+
+			// 		if err != nil {
+			// 			w.WriteHeader(http.StatusInternalServerError)
+			// 			return
+			// 		}
+			// 		computedHash := hex.EncodeToString(hashByte)
+
+			// 		if headerHash != computedHash || headerHash == "" {
+			// 			log.Print(computedHash)
+			// 			w.WriteHeader(http.StatusInternalServerError)
+			// 			return
+			// 		}
+			// 		r.Body = io.NopCloser(bytes.NewReader(body))
+			// 		// log.Print(r.Body)
+			// 	}
+			// }
+
+			// next.ServeHTTP(w, r)
+			if key != "" {
+				headerHash := r.Header.Get("HashSHA256")
+				if headerHash != "" {
+					log.Println("SECRET", key)
+					// log.Print("Key")
+					body, err := io.ReadAll(r.Body)
 					if err != nil {
 						w.WriteHeader(http.StatusInternalServerError)
 						return
 					}
 
-					headerHash := req.Header.Get("HashSHA256")
 					hashByte, err := encrypt.EncryptSHA256(body, []byte(key)) //h.cfg.SECRET
-
 					if err != nil {
 						w.WriteHeader(http.StatusInternalServerError)
 						return
@@ -79,50 +111,45 @@ func (m *Middleware) Encrypting(key string) func(next http.Handler) http.Handler
 					computedHash := hex.EncodeToString(hashByte)
 
 					if headerHash != computedHash {
+						log.Print(computedHash)
 						w.WriteHeader(http.StatusInternalServerError)
 						return
 					}
-					req.Body = io.NopCloser(bytes.NewReader(body))
+					r.Body = io.NopCloser(bytes.NewReader(body))
+					// log.Print(r.Body)
 				}
 			}
-
 			next.ServeHTTP(w, r)
 
-			// headerHash := r.Header.Get("HashSHA256")
-			// if r.Method == "POST" {
-			// 	headerHash := r.Header.Get("HashSHA256")
-			// 	if headerHash == "" {
-			// 		w.WriteHeader(http.StatusInternalServerError)
-			// 		return
-			// 	}
-
-			// 	body, err := io.ReadAll(r.Body)
-			// 	defer r.Body.Close()
-			// 	if err != nil {
-			// 		w.WriteHeader(http.StatusInternalServerError)
-			// 		return
-			// 	}
-
-			// 	hash, err := encrypt.EncryptSHA256(body, []byte(key)) //h.cfg.SECRET
-			// 	if err != nil {
-			// 		w.WriteHeader(http.StatusInternalServerError)
-			// 		return
-			// 	}
-
-			// 	bodyHash := hex.EncodeToString(hash)
-			// 	w.Header().Set("HashSHA256", bodyHash)
-			// 	if bodyHash != headerHash {
-			// 		log.Printf("Заголовк%s", headerHash)
-			// 		log.Printf("Тело зап%s", bodyHash)
-			// 		w.WriteHeader(http.StatusInternalServerError)
-			// 		return
-			// 	}
-			// 	r.Body = io.NopCloser(bytes.NewBuffer(body))
-
+			// hashSHA256 := r.Header.Get("HashSHA256")
+			// log.Print(hashSHA256)
+			// if hashSHA256 == "" {
 			// 	next.ServeHTTP(w, r)
-			// } else {
-			// 	next.ServeHTTP(w, r)
+			// 	return
 			// }
+			// h := hmac.New(sha256.New, []byte(key))
+			// b, err := io.ReadAll(r.Body)
+			// if err != nil {
+			// 	w.WriteHeader(http.StatusBadRequest)
+			// 	return
+			// }
+			// if _, err := h.Write(b); err != nil {
+			// 	w.WriteHeader(http.StatusInternalServerError)
+			// 	return
+			// }
+			// d := h.Sum(nil)
+			// hh, err := hex.DecodeString(hashSHA256)
+			// log.Println(hh, d)
+			// if err != nil {
+			// 	w.WriteHeader(http.StatusInternalServerError)
+			// 	return
+			// }
+			// if !hmac.Equal(d, hh) {
+			// 	w.WriteHeader(http.StatusBadRequest)
+			// 	return
+			// }
+			// r.Body = io.NopCloser(bytes.NewReader(b))
+			// next.ServeHTTP(w, r)
 		})
 	}
 }

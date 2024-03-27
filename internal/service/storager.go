@@ -93,11 +93,12 @@ func (s ServerService) BatchUpdate(ctx context.Context, metrics []models.Metrics
 		case "gauge":
 			gauges[metric.ID] = *metric.Value
 		case "counter":
-			if _, ok := counters[metric.ID]; ok {
-				counters[metric.ID] = counters[metric.ID] + *metric.Delta
-			} else {
-				counters[metric.ID] = *metric.Delta
-			}
+			counters[metric.ID] = *metric.Delta
+			// if _, ok := counters[metric.ID]; ok {
+			// 	counters[metric.ID] = counters[metric.ID] + *metric.Delta
+			// } else {
+			// 	counters[metric.ID] = *metric.Delta
+			// }
 
 		}
 	}
