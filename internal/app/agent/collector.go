@@ -1,6 +1,7 @@
 package agent
 
 import (
+	"log"
 	"runtime"
 )
 
@@ -49,6 +50,7 @@ func (c *Collector) ReadMemStatsValue(ms string) float64 {
 	case "MSpanSys":
 		return float64(c.MemStats.MSpanSys)
 	case "Mallocs":
+		log.Println("Mallocs", c.MemStats.Mallocs)
 		return float64(c.MemStats.Mallocs)
 	case "NextGC":
 		return float64(c.MemStats.NextGC)

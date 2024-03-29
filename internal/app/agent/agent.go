@@ -45,7 +45,10 @@ func (a *AgentApp) SendMetrics() {
 
 	for _, ms := range gaugeList {
 		value := a.Collector.ReadMemStatsValue(ms)
-		// log.Println("#####agent.go MemValue-->", value)
+		if ms == "Mallocs" {
+			log.Println("SendMetrics", ms, "-->", value)
+		}
+		//
 		batch.AddGauge(ms, value)
 		counter++
 	}

@@ -11,6 +11,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/imirjar/metrx/internal/app/server/http/middleware/compressor"
+	"github.com/imirjar/metrx/internal/app/server/http/middleware/encrypter"
 	"github.com/imirjar/metrx/internal/app/server/http/middleware/logger"
 	"github.com/imirjar/metrx/pkg/encrypt"
 )
@@ -94,20 +95,22 @@ func (m *Middleware) Encrypting(key string) func(next http.Handler) http.Handler
 			// next.ServeHTTP(w, r)
 			if key != "" {
 				headerHash := r.Header.Get("HashSHA256")
+				body, err := io.ReadAll(r.Body)
+				if err != nil {
+					w.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+
+				hashByte, err := encrypt.EncryptSHA256(body, []byte(key)) //h.cfg.SECRET
+				if err != nil {
+					w.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+
 				if headerHash != "" {
 					log.Println("SECRET", key)
 					// log.Print("Key")
-					body, err := io.ReadAll(r.Body)
-					if err != nil {
-						w.WriteHeader(http.StatusInternalServerError)
-						return
-					}
 
-					hashByte, err := encrypt.EncryptSHA256(body, []byte(key)) //h.cfg.SECRET
-					if err != nil {
-						w.WriteHeader(http.StatusInternalServerError)
-						return
-					}
 					computedHash := hex.EncodeToString(hashByte)
 
 					if headerHash != computedHash {
@@ -115,9 +118,17 @@ func (m *Middleware) Encrypting(key string) func(next http.Handler) http.Handler
 						w.WriteHeader(http.StatusInternalServerError)
 						return
 					}
-					r.Body = io.NopCloser(bytes.NewReader(body))
+
 					// log.Print(r.Body)
 				}
+				r.Body = io.NopCloser(bytes.NewReader(body))
+				resp := encrypter.EncWriter{
+					Key: []byte(key),
+					W:   w,
+				}
+				next.ServeHTTP(resp, r)
+				return
+
 			}
 			next.ServeHTTP(w, r)
 

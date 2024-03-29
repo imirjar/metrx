@@ -46,12 +46,6 @@ func (c *Client) POST(path, secret string, body []byte) error {
 		return err
 	}
 
-	// log.Print(resp.Status)
-	// log.Print(resp.Header.Get("HashSHA256"))
-	// nn, _ := io.ReadAll(resp.Body)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
 	resp.Body.Close()
 	return err
 }
