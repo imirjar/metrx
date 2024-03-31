@@ -102,7 +102,7 @@ func (a *AgentApp) SendMetrics(ctx context.Context) error {
 }
 
 func (a *AgentApp) Run() error {
-
+	time.Sleep(1 * time.Second)
 	poll := time.NewTicker(a.cfg.PollInterval)
 	report := time.NewTicker(a.cfg.ReportInterval)
 
@@ -115,7 +115,7 @@ func (a *AgentApp) Run() error {
 			// log.Println("Send")
 			err := a.SendMetrics(context.Background())
 			if err != nil {
-				log.Fatal(err)
+				log.Print(err)
 			}
 		}
 	}
