@@ -3,9 +3,7 @@ package agent
 import (
 	"bytes"
 	"compress/gzip"
-	"context"
 	"encoding/hex"
-	"errors"
 	"log"
 	"net/http"
 
@@ -16,25 +14,25 @@ type Client struct {
 	Client http.Client
 }
 
-func (c *Client) POST(ctx context.Context, path, secret string, body []byte) error {
+func (c *Client) POST(path, secret string, body []byte) error {
 	log.Println("client.go SECRET", secret)
+
 	var buf bytes.Buffer
 	gz := gzip.NewWriter(&buf)
-	_, err := gz.Write(body)
-	if err != nil {
-		return errors.New("client.go GZIP ERROR")
-	}
+	gz.Write(body)
 	gz.Close()
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, path, &buf)
-	if err != nil || req == nil {
-		return errors.New("client.go REQUEST ERROR")
+	req, err := http.NewRequest(http.MethodPost, path, &buf)
+	if err != nil {
+		log.Print("REQUEST ERROR")
+		return err
 	}
 
 	if secret != "" {
 		hash, err := encrypt.EncryptSHA256(body, []byte(secret))
+		log.Println("client.go hash", hex.EncodeToString(hash))
 		if err != nil {
-			return errors.New("client.go HASH ERROR")
+			log.Fatal(err)
 		}
 		req.Header.Add("HashSHA256", hex.EncodeToString(hash))
 	}
@@ -44,11 +42,10 @@ func (c *Client) POST(ctx context.Context, path, secret string, body []byte) err
 
 	resp, err := c.Client.Do(req)
 	if err != nil {
-		log.Print("REASON IS", err)
-		// log.Println(err)
-		return errors.New("client.go CLIENT DO ERROR")
+		log.Print("CLIENT ERROR")
+		return err
 	}
-	defer resp.Body.Close()
 
-	return nil
+	resp.Body.Close()
+	return err
 }
