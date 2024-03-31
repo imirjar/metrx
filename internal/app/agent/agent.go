@@ -28,9 +28,7 @@ func NewAgentApp() *AgentApp {
 			MemStats: runtime.MemStats{},
 		},
 		Client: Client{
-			Client: http.Client{
-				Timeout: 1 * time.Second,
-			},
+			Client: http.Client{},
 		},
 	}
 }
