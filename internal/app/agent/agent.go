@@ -71,7 +71,11 @@ func (a *AgentApp) SendMetrics(ctx context.Context) {
 	gz.Write(mm)
 	gz.Close()
 
-	a.Client.POST(ctx, a.cfg.URL+"/updates/", a.cfg.SECRET, mm)
+	err = a.Client.POST(ctx, a.cfg.URL+"/updates/", a.cfg.SECRET, mm)
+	if err != nil {
+		log.Println("POST ERROR", err)
+		return
+	}
 }
 
 func (a *AgentApp) Run() error {

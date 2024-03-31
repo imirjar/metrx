@@ -43,10 +43,14 @@ func (c *Client) POST(ctx context.Context, path, secret string, body []byte) err
 
 	resp, err := c.Client.Do(req)
 	if err != nil {
-		log.Print("CLIENT ERROR")
+		log.Println("CLIENT ERROR")
+		log.Println(secret)
+		log.Println(http.MethodPost)
+		log.Println(path)
+		log.Println(string(body))
 		return err
 	}
+	defer resp.Body.Close()
 
-	resp.Body.Close()
 	return err
 }
