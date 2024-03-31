@@ -32,6 +32,7 @@ type Middleware interface {
 	Encrypting(key string) func(next http.Handler) http.Handler
 	Logging() func(next http.Handler) http.Handler
 	Compressing() func(next http.Handler) http.Handler
+	EncWrite(key string) func(next http.Handler) http.Handler
 }
 
 type HTTPGateway struct {
@@ -46,6 +47,7 @@ func (h *HTTPGateway) Start(path, conn, secret string) error {
 	// compression then encrypting its matter!
 	router.Use(h.Middleware.Compressing())
 	router.Use(h.Middleware.Encrypting(secret))
+	router.Use(h.Middleware.EncWrite(secret))
 	// router.Use(h.Middleware.Logging())
 
 	router.Route("/update", func(update chi.Router) {

@@ -16,15 +16,19 @@ type Client struct {
 
 func (c *Client) POST(path, secret string, body []byte) error {
 	log.Println("client.go SECRET", secret)
-
 	var buf bytes.Buffer
 	gz := gzip.NewWriter(&buf)
-	gz.Write(body)
+	_, err := gz.Write(body)
+	if err != nil {
+		log.Print("client.go GZIP ERROR")
+		return err
+	}
 	gz.Close()
 
 	req, err := http.NewRequest(http.MethodPost, path, &buf)
+
 	if err != nil {
-		log.Print("REQUEST ERROR")
+		log.Print("client.go REQUEST ERROR")
 		return err
 	}
 
@@ -33,6 +37,7 @@ func (c *Client) POST(path, secret string, body []byte) error {
 		log.Println("client.go hash", hex.EncodeToString(hash))
 		if err != nil {
 			log.Fatal(err)
+			return err
 		}
 		req.Header.Add("HashSHA256", hex.EncodeToString(hash))
 	}
@@ -42,10 +47,10 @@ func (c *Client) POST(path, secret string, body []byte) error {
 
 	resp, err := c.Client.Do(req)
 	if err != nil {
-		log.Print("CLIENT ERROR")
+		log.Print("client.go CLIENT ERROR")
+		log.Println(err)
 		return err
 	}
 
-	resp.Body.Close()
-	return err
+	return resp.Body.Close()
 }

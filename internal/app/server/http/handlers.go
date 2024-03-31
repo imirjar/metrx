@@ -85,7 +85,7 @@ func (h *HTTPGateway) UpdateJSONHandler() http.HandlerFunc {
 
 		result, err := h.Service.UpdatePath(ctx, metric.ID, metric.MType, value)
 		if err != nil {
-			log.Print("Что-то не обновляется")
+			log.Println("Что-то не обновляется", metric.ID, metric.MType, value)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}

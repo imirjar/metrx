@@ -3,6 +3,7 @@ package middleware
 import (
 	"bytes"
 	"encoding/hex"
+	"errors"
 	"io"
 	"net/http"
 	"strings"
@@ -11,7 +12,6 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/imirjar/metrx/internal/app/server/http/middleware/compressor"
-	"github.com/imirjar/metrx/internal/app/server/http/middleware/encrypter"
 	"github.com/imirjar/metrx/internal/app/server/http/middleware/logger"
 	"github.com/imirjar/metrx/pkg/encrypt"
 )
@@ -59,108 +59,86 @@ func (m *Middleware) Compressing() func(next http.Handler) http.Handler {
 
 func (m *Middleware) Encrypting(key string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-			// if r.Method == "POST" && strings.Contains(r.URL.Path, "/updates") {
-			// 	// log.Print("POST")
-			// 	if key != "" {
-			// 		log.Println("SECRET", key)
-			// 		// log.Print("Key")
-			// 		body, err := io.ReadAll(r.Body)
-			// 		// log.Print(body)
-			// 		if err != nil {
-			// 			w.WriteHeader(http.StatusInternalServerError)
-			// 			return
-			// 		}
-
-			// 		headerHash := r.Header.Get("HashSHA256")
-			// 		hashByte, err := encrypt.EncryptSHA256(body, []byte(key)) //h.cfg.SECRET
-
-			// 		if err != nil {
-			// 			w.WriteHeader(http.StatusInternalServerError)
-			// 			return
-			// 		}
-			// 		computedHash := hex.EncodeToString(hashByte)
-
-			// 		if headerHash != computedHash || headerHash == "" {
-			// 			log.Print(computedHash)
-			// 			w.WriteHeader(http.StatusInternalServerError)
-			// 			return
-			// 		}
-			// 		r.Body = io.NopCloser(bytes.NewReader(body))
-			// 		// log.Print(r.Body)
-			// 	}
-			// }
-
-			// next.ServeHTTP(w, r)
-			if key != "" {
-				headerHash := r.Header.Get("HashSHA256")
-				body, err := io.ReadAll(r.Body)
-				if err != nil {
-					w.WriteHeader(http.StatusInternalServerError)
-					return
-				}
-
+		fn := func(w http.ResponseWriter, r *http.Request) {
+			body, err := io.ReadAll(r.Body)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			hashHeader := r.Header.Get("HashSHA256")
+			if key != "" && hashHeader != "" {
 				hashByte, err := encrypt.EncryptSHA256(body, []byte(key)) //h.cfg.SECRET
 				if err != nil {
 					w.WriteHeader(http.StatusInternalServerError)
 					return
 				}
 
-				if headerHash != "" {
-					log.Println("SECRET", key)
-					// log.Print("Key")
-
-					computedHash := hex.EncodeToString(hashByte)
-
-					if headerHash != computedHash {
-						log.Print(computedHash)
-						w.WriteHeader(http.StatusInternalServerError)
-						return
-					}
-
-					// log.Print(r.Body)
+				if hashHeader != hex.EncodeToString(hashByte) {
+					w.WriteHeader(http.StatusTeapot)
+					// logger.Log.Infof("key %s hashHeader: %s hash: %s", key, hashHeader, hash)
+					return
 				}
-				r.Body = io.NopCloser(bytes.NewReader(body))
-				resp := encrypter.EncWriter{
-					Key: []byte(key),
-					W:   w,
+			}
+			r.Body = io.NopCloser(bytes.NewBuffer(body))
+			next.ServeHTTP(w, r)
+		}
+		return http.HandlerFunc(fn)
+
+		// return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		// if key != "" {
+
+		// 	headerHash := r.Header.Get("HashSHA256")
+		// 	body, err := io.ReadAll(r.Body)
+		// 	if err != nil {
+		// 		w.WriteHeader(http.StatusInternalServerError)
+		// 		return
+		// 	}
+
+		// 	hashByte, err := encrypt.EncryptSHA256(body, []byte(key)) //h.cfg.SECRET
+		// 	if err != nil {
+		// 		w.WriteHeader(http.StatusInternalServerError)
+		// 		return
+		// 	}
+
+		// 	if headerHash != "" {
+		// 		log.Println("SECRET", key)
+		// 		// log.Print("Key")
+
+		// 		computedHash := hex.EncodeToString(hashByte)
+
+		// 		if headerHash != computedHash {
+		// 			log.Print(computedHash)
+		// 			w.WriteHeader(http.StatusInternalServerError)
+		// 			return
+		// 		}
+
+		// 		// log.Print(r.Body)
+		// 	}
+		// 	r.Body = io.NopCloser(bytes.NewReader(body))
+		// }
+		// next.ServeHTTP(w, r)
+		// })
+	}
+}
+
+func (m *Middleware) EncWrite(key string) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+			wr := w
+			if key != "" {
+				hw := hashWriter{
+					ResponseWriter: w,
+					w:              w,
+					key:            []byte(key),
 				}
-				next.ServeHTTP(resp, r)
-				return
+
+				wr = hw
+				defer hw.Close()
 
 			}
-			next.ServeHTTP(w, r)
-
-			// hashSHA256 := r.Header.Get("HashSHA256")
-			// log.Print(hashSHA256)
-			// if hashSHA256 == "" {
-			// 	next.ServeHTTP(w, r)
-			// 	return
-			// }
-			// h := hmac.New(sha256.New, []byte(key))
-			// b, err := io.ReadAll(r.Body)
-			// if err != nil {
-			// 	w.WriteHeader(http.StatusBadRequest)
-			// 	return
-			// }
-			// if _, err := h.Write(b); err != nil {
-			// 	w.WriteHeader(http.StatusInternalServerError)
-			// 	return
-			// }
-			// d := h.Sum(nil)
-			// hh, err := hex.DecodeString(hashSHA256)
-			// log.Println(hh, d)
-			// if err != nil {
-			// 	w.WriteHeader(http.StatusInternalServerError)
-			// 	return
-			// }
-			// if !hmac.Equal(d, hh) {
-			// 	w.WriteHeader(http.StatusBadRequest)
-			// 	return
-			// }
-			// r.Body = io.NopCloser(bytes.NewReader(b))
-			// next.ServeHTTP(w, r)
+			next.ServeHTTP(wr, r)
 		})
 	}
 }
@@ -200,4 +178,26 @@ func (m *Middleware) Logging() func(next http.Handler) http.Handler {
 			respLog.Info("response")
 		})
 	}
+}
+
+type hashWriter struct {
+	http.ResponseWriter
+	w   io.Writer
+	key []byte
+}
+
+func (hw hashWriter) Write(b []byte) (int, error) {
+	hashByte, err := encrypt.EncryptSHA256(b, hw.key) //h.cfg.SECRET
+	if err != nil {
+		hw.WriteHeader(http.StatusInternalServerError)
+		return 0, err
+	}
+	hw.Header().Add("HashSHA256", hex.EncodeToString(hashByte))
+	return hw.w.Write(b)
+}
+func (hw *hashWriter) Close() error {
+	if c, ok := hw.w.(io.WriteCloser); ok {
+		return c.Close()
+	}
+	return errors.New("middlewares: io.WriteCloser is unavailable on the writer")
 }

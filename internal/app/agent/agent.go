@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
+	"errors"
 	"log"
 	"math/rand"
 	"net/http"
@@ -34,9 +35,10 @@ func NewAgentApp() *AgentApp {
 	}
 }
 
-func (a *AgentApp) SendMetrics() {
+func (a *AgentApp) SendMetrics() error {
 	var counter int64 = 0
-	var batch models.Batch
+	// var batch models.Batch
+	var metrics []models.Metrics
 	var gaugeList = []string{
 		"Alloc", "BuckHashSys", "Frees", "GCCPUFraction", "GCSys", "HeapAlloc", "HeapIdle", "HeapInuse", "HeapObjects",
 		"HeapReleased", "HeapSys", "LastGC", "Lookups", "MCacheInuse", "MCacheSys", "MSpanInuse", "MSpanSys", "Mallocs",
@@ -44,33 +46,57 @@ func (a *AgentApp) SendMetrics() {
 	}
 
 	for _, ms := range gaugeList {
-		value := a.Collector.ReadMemStatsValue(ms)
-		if ms == "Mallocs" {
-			log.Println("SendMetrics", ms, "-->", value)
+		val := a.Collector.ReadMemStatsValue(ms)
+		m := models.Metrics{
+			ID:    ms,
+			MType: "gauge",
+			Value: &val,
 		}
-		//
-		batch.AddGauge(ms, value)
+
+		log.Println("agent.go SendMetrics", ms, "-->", val)
+		metrics = append(metrics, m)
 		counter++
 	}
 
 	randV := rand.Float64()
-	batch.AddGauge("RandomValue", randV)
+	rm := models.Metrics{
+		ID:    "RandomValue",
+		MType: "gauge",
+		Value: &randV,
+	}
+	metrics = append(metrics, rm)
 	counter++
 
-	batch.AddCounter("PollCount", counter)
+	// batch.AddCounter("PollCount", counter)
+	c := models.Metrics{
+		ID:    "PollCount",
+		MType: "counter",
+		Delta: &counter,
+	}
+	metrics = append(metrics, c)
 
-	mm, err := json.Marshal(batch.Metrics)
+	if len(metrics) == 0 {
+		log.Print("NO METRICS NO METRICS NO METRICS NO METRICSNO METRICS")
+		return errors.New("NO METRICS NO METRICS NO METRICS NO METRICSNO METRICS")
+	}
+	mm, err := json.Marshal(metrics)
 	if err != nil {
-		log.Fatal(err)
+		log.Print("agent.go MARSHALL ERR")
+		log.Print(err)
+		return errors.New("agent.go MARSHALL ERR")
 	}
 
 	//compress resp.body
 	var body bytes.Buffer
 	gz := gzip.NewWriter(&body)
-	gz.Write(mm)
+	if _, err := gz.Write(mm); err != nil {
+		log.Print("agent.go GZIP ERR")
+		log.Print(err)
+		return errors.New("agent.go GZIP ERR")
+	}
 	gz.Close()
 
-	a.Client.POST(a.cfg.URL+"/updates/", a.cfg.SECRET, mm)
+	return a.Client.POST(a.cfg.URL+"/updates/", a.cfg.SECRET, mm)
 }
 
 func (a *AgentApp) Run() error {
@@ -85,7 +111,10 @@ func (a *AgentApp) Run() error {
 			a.Collector.CollectMemStats()
 		case <-report.C:
 			// log.Println("Send")
-			a.SendMetrics()
+			err := a.SendMetrics()
+			if err != nil {
+				panic(err)
+			}
 		}
 	}
 }
