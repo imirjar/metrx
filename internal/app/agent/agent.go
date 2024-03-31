@@ -115,7 +115,7 @@ func (a *AgentApp) Run() error {
 			// log.Println("Send")
 			err := a.SendMetrics(context.Background())
 			if err != nil {
-				panic(err)
+				log.Fatal(err)
 			}
 		}
 	}
