@@ -3,6 +3,7 @@ package agent
 import (
 	"bytes"
 	"compress/gzip"
+	"context"
 	"encoding/json"
 	"errors"
 	"log"
@@ -35,7 +36,7 @@ func NewAgentApp() *AgentApp {
 	}
 }
 
-func (a *AgentApp) SendMetrics() error {
+func (a *AgentApp) SendMetrics(ctx context.Context) error {
 	var counter int64 = 0
 	// var batch models.Batch
 	var metrics []models.Metrics
@@ -76,13 +77,14 @@ func (a *AgentApp) SendMetrics() error {
 	metrics = append(metrics, c)
 
 	if len(metrics) == 0 {
-		log.Print("NO METRICS NO METRICS NO METRICS NO METRICSNO METRICS")
+		// log.Print("NO METRICS NO METRICS NO METRICS NO METRICSNO METRICS")
 		return errors.New("NO METRICS NO METRICS NO METRICS NO METRICSNO METRICS")
 	}
 	mm, err := json.Marshal(metrics)
+	// log.Print(mm)
 	if err != nil {
-		log.Print("agent.go MARSHALL ERR")
-		log.Print(err)
+		// log.Print("agent.go MARSHALL ERR")
+		// log.Print(err)
 		return errors.New("agent.go MARSHALL ERR")
 	}
 
@@ -90,13 +92,13 @@ func (a *AgentApp) SendMetrics() error {
 	var body bytes.Buffer
 	gz := gzip.NewWriter(&body)
 	if _, err := gz.Write(mm); err != nil {
-		log.Print("agent.go GZIP ERR")
-		log.Print(err)
+		// log.Print("agent.go GZIP ERR")
+		// log.Print(err)
 		return errors.New("agent.go GZIP ERR")
 	}
 	gz.Close()
 
-	return a.Client.POST(a.cfg.URL+"/updates/", a.cfg.SECRET, mm)
+	return a.Client.POST(ctx, a.cfg.URL+"/updates/", a.cfg.SECRET, mm)
 }
 
 func (a *AgentApp) Run() error {
@@ -111,7 +113,7 @@ func (a *AgentApp) Run() error {
 			a.Collector.CollectMemStats()
 		case <-report.C:
 			// log.Println("Send")
-			err := a.SendMetrics()
+			err := a.SendMetrics(context.Background())
 			if err != nil {
 				panic(err)
 			}
