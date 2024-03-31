@@ -3,6 +3,7 @@ package agent
 import (
 	"bytes"
 	"compress/gzip"
+	"context"
 	"encoding/hex"
 	"log"
 	"net/http"
@@ -14,7 +15,7 @@ type Client struct {
 	Client http.Client
 }
 
-func (c *Client) POST(path, secret string, body []byte) error {
+func (c *Client) POST(ctx context.Context, path, secret string, body []byte) error {
 	log.Println("client.go SECRET", secret)
 
 	var buf bytes.Buffer
@@ -22,7 +23,7 @@ func (c *Client) POST(path, secret string, body []byte) error {
 	gz.Write(body)
 	gz.Close()
 
-	req, err := http.NewRequest(http.MethodPost, path, &buf)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, path, &buf)
 	if err != nil {
 		log.Print("REQUEST ERROR")
 		return err

@@ -3,6 +3,7 @@ package agent
 import (
 	"bytes"
 	"compress/gzip"
+	"context"
 	"encoding/json"
 	"log"
 	"math/rand"
@@ -34,7 +35,7 @@ func NewAgentApp() *AgentApp {
 	}
 }
 
-func (a *AgentApp) SendMetrics() {
+func (a *AgentApp) SendMetrics(ctx context.Context) {
 	var counter int64 = 0
 	var batch models.Batch
 	var gaugeList = []string{
@@ -70,7 +71,7 @@ func (a *AgentApp) SendMetrics() {
 	gz.Write(mm)
 	gz.Close()
 
-	a.Client.POST(a.cfg.URL+"/updates/", a.cfg.SECRET, mm)
+	a.Client.POST(ctx, a.cfg.URL+"/updates/", a.cfg.SECRET, mm)
 }
 
 func (a *AgentApp) Run() error {
@@ -85,7 +86,7 @@ func (a *AgentApp) Run() error {
 			a.Collector.CollectMemStats()
 		case <-report.C:
 			// log.Println("Send")
-			a.SendMetrics()
+			a.SendMetrics(context.Background())
 		}
 	}
 }
