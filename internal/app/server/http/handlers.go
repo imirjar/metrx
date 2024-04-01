@@ -39,13 +39,6 @@ func (h *HTTPGateway) UpdatePathHandler() http.HandlerFunc {
 		mName := chi.URLParam(r, "name")
 		mValue := chi.URLParam(r, "value")
 
-		//iter 14 catche malloc
-		if mName == "Malloc" {
-			log.Println("####MALLOC IN PATH HANDLER")
-			log.Println(mValue)
-			log.Println(mType)
-		}
-
 		if mType == "" || mName == "" || mValue == "" {
 			http.Error(w, errMetricNameIncorrect.Error(), http.StatusBadRequest)
 			return
@@ -69,7 +62,6 @@ func (h *HTTPGateway) UpdateJSONHandler() http.HandlerFunc {
 
 		err := json.NewDecoder(r.Body).Decode(&metric)
 		if err != nil {
-			log.Print("Что-то с докодером")
 			log.Print(err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return

@@ -7,15 +7,22 @@ import (
 	"encoding/hex"
 	"log"
 	"net/http"
+	"sync"
+	"time"
 
 	"github.com/imirjar/metrx/pkg/encrypt"
 )
 
 type Client struct {
 	Client http.Client
+	sync.Mutex
 }
 
 func (c *Client) POST(ctx context.Context, path, secret string, body []byte) error {
+	ctxT, cancel := context.WithTimeout(context.Background(), time.Duration(time.Millisecond*200))
+	defer cancel()
+	c.Lock()
+	defer c.Unlock()
 	log.Println("client.go SECRET", secret)
 
 	var buf bytes.Buffer
@@ -23,7 +30,7 @@ func (c *Client) POST(ctx context.Context, path, secret string, body []byte) err
 	gz.Write(body)
 	gz.Close()
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, path, &buf)
+	req, err := http.NewRequestWithContext(ctxT, http.MethodPost, path, &buf)
 	if err != nil {
 		log.Print("REQUEST ERROR")
 		return err
@@ -43,14 +50,10 @@ func (c *Client) POST(ctx context.Context, path, secret string, body []byte) err
 
 	resp, err := c.Client.Do(req)
 	if err != nil {
-		log.Println("CLIENT ERROR")
-		log.Println(secret)
-		log.Println(http.MethodPost)
-		log.Println(path)
-		log.Println(string(body))
 		return err
 	}
 	defer resp.Body.Close()
+	log.Print(resp.Status)
 
 	return err
 }
