@@ -74,7 +74,8 @@ func (m *Middleware) Encrypting(key string) func(next http.Handler) http.Handler
 				}
 
 				if hashHeader != hex.EncodeToString(hashByte) {
-					w.WriteHeader(http.StatusInternalServerError)
+					// w.WriteHeader(http.StatusInternalServerError)
+					http.Error(w, "", http.StatusInternalServerError)
 					// logger.Log.Infof("key %s hashHeader: %s hash: %s", key, hashHeader, hash)
 					return
 				}

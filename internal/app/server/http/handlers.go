@@ -145,6 +145,11 @@ func (h *HTTPGateway) ValueJSONHandler() http.HandlerFunc {
 			return
 		}
 
+		if metric.ID == "Malloc" {
+			v, _ := metric.GetVal()
+			log.Println("METRIC OUT", metric, v)
+		}
+
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusOK)
 
@@ -177,9 +182,8 @@ func (h *HTTPGateway) BatchHandler() http.HandlerFunc {
 		for _, m := range metrics {
 			//iter 14 catche malloc
 			if m.ID == "Malloc" {
-				log.Println("####MALLOC IN BATCH HANDLER")
-				log.Println(m.Value)
-				log.Println(m.MType)
+				v, _ := m.GetVal()
+				log.Println("METRIC IN", m, v)
 			}
 
 			if m.MType == "gauge" {
