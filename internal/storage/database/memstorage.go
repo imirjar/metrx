@@ -23,24 +23,29 @@ func (m *DB) AddGauges(ctx context.Context, gauges map[string]float64) error {
 			ON CONFLICT (id) DO 
 			UPDATE SET value = $3`, i, "gauge", value)
 	}
-	return m.db.SendBatch(ctx, batch).Close()
+	err := m.db.SendBatch(ctx, batch).Close()
+	if err != nil {
+		log.Println("STORAGE AddGauges ERROR", err)
+	}
+	return err
 }
 
 func (m *DB) AddCounters(ctx context.Context, counters map[string]int64) error {
 	batch := &pgx.Batch{}
 
 	for i, d := range counters {
-		log.Println("AddCounters-->", i)
-		log.Println("AddGaAddCountersuges d -->", d)
-		delta := fmt.Sprint(d)
-		log.Println("AddGauges delta -->", delta)
+		log.Println("database AddCounters", i, "-->", d)
 		batch.Queue(`
 			INSERT INTO metrics (id, type, value)
 			VALUES($1, $2, $3)
 			ON CONFLICT (id) DO 
-			UPDATE SET value = EXCLUDED.value + metrics.value`, i, "counter", delta)
+			UPDATE SET value = EXCLUDED.value + metrics.value`, i, "counter", fmt.Sprint(d))
 	}
-	return m.db.SendBatch(ctx, batch).Close()
+	err := m.db.SendBatch(ctx, batch).Close()
+	if err != nil {
+		log.Println("STORAGE AddCounters ERROR", err)
+	}
+	return err
 }
 
 func (m *DB) AddGauge(ctx context.Context, name string, value float64) (float64, error) {
@@ -54,7 +59,7 @@ func (m *DB) AddGauge(ctx context.Context, name string, value float64) (float64,
 	)
 
 	if err != nil {
-		log.Println(err)
+		log.Println("STORAGE AddGauge ERROR", err)
 		return 0, err
 	}
 
@@ -63,15 +68,14 @@ func (m *DB) AddGauge(ctx context.Context, name string, value float64) (float64,
 
 func (m *DB) AddCounter(ctx context.Context, name string, delta int64) (int64, error) {
 	mDelta := fmt.Sprint(delta)
-	log.Println("AddGauge-->", name)
-	log.Println("AddGauge value -->", delta)
-	log.Println("AddGauge mValue -->", mDelta)
+	log.Println("AddGauge-->", name, " -->", mDelta)
+
 	_, err := m.db.Exec(ctx,
 		`INSERT INTO metrics (id, type, value) VALUES($1, $2, $3)
 		ON CONFLICT (id) DO UPDATE SET value = EXCLUDED.value + metrics.value`, name, "counter", mDelta,
 	)
 	if err != nil {
-		log.Println(err)
+		log.Println("STORAGE AddCOunter ERROR", err)
 		return 0, err
 	}
 
@@ -79,9 +83,8 @@ func (m *DB) AddCounter(ctx context.Context, name string, delta int64) (int64, e
 	rows := m.db.QueryRow(ctx, "SELECT value FROM metrics WHERE type=$1 AND id=$2", "counter", name)
 
 	err = rows.Scan(&result)
-
 	if err != nil {
-		log.Println(err)
+		log.Println("STORAGE AddCounter scan ERROR", err)
 		return 0, err
 	}
 
@@ -95,7 +98,7 @@ func (m *DB) ReadGauge(ctx context.Context, name string) (float64, bool) {
 	err := rows.Scan(&value)
 
 	if err != nil {
-		log.Println(err)
+		log.Println("STORAGE ReadGauge ERROR", err)
 		return value, false
 	}
 
@@ -109,7 +112,7 @@ func (m *DB) ReadCounter(ctx context.Context, name string) (int64, bool) {
 	err := rows.Scan(&delta)
 
 	if err != nil {
-		log.Println(err)
+		log.Println("STORAGE ReadCounter ERROR", err)
 		return delta, false
 	}
 

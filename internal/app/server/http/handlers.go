@@ -15,6 +15,7 @@ import (
 
 // MainPage ...
 func (h *HTTPGateway) MainPage() http.HandlerFunc {
+	log.Println("HANDLER MAIN PAGE")
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		page, err := h.Service.MetricPage(ctx)
@@ -33,6 +34,7 @@ func (h *HTTPGateway) MainPage() http.HandlerFunc {
 // UPDATE ...
 func (h *HTTPGateway) UpdatePathHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		log.Println("HANDLER UpdatePathHandler PAGE")
 
 		ctx := r.Context()
 		mType := chi.URLParam(r, "type")
@@ -56,13 +58,14 @@ func (h *HTTPGateway) UpdatePathHandler() http.HandlerFunc {
 
 func (h *HTTPGateway) UpdateJSONHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		log.Println("HANDLER UpdateJSONHandler PAGE")
 
 		ctx := r.Context()
 		var metric models.Metrics
 
 		err := json.NewDecoder(r.Body).Decode(&metric)
 		if err != nil {
-			log.Print(err)
+			log.Println("HANDLER UpdateJSONHandler Decode ERROR", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -70,21 +73,23 @@ func (h *HTTPGateway) UpdateJSONHandler() http.HandlerFunc {
 
 		value, err := metric.GetVal()
 		if err != nil {
-			log.Print("Что-то не вычленилось значение")
+			log.Println("HANDLER UpdateJSONHandler GetVal ERROR", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
 		result, err := h.Service.UpdatePath(ctx, metric.ID, metric.MType, value)
 		if err != nil {
-			log.Println("Что-то не обновляется", metric.ID, metric.MType, value)
+			// log.Println("Что-то не обновляется", metric.ID, metric.MType, value)
+			log.Println("HANDLER UpdateJSONHandler UpdatePath ERROR", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
 		err = metric.SetVal(result)
 		if err != nil {
-			log.Print("Что-то не присваевается новое значение")
+			// log.Print("Что-то не присваевается новое значение")
+			log.Println("HANDLER UpdateJSONHandler SetVal ERROR", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -98,6 +103,7 @@ func (h *HTTPGateway) UpdateJSONHandler() http.HandlerFunc {
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		if err = json.NewEncoder(w).Encode(metric); err != nil {
+			log.Println("HANDLER UpdateJSONHandler Encode ERROR", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -108,13 +114,14 @@ func (h *HTTPGateway) UpdateJSONHandler() http.HandlerFunc {
 // VALUE ...
 func (h *HTTPGateway) ValuePathHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
+		log.Println("HANDLER ValuePathHandler PAGE")
 		ctx := r.Context()
 		mType := chi.URLParam(r, "type")
 		mName := chi.URLParam(r, "name")
 
 		result, err := h.Service.ViewPath(ctx, mName, mType)
 		if err != nil {
+			log.Println("HANDLER ValuePathHandler ViewPath ERROR", err)
 			http.Error(w, errParamsIncorrect.Error(), http.StatusNotFound)
 			return
 		}
@@ -127,23 +134,25 @@ func (h *HTTPGateway) ValuePathHandler() http.HandlerFunc {
 
 func (h *HTTPGateway) ValueJSONHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		log.Println("HANDLER ValueJSONHandler PAGE")
 
 		ctx := r.Context()
 		var metric models.Metrics
 
 		if err := json.NewDecoder(r.Body).Decode(&metric); err != nil {
+			log.Println("HANDLER ValueJSONHandler Decode ERROR", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		defer r.Body.Close()
 
 		val, err := h.Service.ViewPath(ctx, metric.ID, metric.MType)
-		metric.SetVal(val)
-
 		if err != nil {
+			log.Println("HANDLER ValueJSONHandler ViewPath ERROR", err)
 			http.Error(w, errMetricNameIncorrect.Error(), http.StatusNotFound)
 			return
 		}
+		metric.SetVal(val)
 
 		if metric.ID == "Malloc" {
 			v, _ := metric.GetVal()
@@ -154,6 +163,7 @@ func (h *HTTPGateway) ValueJSONHandler() http.HandlerFunc {
 		w.WriteHeader(http.StatusOK)
 
 		if err = json.NewEncoder(w).Encode(metric); err != nil {
+			log.Println("HANDLER ValueJSONHandler Encode ERROR", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -163,11 +173,13 @@ func (h *HTTPGateway) ValueJSONHandler() http.HandlerFunc {
 // Batch ...
 func (h *HTTPGateway) BatchHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		log.Println("HANDLER BatchHandler PAGE")
 		ctx := r.Context()
 		var metrics []models.Metrics
 
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
+			log.Println("HANDLER BatchHandler ReadAll ERROR", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -175,26 +187,14 @@ func (h *HTTPGateway) BatchHandler() http.HandlerFunc {
 
 		err = json.Unmarshal(body, &metrics)
 		if err != nil {
+			log.Println("HANDLER BatchHandler Unmarshal ERROR", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
-		for _, m := range metrics {
-			//iter 14 catche malloc
-			if m.ID == "Malloc" {
-				v, _ := m.GetVal()
-				log.Println("METRIC IN", m, v)
-			}
-
-			if m.MType == "gauge" {
-				log.Println("handlers.go batch metric ===>", m.ID, *m.Value)
-			} else {
-				log.Println("handlers.go batch metric ===>", m.ID, *m.Delta)
-			}
-		}
-
 		err = h.Service.BatchUpdate(ctx, metrics)
 		if err != nil {
+			log.Println("HANDLER BatchHandler BatchUpdate ERROR", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -206,14 +206,17 @@ func (h *HTTPGateway) BatchHandler() http.HandlerFunc {
 // Check ...
 func (h *HTTPGateway) Ping(path string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		log.Println("HANDLER Ping PAGE")
 		ctx := r.Context()
 
 		db, err := ping.NewDBPool(ctx, path)
 		if err != nil {
+			log.Println("HANDLER NewDBPool ERROR", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 		if err = db.Ping(ctx); err != nil {
+			log.Println("HANDLER DB Ping ERROR", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}

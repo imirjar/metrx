@@ -33,7 +33,7 @@ func NewAgentApp() *AgentApp {
 	}
 }
 
-func (a *AgentApp) SendMetrics(ctx context.Context) {
+func (a *AgentApp) SendMetrics(ctx context.Context) error {
 	var counter int64 = 0
 	var batch models.Batch
 	var gaugeList = []string{
@@ -44,10 +44,6 @@ func (a *AgentApp) SendMetrics(ctx context.Context) {
 
 	for _, ms := range gaugeList {
 		value := a.Collector.ReadMemStatsValue(ms)
-		if ms == "Mallocs" {
-			log.Println("SendMetrics", ms, "-->", value)
-		}
-		//
 		batch.AddGauge(ms, value)
 		counter++
 	}
@@ -71,9 +67,10 @@ func (a *AgentApp) SendMetrics(ctx context.Context) {
 
 	err = a.Client.POST(ctx, a.cfg.URL+"/updates/", a.cfg.SECRET, mm)
 	if err != nil {
-		log.Println("POST ERROR", err)
-		return
+		log.Println("agent.go POST ERROR", err)
+
 	}
+	return err
 }
 
 func (a *AgentApp) Run() error {
@@ -88,7 +85,10 @@ func (a *AgentApp) Run() error {
 			a.Collector.CollectMemStats()
 		case <-report.C:
 			// log.Println("Send")
-			a.SendMetrics(context.Background())
+			err := a.SendMetrics(context.Background())
+			if err != nil {
+				log.Println("SendMetrix ERROR", err)
+			}
 		}
 	}
 }
