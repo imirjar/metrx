@@ -10,6 +10,7 @@ import (
 )
 
 func (s ServerService) MetricPage(ctx context.Context) (string, error) {
+	log.Println("SERVICE MetricPage")
 	gauges, err := s.MemStorager.ReadAllGauges(ctx)
 	if err != nil {
 		return "", err
@@ -35,6 +36,7 @@ func (s ServerService) MetricPage(ctx context.Context) (string, error) {
 }
 
 func (s ServerService) ViewPath(ctx context.Context, name, mType string) (string, error) {
+	log.Println("SERVICE ViewPath")
 	switch mType {
 	case "gauge":
 		value, ok := s.MemStorager.ReadGauge(ctx, name)
@@ -54,6 +56,7 @@ func (s ServerService) ViewPath(ctx context.Context, name, mType string) (string
 }
 
 func (s ServerService) UpdatePath(ctx context.Context, name, mType, mValue string) (string, error) {
+	log.Println("SERVICE UpdatePath")
 	switch mType {
 	case "gauge":
 		value, err := strconv.ParseFloat(mValue, 64)
@@ -84,6 +87,7 @@ func (s ServerService) UpdatePath(ctx context.Context, name, mType, mValue strin
 }
 
 func (s ServerService) BatchUpdate(ctx context.Context, metrics []models.Metrics) error {
+	log.Println("SERVICE BatchUpdate")
 	var (
 		gauges   = map[string]float64{}
 		counters = map[string]int64{}
@@ -105,13 +109,11 @@ func (s ServerService) BatchUpdate(ctx context.Context, metrics []models.Metrics
 
 	err := s.MemStorager.AddGauges(ctx, gauges)
 	if err != nil {
-		log.Println("SERVICE storager.go AddGauges ERROR", err)
 		return err
 	}
 
 	err = s.MemStorager.AddCounters(ctx, counters)
 	if err != nil {
-		log.Println("SERVICE storager.go AddCounters ERROR", err)
 		return err
 	}
 

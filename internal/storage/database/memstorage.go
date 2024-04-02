@@ -12,10 +12,10 @@ import (
 func (m *DB) AddGauges(ctx context.Context, gauges map[string]float64) error {
 	batch := &pgx.Batch{}
 	for i, v := range gauges {
-		log.Println("AddGauges-->", i)
-		log.Println("AddGauges v -->", v)
+		// log.Println("AddGauges-->", i)
+		// log.Println("AddGauges v -->", v)
 		value := fmt.Sprint(v)
-		log.Println("AddGauges value -->", value)
+		// log.Println("AddGauges value -->", value)
 		// value := fmt.Sprintln(v)
 		batch.Queue(`
 			INSERT INTO metrics (id, type, value)
@@ -25,7 +25,7 @@ func (m *DB) AddGauges(ctx context.Context, gauges map[string]float64) error {
 	}
 	err := m.db.SendBatch(ctx, batch).Close()
 	if err != nil {
-		log.Println("STORAGE AddGauges ERROR", err)
+		return errAddGaugesCloseError
 	}
 	return err
 }
@@ -43,7 +43,7 @@ func (m *DB) AddCounters(ctx context.Context, counters map[string]int64) error {
 	}
 	err := m.db.SendBatch(ctx, batch).Close()
 	if err != nil {
-		log.Println("STORAGE AddCounters ERROR", err)
+		return errAddCountersCloseError
 	}
 	return err
 }
@@ -53,17 +53,15 @@ func (m *DB) AddGauge(ctx context.Context, name string, value float64) (float64,
 	log.Println("AddGauge-->", name)
 	log.Println("AddGauge value -->", value)
 	log.Println("AddGauge mValue -->", mValue)
+
 	_, err := m.db.Exec(ctx,
 		`INSERT INTO metrics (id, type, value) VALUES($1, $2, $3)
 		ON CONFLICT (id) DO UPDATE SET value = $3`, name, "gauge", mValue,
 	)
-
 	if err != nil {
-		log.Println("STORAGE AddGauge ERROR", err)
-		return 0, err
+		return 0, errAddGaugeExecError
 	}
-
-	return value, nil
+	return value, err
 }
 
 func (m *DB) AddCounter(ctx context.Context, name string, delta int64) (int64, error) {
@@ -75,8 +73,7 @@ func (m *DB) AddCounter(ctx context.Context, name string, delta int64) (int64, e
 		ON CONFLICT (id) DO UPDATE SET value = EXCLUDED.value + metrics.value`, name, "counter", mDelta,
 	)
 	if err != nil {
-		log.Println("STORAGE AddCOunter ERROR", err)
-		return 0, err
+		return 0, errAddCounterExecError
 	}
 
 	var result int64
@@ -84,9 +81,8 @@ func (m *DB) AddCounter(ctx context.Context, name string, delta int64) (int64, e
 
 	err = rows.Scan(&result)
 	if err != nil {
-		log.Println("STORAGE AddCounter scan ERROR", err)
-		log.Println("name", name, delta, rows)
-		return 0, err
+		// log.Println("name", name, delta, rows)
+		return 0, errAddCounterScanError
 	}
 
 	return result, nil
@@ -125,8 +121,7 @@ func (m *DB) ReadAllGauges(ctx context.Context) (map[string]float64, error) {
 
 	rows, err := m.db.Query(ctx, `SELECT id, value FROM metrics WHERE type = $1`, "gauge")
 	if err != nil {
-		log.Println(err)
-		panic(err)
+		return map[string]float64{}, errReadAllGaugesQueryError
 	}
 
 	// обязательно закрываем перед возвратом функции
@@ -137,8 +132,7 @@ func (m *DB) ReadAllGauges(ctx context.Context) (map[string]float64, error) {
 		var m models.Metrics
 		err = rows.Scan(&m.ID, &m.Value)
 		if err != nil {
-			log.Println(err)
-			return gauges, err
+			return map[string]float64{}, errReadAllGaugesScanError
 		}
 		gauges[m.ID] = *m.Value
 	}
@@ -146,8 +140,7 @@ func (m *DB) ReadAllGauges(ctx context.Context) (map[string]float64, error) {
 	// проверяем на ошибки
 	err = rows.Err()
 	if err != nil {
-		log.Println(err)
-		return gauges, err
+		return gauges, errReadAllGaugesRowsError
 	}
 
 	return gauges, nil
@@ -158,9 +151,7 @@ func (m *DB) ReadAllCounters(ctx context.Context) (map[string]int64, error) {
 
 	rows, err := m.db.Query(ctx, `SELECT id, value FROM metrics WHERE type = $1`, "counter")
 	if err != nil {
-		log.Println("###ReadAllCounters 1--->", err)
-		log.Println(err)
-		panic(err)
+		return map[string]int64{}, errReadAllCountersQueryError
 	}
 
 	// обязательно закрываем перед возвратом функции
@@ -171,8 +162,7 @@ func (m *DB) ReadAllCounters(ctx context.Context) (map[string]int64, error) {
 		var m models.Metrics
 		err = rows.Scan(&m.ID, &m.Delta)
 		if err != nil {
-			log.Println("###ReadAllCounters 2--->", err)
-			return counters, err
+			return counters, errReadAllCountersScanError
 		}
 		counters[m.ID] = *m.Delta
 	}
@@ -180,9 +170,7 @@ func (m *DB) ReadAllCounters(ctx context.Context) (map[string]int64, error) {
 	// проверяем на ошибки
 	err = rows.Err()
 	if err != nil {
-		log.Println("###ReadAllCounters 3--->", err)
-		log.Println(err)
-		return counters, err
+		return counters, errReadAllCountersRowsError
 	}
 
 	// fmt.Println(counters)

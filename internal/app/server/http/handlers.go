@@ -194,7 +194,7 @@ func (h *HTTPGateway) BatchHandler() http.HandlerFunc {
 
 		err = h.Service.BatchUpdate(ctx, metrics)
 		if err != nil {
-			log.Println("HANDLER BatchHandler BatchUpdate ERROR", err)
+			log.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
