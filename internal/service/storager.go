@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"log"
 	"strconv"
 
 	"github.com/imirjar/metrx/internal/models"
@@ -104,11 +105,13 @@ func (s ServerService) BatchUpdate(ctx context.Context, metrics []models.Metrics
 
 	err := s.MemStorager.AddGauges(ctx, gauges)
 	if err != nil {
+		log.Println("SERVICE storager.go AddGauges ERROR", err)
 		return err
 	}
 
 	err = s.MemStorager.AddCounters(ctx, counters)
 	if err != nil {
+		log.Println("SERVICE storager.go AddCounters ERROR", err)
 		return err
 	}
 

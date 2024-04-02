@@ -134,7 +134,7 @@ func (h *HTTPGateway) ValuePathHandler() http.HandlerFunc {
 
 func (h *HTTPGateway) ValueJSONHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		log.Println("HANDLER ValueJSONHandler PAGE")
+		// log.Println("HANDLER ValueJSONHandler PAGE")
 
 		ctx := r.Context()
 		var metric models.Metrics

@@ -85,6 +85,7 @@ func (m *DB) AddCounter(ctx context.Context, name string, delta int64) (int64, e
 	err = rows.Scan(&result)
 	if err != nil {
 		log.Println("STORAGE AddCounter scan ERROR", err)
+		log.Println("name", name, delta, rows)
 		return 0, err
 	}
 

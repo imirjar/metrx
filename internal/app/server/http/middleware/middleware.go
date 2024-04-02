@@ -69,6 +69,7 @@ func (m *Middleware) Encrypting(key string) func(next http.Handler) http.Handler
 			if key != "" && hashHeader != "" {
 				hashByte, err := encrypt.EncryptSHA256(body, []byte(key)) //h.cfg.SECRET
 				if err != nil {
+					log.Print("middleware EncryptSHA256 ERROR", err)
 					w.WriteHeader(http.StatusInternalServerError)
 					return
 				}
@@ -76,7 +77,7 @@ func (m *Middleware) Encrypting(key string) func(next http.Handler) http.Handler
 				if hashHeader != hex.EncodeToString(hashByte) {
 					// w.WriteHeader(http.StatusInternalServerError)
 					http.Error(w, "", http.StatusInternalServerError)
-					// logger.Log.Infof("key %s hashHeader: %s hash: %s", key, hashHeader, hash)
+					log.Printf("key %s hashHeader: %s hash: %s", key, hashHeader, hex.EncodeToString(hashByte))
 					return
 				}
 			}
