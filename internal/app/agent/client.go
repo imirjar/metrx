@@ -32,16 +32,15 @@ func (c *Client) POST(ctx context.Context, path, secret string, body []byte) err
 
 	req, err := http.NewRequestWithContext(ctxT, http.MethodPost, path, &buf)
 	if err != nil {
-		log.Print("client.go NewRequestWithContext ERROR", err)
-		return err
+		// log.Print("client.go NewRequestWithContext ERROR", err)
+		return errNewRequestWithContextErr
 	}
 
 	if secret != "" {
 		hash, err := encrypt.EncryptSHA256(body, []byte(secret))
 		// log.Println("client.go hash", hex.EncodeToString(hash))
 		if err != nil {
-			log.Print("client.go EncryptSHA256 ERROR", err)
-			return err
+			return errEncryptSHA256Err
 		}
 		req.Header.Add("HashSHA256", hex.EncodeToString(hash))
 	}
@@ -51,8 +50,8 @@ func (c *Client) POST(ctx context.Context, path, secret string, body []byte) err
 
 	resp, err := c.Client.Do(req)
 	if err != nil {
-		log.Print("client.go Client.Do ERROR", err)
-		return err
+		// log.Print("client.go Client.Do ERROR", err)
+		return errClientDoErr
 	}
 	defer resp.Body.Close()
 	log.Print(resp.Status)
