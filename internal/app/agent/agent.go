@@ -45,14 +45,17 @@ func (a *AgentApp) SendMetrics(ctx context.Context) error {
 	for _, ms := range gaugeList {
 		value := a.Collector.ReadMemStatsValue(ms)
 		batch.AddGauge(ms, value)
+		log.Println("OUTGOING gauge VALUE", ms, value)
 		counter++
 	}
 
 	randV := rand.Float64()
 	batch.AddGauge("RandomValue", randV)
+	log.Println("OUTGOING gauge VALUE", "RandomValue", randV)
 	counter++
 
 	batch.AddCounter("PollCount", counter)
+	log.Println("OUTGOING gauge VALUE", "PollCount", counter)
 
 	mm, err := json.Marshal(batch.Metrics)
 	if err != nil {
