@@ -70,26 +70,15 @@ func (s ServerService) UpdatePath(ctx context.Context, name, mType, mValue strin
 		return fmt.Sprint(newValue), nil
 
 	case "counter":
-		oldDelta, ok := s.MemStorager.ReadCounter(ctx, name)
-		if !ok {
-			return "", errCounterDoesNotMatched
-		}
-
 		delta, err := strconv.ParseInt(mValue, 10, 64)
 		if err != nil {
 			return "", errConvertationError
 		}
 
-		//bad usecase becouse of i cant't get new counter value from sql query
-		newDelta := oldDelta + delta
-		_, err = s.MemStorager.AddCounter(ctx, name, delta)
+		newDelta, err := s.MemStorager.AddCounter(ctx, name, delta)
 		if err != nil {
 			return "", err
 		}
-		// newDelta, err := s.MemStorager.AddCounter(ctx, name, delta)
-		// if err != nil {
-		// 	return "", err
-		// }
 
 		return fmt.Sprint(newDelta), nil
 	default:
