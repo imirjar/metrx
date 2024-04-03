@@ -36,7 +36,7 @@ func (s ServerService) MetricPage(ctx context.Context) (string, error) {
 }
 
 func (s ServerService) ViewPath(ctx context.Context, name, mType string) (string, error) {
-	log.Println("SERVICE ViewPath")
+	// log.Println("SERVICE ViewPath")
 	switch mType {
 	case "gauge":
 		value, ok := s.MemStorager.ReadGauge(ctx, name)

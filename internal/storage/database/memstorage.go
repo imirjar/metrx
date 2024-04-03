@@ -65,26 +65,25 @@ func (m *DB) AddGauge(ctx context.Context, name string, value float64) (float64,
 }
 
 func (m *DB) AddCounter(ctx context.Context, name string, delta int64) (int64, error) {
-	mDelta := fmt.Sprint(delta)
-	log.Println("AddGauge-->", name, " -->", mDelta)
+	// mDelta := fmt.Sprint(delta)
+	// log.Println("AddCounter-->", name, " -->", mDelta)
 
 	_, err := m.db.Exec(ctx,
 		`INSERT INTO metrics (id, type, value) VALUES($1, $2, $3)
-		ON CONFLICT (id) DO UPDATE SET value = EXCLUDED.value + metrics.value`, name, "counter", mDelta,
+		ON CONFLICT (id) DO UPDATE SET value = EXCLUDED.value + metrics.value`, name, "counter", delta,
 	)
 	if err != nil {
 		return 0, errAddCounterExecError
 	}
 
-	// var result int64
-	// rows := m.db.QueryRow(ctx, "SELECT value FROM metrics WHERE type=$1 AND id=$2", "counter", name)
-	// err = rows.Scan(&result)
-	// if err != nil {
-	// 	log.Println("name", name, delta, rows)
-	// 	return 0, errAddCounterScanError
-	// }
+	var result int64
+	err = m.db.QueryRow(ctx, "SELECT value FROM metrics WHERE id=$1", name).Scan(&result)
+	if err != nil {
+		log.Println("", err)
+		return 0, errAddCounterScanError
+	}
 
-	return delta, nil
+	return result, nil
 }
 
 func (m *DB) ReadGauge(ctx context.Context, name string) (float64, bool) {
