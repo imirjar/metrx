@@ -76,16 +76,15 @@ func (m *DB) AddCounter(ctx context.Context, name string, delta int64) (int64, e
 		return 0, errAddCounterExecError
 	}
 
-	var result int64
-	rows := m.db.QueryRow(ctx, "SELECT value FROM metrics WHERE type=$1 AND id=$2", "counter", name)
+	// var result int64
+	// rows := m.db.QueryRow(ctx, "SELECT value FROM metrics WHERE type=$1 AND id=$2", "counter", name)
+	// err = rows.Scan(&result)
+	// if err != nil {
+	// 	log.Println("name", name, delta, rows)
+	// 	return 0, errAddCounterScanError
+	// }
 
-	err = rows.Scan(&result)
-	if err != nil {
-		// log.Println("name", name, delta, rows)
-		return 0, errAddCounterScanError
-	}
-
-	return result, nil
+	return delta, nil
 }
 
 func (m *DB) ReadGauge(ctx context.Context, name string) (float64, bool) {

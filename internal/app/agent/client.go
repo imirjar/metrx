@@ -50,7 +50,7 @@ func (c *Client) POST(ctx context.Context, path, secret string, body []byte) err
 
 	resp, err := c.Client.Do(req)
 	if err != nil {
-		// log.Print("client.go Client.Do ERROR", err)
+		log.Print(err)
 		return errClientDoErr
 	}
 	defer resp.Body.Close()
