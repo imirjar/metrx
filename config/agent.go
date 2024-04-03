@@ -62,6 +62,7 @@ func (c *AgentConfig) setFlags() {
 		c.PollInterval = time.Duration(1_000_000_000 * *p)
 	}
 	if *k != "" {
+		log.Println("MY LOVELY KEY", *k)
 		c.SECRET = *k
 	}
 

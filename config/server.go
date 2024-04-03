@@ -89,6 +89,7 @@ func (s *ServerConfig) setFlags() {
 		s.ServiceConfig.DBConn = *d
 	}
 	if *k != "" {
+		// log.Println("MY LOVELY KEY", *k)
 		s.AppConfig.SECRET = *k
 	}
 }

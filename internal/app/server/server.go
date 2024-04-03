@@ -6,7 +6,7 @@ import (
 )
 
 type Gatewayer interface {
-	Start(path, conn, secret string) error
+	Start(path, conn string) error
 }
 
 type ServerApp struct {
@@ -15,7 +15,7 @@ type ServerApp struct {
 }
 
 func (s *ServerApp) Run() {
-	if err := s.Gateway.Start(s.cfg.URL, s.cfg.DBConn, s.cfg.SECRET); err != nil {
+	if err := s.Gateway.Start(s.cfg.URL, s.cfg.DBConn); err != nil {
 		panic(err)
 	}
 }

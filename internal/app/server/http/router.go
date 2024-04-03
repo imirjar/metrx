@@ -17,6 +17,7 @@ func NewGateway(cfg config.ServerConfig) *HTTPGateway {
 	app := HTTPGateway{
 		Service:    service,
 		Middleware: middleware,
+		Secret:     cfg.SECRET,
 	}
 	return &app
 }
@@ -38,16 +39,17 @@ type Middleware interface {
 type HTTPGateway struct {
 	Service    Service
 	Middleware Middleware
+	Secret     string
 }
 
-func (h *HTTPGateway) Start(path, conn, secret string) error {
+func (h *HTTPGateway) Start(path, conn string) error {
 
 	router := chi.NewRouter()
 
 	// compression is upper then encrypting its matter!
 	router.Use(h.Middleware.Compressing())
-	router.Use(h.Middleware.Encrypting(secret))
-	router.Use(h.Middleware.EncWrite(secret))
+	router.Use(h.Middleware.Encrypting(h.Secret))
+	router.Use(h.Middleware.EncWrite(h.Secret))
 	// router.Use(h.Middleware.Logging())
 
 	router.Route("/update", func(update chi.Router) {
