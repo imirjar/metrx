@@ -68,7 +68,7 @@ func (m *DB) AddCounter(ctx context.Context, name string, delta int64) (int64, e
 	// mDelta := fmt.Sprint(delta)
 	// log.Println("AddCounter-->", name, " -->", mDelta)
 
-	_, err := m.db.Exec(ctx,
+	res, err := m.db.Exec(ctx,
 		`INSERT INTO metrics (id, type, value) VALUES($1, $2, $3)
 		ON CONFLICT (id) DO UPDATE SET value = EXCLUDED.value + metrics.value`, name, "counter", delta,
 	)
@@ -79,6 +79,7 @@ func (m *DB) AddCounter(ctx context.Context, name string, delta int64) (int64, e
 	var result int64
 	err = m.db.QueryRow(ctx, "SELECT value FROM metrics WHERE id=$1", name).Scan(&result)
 	if err != nil {
+		log.Println("RES", res.String())
 		log.Println("", err)
 		return 0, errAddCounterScanError
 	}

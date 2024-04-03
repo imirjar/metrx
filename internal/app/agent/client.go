@@ -37,7 +37,7 @@ func (c *Client) POST(ctx context.Context, path, secret string, body []byte) err
 	}
 
 	if secret != "" {
-		hash, err := encrypt.EncryptSHA256(body, []byte(secret))
+		hash, err := encrypt.EncryptSHA256(hex.EncodeToString(body), secret)
 		// log.Println("client.go hash", hex.EncodeToString(hash))
 		if err != nil {
 			return errEncryptSHA256Err

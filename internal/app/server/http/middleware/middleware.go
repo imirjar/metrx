@@ -65,9 +65,10 @@ func (m *Middleware) Encrypting(key string) func(next http.Handler) http.Handler
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
+
 			hashHeader := r.Header.Get("HashSHA256")
 			if key != "" && hashHeader != "" {
-				hashByte, err := encrypt.EncryptSHA256(body, []byte(key)) //h.cfg.SECRET
+				hashByte, err := encrypt.EncryptSHA256(hex.EncodeToString(body), key) //h.cfg.SECRET
 				if err != nil {
 					log.Print("middleware EncryptSHA256 ERROR", err)
 					w.WriteHeader(http.StatusInternalServerError)
@@ -79,7 +80,10 @@ func (m *Middleware) Encrypting(key string) func(next http.Handler) http.Handler
 					http.Error(w, "", http.StatusInternalServerError)
 					log.Printf("key %s hashHeader: %s hash: %s", key, hashHeader, hex.EncodeToString(hashByte))
 					return
+				} else {
+					log.Printf("HASH IS EQUAL! ALL RIGHT!")
 				}
+
 			}
 			r.Body = io.NopCloser(bytes.NewBuffer(body))
 			next.ServeHTTP(w, r)
@@ -133,7 +137,7 @@ func (m *Middleware) EncWrite(key string) func(next http.Handler) http.Handler {
 				hw := hashWriter{
 					ResponseWriter: w,
 					w:              w,
-					key:            []byte(key),
+					key:            key,
 				}
 
 				wr = hw
@@ -185,13 +189,13 @@ func (m *Middleware) Logging() func(next http.Handler) http.Handler {
 type hashWriter struct {
 	http.ResponseWriter
 	w   io.Writer
-	key []byte
+	key string
 }
 
 func (hw hashWriter) Write(b []byte) (int, error) {
-	hashByte, err := encrypt.EncryptSHA256(b, hw.key) //h.cfg.SECRET
+	hashByte, err := encrypt.EncryptSHA256(hex.EncodeToString(b), hw.key) //h.cfg.SECRET
 	if err != nil {
-		hw.WriteHeader(http.StatusInternalServerError)
+		// hw.WriteHeader(http.StatusInternalServerError)
 		return 0, err
 	}
 	hw.Header().Add("HashSHA256", hex.EncodeToString(hashByte))
