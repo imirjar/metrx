@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
-	"crypto/hmac"
-	"crypto/sha256"
 	"encoding/hex"
 	"log"
 	"net/http"
@@ -43,11 +41,6 @@ func (c *Client) POST(ctx context.Context, path, secret string, body []byte) err
 		log.Println("HashSHA256", secret, hex.EncodeToString(hash))
 
 		req.Header.Add("HashSHA256", hex.EncodeToString(hash))
-
-		qwert := hmac.New(sha256.New, []byte(secret))
-		qwert.Write(body)
-		resQWE := qwert.Sum(nil)
-		log.Printf(hex.EncodeToString(resQWE))
 	}
 
 	req.Header.Add("Content-Type", "application/json")
