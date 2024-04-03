@@ -39,11 +39,9 @@ func (c *Client) POST(ctx context.Context, path, secret string, body []byte) err
 	}
 
 	if secret != "" {
-		hash, err := encrypt.EncryptSHA256(hex.EncodeToString(body), secret)
+		hash := encrypt.EncryptSHA256(hex.EncodeToString(body), secret)
 		log.Println("HashSHA256", secret, hex.EncodeToString(hash))
-		if err != nil {
-			return errEncryptSHA256Err
-		}
+
 		req.Header.Add("HashSHA256", hex.EncodeToString(hash))
 
 		qwert := hmac.New(sha256.New, []byte(secret))

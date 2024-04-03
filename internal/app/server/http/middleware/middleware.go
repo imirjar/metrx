@@ -70,12 +70,7 @@ func (m *Middleware) Encrypting(key string) func(next http.Handler) http.Handler
 
 			hashHeader := r.Header.Get("HashSHA256")
 			if key != "" && hashHeader != "" {
-				hashByte, err := encrypt.EncryptSHA256(hex.EncodeToString(body), key) //h.cfg.SECRET
-				if err != nil {
-					log.Print("middleware EncryptSHA256 ERROR", err)
-					w.WriteHeader(http.StatusInternalServerError)
-					return
-				}
+				hashByte := encrypt.EncryptSHA256(hex.EncodeToString(body), key) //h.cfg.SECRET
 
 				qwert := hmac.New(sha256.New, []byte(key))
 				qwert.Write(body)
@@ -200,11 +195,8 @@ type hashWriter struct {
 }
 
 func (hw hashWriter) Write(b []byte) (int, error) {
-	hashByte, err := encrypt.EncryptSHA256(hex.EncodeToString(b), hw.key) //h.cfg.SECRET
-	if err != nil {
-		// hw.WriteHeader(http.StatusInternalServerError)
-		return 0, err
-	}
+	hashByte := encrypt.EncryptSHA256(hex.EncodeToString(b), hw.key) //h.cfg.SECRET
+
 	hw.Header().Add("HashSHA256", hex.EncodeToString(hashByte))
 	return hw.w.Write(b)
 }
