@@ -2,8 +2,6 @@ package middleware
 
 import (
 	"bytes"
-	"crypto/hmac"
-	"crypto/sha256"
 	"encoding/hex"
 	"errors"
 	"io"
@@ -72,15 +70,9 @@ func (m *Middleware) Encrypting(key string) func(next http.Handler) http.Handler
 			if key != "" && hashHeader != "" {
 				hashByte := encrypt.EncryptSHA256(hex.EncodeToString(body), key) //h.cfg.SECRET
 
-				qwert := hmac.New(sha256.New, []byte(key))
-				qwert.Write(body)
-
 				if hashHeader != hex.EncodeToString(hashByte) {
 					// w.WriteHeader(http.StatusInternalServerError)
 					http.Error(w, "", http.StatusInternalServerError)
-					resQWE := qwert.Sum(nil)
-					log.Printf("key %s hashHeader: %s hash: %s may be: %s", key, hashHeader, hex.EncodeToString(hashByte), hex.EncodeToString(resQWE))
-
 					return
 				} else {
 					log.Printf("HASH IS EQUAL! ALL RIGHT!")
@@ -91,42 +83,6 @@ func (m *Middleware) Encrypting(key string) func(next http.Handler) http.Handler
 			next.ServeHTTP(w, r)
 		}
 		return http.HandlerFunc(fn)
-
-		// return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		// if key != "" {
-
-		// 	headerHash := r.Header.Get("HashSHA256")
-		// 	body, err := io.ReadAll(r.Body)
-		// 	if err != nil {
-		// 		w.WriteHeader(http.StatusInternalServerError)
-		// 		return
-		// 	}
-
-		// 	hashByte, err := encrypt.EncryptSHA256(body, []byte(key)) //h.cfg.SECRET
-		// 	if err != nil {
-		// 		w.WriteHeader(http.StatusInternalServerError)
-		// 		return
-		// 	}
-
-		// 	if headerHash != "" {
-		// 		log.Println("SECRET", key)
-		// 		// log.Print("Key")
-
-		// 		computedHash := hex.EncodeToString(hashByte)
-
-		// 		if headerHash != computedHash {
-		// 			log.Print(computedHash)
-		// 			w.WriteHeader(http.StatusInternalServerError)
-		// 			return
-		// 		}
-
-		// 		// log.Print(r.Body)
-		// 	}
-		// 	r.Body = io.NopCloser(bytes.NewReader(body))
-		// }
-		// next.ServeHTTP(w, r)
-		// })
 	}
 }
 
