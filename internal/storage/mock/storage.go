@@ -2,7 +2,6 @@ package mock
 
 import (
 	"context"
-	"log"
 	"time"
 
 	"github.com/imirjar/metrx/config"
@@ -20,7 +19,6 @@ func (s *Storage) configure(cfg config.ServerConfig) {
 	}
 
 	if cfg.Interval == 0 {
-		log.Println("AutoExport")
 		s.AutoExport = true
 	}
 
@@ -33,7 +31,6 @@ func (s *Storage) configure(cfg config.ServerConfig) {
 			}
 		}()
 	}
-
 }
 
 func (s *Storage) AddGauge(ctx context.Context, name string, value float64) (float64, error) {
@@ -46,7 +43,6 @@ func (s *Storage) AddGauge(ctx context.Context, name string, value float64) (flo
 }
 
 func (s *Storage) AddCounter(ctx context.Context, name string, delta int64) (int64, error) {
-	log.Println("###Я ТОПОВОЕ ХРАНИЛИЩЕ МЕТРИК")
 	newDelta := s.MemStorage.Counter[name] + delta
 	s.MemStorage.Counter[name] = newDelta
 

@@ -1,0 +1,1000 @@
+=== RUN   TestIteration14
+=== RUN   TestIteration14/TestCollectAgentMetrics
+    iteration14_test.go:439: get gauge: "BuckHashSys", value: 6934.000000
+    iteration14_test.go:439: get gauge: "GCCPUFraction", value: 0.000000
+    iteration14_test.go:439: get gauge: "GCSys", value: 1784664.000000
+    iteration14_test.go:439: get gauge: "HeapReleased", value: 1064960.000000
+    iteration14_test.go:439: get gauge: "HeapSys", value: 3833856.000000
+    iteration14_test.go:439: get gauge: "LastGC", value: 0.000000
+    iteration14_test.go:439: get gauge: "Lookups", value: 0.000000
+    iteration14_test.go:439: get gauge: "MCacheInuse", value: 4800.000000
+    iteration14_test.go:439: get gauge: "MCacheSys", value: 15600.000000
+    iteration14_test.go:439: get gauge: "MSpanInuse", value: 33920.000000
+    iteration14_test.go:439: get gauge: "MSpanSys", value: 48960.000000
+    iteration14_test.go:439: get gauge: "NextGC", value: 4194304.000000
+    iteration14_test.go:439: get gauge: "NumForcedGC", value: 0.000000
+    iteration14_test.go:439: get gauge: "NumGC", value: 0.000000
+    iteration14_test.go:439: get gauge: "OtherSys", value: 887154.000000
+    iteration14_test.go:439: get gauge: "PauseTotalNs", value: 0.000000
+    iteration14_test.go:439: get gauge: "StackInuse", value: 327680.000000
+    iteration14_test.go:439: get gauge: "StackSys", value: 327680.000000
+    iteration14_test.go:439: get gauge: "Sys", value: 6904848.000000
+=== RUN   TestIteration14/TestCollectAgentMetrics/counter/PollCount
+    iteration14_test.go:456: 
+        	Error Trace:	/home/imirjar/go/src/pkg/github.com/imirjar/metrx/iteration14_test.go:456
+        	            				/home/imirjar/go/src/pkg/github.com/imirjar/metrx/suite.go:91
+        	Error:      	Should be true
+        	Test:       	TestIteration14/TestCollectAgentMetrics/counter/PollCount
+        	Messages:   	Отсутствует изменение метрики: PollCount, тип: counter
+=== RUN   TestIteration14/TestCollectAgentMetrics/gauge/RandomValue
+    iteration14_test.go:456: 
+        	Error Trace:	/home/imirjar/go/src/pkg/github.com/imirjar/metrx/iteration14_test.go:456
+        	            				/home/imirjar/go/src/pkg/github.com/imirjar/metrx/suite.go:91
+        	Error:      	Should be true
+        	Test:       	TestIteration14/TestCollectAgentMetrics/gauge/RandomValue
+        	Messages:   	Отсутствует изменение метрики: RandomValue, тип: gauge
+=== RUN   TestIteration14/TestCollectAgentMetrics/gauge/Alloc
+    iteration14_test.go:456: 
+        	Error Trace:	/home/imirjar/go/src/pkg/github.com/imirjar/metrx/iteration14_test.go:456
+        	            				/home/imirjar/go/src/pkg/github.com/imirjar/metrx/suite.go:91
+        	Error:      	Should be true
+        	Test:       	TestIteration14/TestCollectAgentMetrics/gauge/Alloc
+        	Messages:   	Отсутствует изменение метрики: Alloc, тип: gauge
+=== RUN   TestIteration14/TestCollectAgentMetrics/gauge/BuckHashSys
+=== RUN   TestIteration14/TestCollectAgentMetrics/gauge/Frees
+    iteration14_test.go:456: 
+        	Error Trace:	/home/imirjar/go/src/pkg/github.com/imirjar/metrx/iteration14_test.go:456
+        	            				/home/imirjar/go/src/pkg/github.com/imirjar/metrx/suite.go:91
+        	Error:      	Should be true
+        	Test:       	TestIteration14/TestCollectAgentMetrics/gauge/Frees
+        	Messages:   	Отсутствует изменение метрики: Frees, тип: gauge
+=== RUN   TestIteration14/TestCollectAgentMetrics/gauge/GCCPUFraction
+=== RUN   TestIteration14/TestCollectAgentMetrics/gauge/GCSys
+=== RUN   TestIteration14/TestCollectAgentMetrics/gauge/HeapAlloc
+    iteration14_test.go:456: 
+        	Error Trace:	/home/imirjar/go/src/pkg/github.com/imirjar/metrx/iteration14_test.go:456
+        	            				/home/imirjar/go/src/pkg/github.com/imirjar/metrx/suite.go:91
+        	Error:      	Should be true
+        	Test:       	TestIteration14/TestCollectAgentMetrics/gauge/HeapAlloc
+        	Messages:   	Отсутствует изменение метрики: HeapAlloc, тип: gauge
+=== RUN   TestIteration14/TestCollectAgentMetrics/gauge/HeapIdle
+    iteration14_test.go:456: 
+        	Error Trace:	/home/imirjar/go/src/pkg/github.com/imirjar/metrx/iteration14_test.go:456
+        	            				/home/imirjar/go/src/pkg/github.com/imirjar/metrx/suite.go:91
+        	Error:      	Should be true
+        	Test:       	TestIteration14/TestCollectAgentMetrics/gauge/HeapIdle
+        	Messages:   	Отсутствует изменение метрики: HeapIdle, тип: gauge
+=== RUN   TestIteration14/TestCollectAgentMetrics/gauge/HeapInuse
+    iteration14_test.go:456: 
+        	Error Trace:	/home/imirjar/go/src/pkg/github.com/imirjar/metrx/iteration14_test.go:456
+        	            				/home/imirjar/go/src/pkg/github.com/imirjar/metrx/suite.go:91
+        	Error:      	Should be true
+        	Test:       	TestIteration14/TestCollectAgentMetrics/gauge/HeapInuse
+        	Messages:   	Отсутствует изменение метрики: HeapInuse, тип: gauge
+=== RUN   TestIteration14/TestCollectAgentMetrics/gauge/HeapObjects
+    iteration14_test.go:456: 
+        	Error Trace:	/home/imirjar/go/src/pkg/github.com/imirjar/metrx/iteration14_test.go:456
+        	            				/home/imirjar/go/src/pkg/github.com/imirjar/metrx/suite.go:91
+        	Error:      	Should be true
+        	Test:       	TestIteration14/TestCollectAgentMetrics/gauge/HeapObjects
+        	Messages:   	Отсутствует изменение метрики: HeapObjects, тип: gauge
+=== RUN   TestIteration14/TestCollectAgentMetrics/gauge/HeapReleased
+=== RUN   TestIteration14/TestCollectAgentMetrics/gauge/HeapSys
+=== RUN   TestIteration14/TestCollectAgentMetrics/gauge/LastGC
+=== RUN   TestIteration14/TestCollectAgentMetrics/gauge/Lookups
+=== RUN   TestIteration14/TestCollectAgentMetrics/gauge/MCacheInuse
+=== RUN   TestIteration14/TestCollectAgentMetrics/gauge/MCacheSys
+=== RUN   TestIteration14/TestCollectAgentMetrics/gauge/MSpanInuse
+=== RUN   TestIteration14/TestCollectAgentMetrics/gauge/MSpanSys
+=== RUN   TestIteration14/TestCollectAgentMetrics/gauge/Mallocs
+    iteration14_test.go:456: 
+        	Error Trace:	/home/imirjar/go/src/pkg/github.com/imirjar/metrx/iteration14_test.go:456
+        	            				/home/imirjar/go/src/pkg/github.com/imirjar/metrx/suite.go:91
+        	Error:      	Should be true
+        	Test:       	TestIteration14/TestCollectAgentMetrics/gauge/Mallocs
+        	Messages:   	Отсутствует изменение метрики: Mallocs, тип: gauge
+=== RUN   TestIteration14/TestCollectAgentMetrics/gauge/NextGC
+=== RUN   TestIteration14/TestCollectAgentMetrics/gauge/NumForcedGC
+=== RUN   TestIteration14/TestCollectAgentMetrics/gauge/NumGC
+=== RUN   TestIteration14/TestCollectAgentMetrics/gauge/OtherSys
+=== RUN   TestIteration14/TestCollectAgentMetrics/gauge/PauseTotalNs
+=== RUN   TestIteration14/TestCollectAgentMetrics/gauge/StackInuse
+=== RUN   TestIteration14/TestCollectAgentMetrics/gauge/StackSys
+=== RUN   TestIteration14/TestCollectAgentMetrics/gauge/Sys
+=== RUN   TestIteration14/TestCollectAgentMetrics/gauge/TotalAlloc
+    iteration14_test.go:456: 
+        	Error Trace:	/home/imirjar/go/src/pkg/github.com/imirjar/metrx/iteration14_test.go:456
+        	            				/home/imirjar/go/src/pkg/github.com/imirjar/metrx/suite.go:91
+        	Error:      	Should be true
+        	Test:       	TestIteration14/TestCollectAgentMetrics/gauge/TotalAlloc
+        	Messages:   	Отсутствует изменение метрики: TotalAlloc, тип: gauge
+=== RUN   TestIteration14/TestCounterGzipHandlers
+=== RUN   TestIteration14/TestCounterGzipHandlers/update
+    iteration14_test.go:221: 
+        	Error Trace:	/home/imirjar/go/src/pkg/github.com/imirjar/metrx/iteration14_test.go:221
+        	            				/home/imirjar/go/src/pkg/github.com/imirjar/metrx/suite.go:91
+        	Error:      	Not equal: 
+        	            	expected: 200
+        	            	actual  : 400
+        	Test:       	TestIteration14/TestCounterGzipHandlers/update
+        	Messages:   	Несоответствие статус кода ответа ожидаемому в хендлере "POST": "http://localhost:35773/update/" 
+    iteration14_test.go:260: Оригинальный запрос:
+        
+        POST /value/ HTTP/1.1
+        Host: localhost:35773
+        Accept: application/json
+        Accept-Encoding: gzip
+        Content-Type: application/json
+        User-Agent: go-resty/2.7.0 (https://github.com/go-resty/resty)
+        
+    iteration14_test.go:262: Оригинальный ответ:
+        
+=== RUN   TestIteration14/TestGaugeGzipHandlers
+=== RUN   TestIteration14/TestGaugeGzipHandlers/update
+=== NAME  TestIteration14
+    iteration14_test.go:169: Получен STDOUT лог процесса:
+        
+        2024/04/02 14:45:15 OUTGOING gauge VALUE Alloc 124952
+        2024/04/02 14:45:15 OUTGOING gauge VALUE BuckHashSys 6935
+        2024/04/02 14:45:15 OUTGOING gauge VALUE Frees 11
+        2024/04/02 14:45:15 OUTGOING gauge VALUE GCCPUFraction 0
+        2024/04/02 14:45:15 OUTGOING gauge VALUE GCSys 1.64704e+06
+        2024/04/02 14:45:15 OUTGOING gauge VALUE HeapAlloc 124952
+        2024/04/02 14:45:15 OUTGOING gauge VALUE HeapIdle 3.31776e+06
+        2024/04/02 14:45:15 OUTGOING gauge VALUE HeapInuse 548864
+        2024/04/02 14:45:15 OUTGOING gauge VALUE HeapObjects 385
+        2024/04/02 14:45:15 OUTGOING gauge VALUE HeapReleased 3.31776e+06
+        2024/04/02 14:45:15 OUTGOING gauge VALUE HeapSys 3.866624e+06
+        2024/04/02 14:45:15 OUTGOING gauge VALUE LastGC 0
+        2024/04/02 14:45:15 OUTGOING gauge VALUE Lookups 0
+        2024/04/02 14:45:15 OUTGOING gauge VALUE MCacheInuse 4800
+        2024/04/02 14:45:15 OUTGOING gauge VALUE MCacheSys 15600
+        2024/04/02 14:45:15 OUTGOING gauge VALUE MSpanInuse 23680
+        2024/04/02 14:45:15 OUTGOING gauge VALUE MSpanSys 32640
+        2024/04/02 14:45:15 OUTGOING gauge VALUE Mallocs 396
+        2024/04/02 14:45:15 OUTGOING gauge VALUE NextGC 4.194304e+06
+        2024/04/02 14:45:15 OUTGOING gauge VALUE NumForcedGC 0
+        2024/04/02 14:45:15 OUTGOING gauge VALUE NumGC 0
+        2024/04/02 14:45:15 OUTGOING gauge VALUE OtherSys 746185
+        2024/04/02 14:45:15 OUTGOING gauge VALUE PauseTotalNs 0
+        2024/04/02 14:45:15 OUTGOING gauge VALUE StackInuse 327680
+        2024/04/02 14:45:15 OUTGOING gauge VALUE StackSys 327680
+        2024/04/02 14:45:15 OUTGOING gauge VALUE Sys 6.642704e+06
+        2024/04/02 14:45:15 OUTGOING gauge VALUE TotalAlloc 124952
+        2024/04/02 14:45:15 OUTGOING gauge VALUE RandomValue 0.7483149674097873
+        2024/04/02 14:45:15 OUTGOING gauge VALUE PollCount 28
+        2024/04/02 14:45:15 CLIENT Client Do ERROR
+        2024/04/02 14:45:25 OUTGOING gauge VALUE Alloc 2.04836e+06
+        2024/04/02 14:45:25 OUTGOING gauge VALUE BuckHashSys 6935
+        2024/04/02 14:45:25 OUTGOING gauge VALUE Frees 74
+        2024/04/02 14:45:25 OUTGOING gauge VALUE GCCPUFraction 0
+        2024/04/02 14:45:25 OUTGOING gauge VALUE GCSys 1.790832e+06
+        2024/04/02 14:45:25 OUTGOING gauge VALUE HeapAlloc 2.04836e+06
+        2024/04/02 14:45:25 OUTGOING gauge VALUE HeapIdle 1.253376e+06
+        2024/04/02 14:45:25 OUTGOING gauge VALUE HeapInuse 2.58048e+06
+        2024/04/02 14:45:25 OUTGOING gauge VALUE HeapObjects 946
+        2024/04/02 14:45:25 OUTGOING gauge VALUE HeapReleased 1.220608e+06
+        2024/04/02 14:45:25 OUTGOING gauge VALUE HeapSys 3.833856e+06
+        2024/04/02 14:45:25 OUTGOING gauge VALUE LastGC 0
+        2024/04/02 14:45:25 OUTGOING gauge VALUE Lookups 0
+        2024/04/02 14:45:25 OUTGOING gauge VALUE MCacheInuse 4800
+        2024/04/02 14:45:25 OUTGOING gauge VALUE MCacheSys 15600
+        2024/04/02 14:45:25 OUTGOING gauge VALUE MSpanInuse 23680
+        2024/04/02 14:45:25 OUTGOING gauge VALUE MSpanSys 32640
+        2024/04/02 14:45:25 OUTGOING gauge VALUE Mallocs 1020
+        2024/04/02 14:45:25 OUTGOING gauge VALUE NextGC 4.194304e+06
+        2024/04/02 14:45:25 OUTGOING gauge VALUE NumForcedGC 0
+        2024/04/02 14:45:25 OUTGOING gauge VALUE NumGC 0
+        2024/04/02 14:45:25 OUTGOING gauge VALUE OtherSys 635161
+        2024/04/02 14:45:25 OUTGOING gauge VALUE PauseTotalNs 0
+        2024/04/02 14:45:25 OUTGOING gauge VALUE StackInuse 327680
+        2024/04/02 14:45:25 OUTGOING gauge VALUE StackSys 327680
+        2024/04/02 14:45:25 OUTGOING gauge VALUE Sys 6.642704e+06
+        2024/04/02 14:45:25 OUTGOING gauge VALUE TotalAlloc 2.04836e+06
+        2024/04/02 14:45:25 OUTGOING gauge VALUE RandomValue 0.9471360146494467
+        2024/04/02 14:45:25 OUTGOING gauge VALUE PollCount 28
+        2024/04/02 14:45:25 500 Internal Server Error
+        2024/04/02 14:45:35 OUTGOING gauge VALUE Alloc 237328
+        2024/04/02 14:45:35 OUTGOING gauge VALUE BuckHashSys 6935
+        2024/04/02 14:45:35 OUTGOING gauge VALUE Frees 635
+        2024/04/02 14:45:35 OUTGOING gauge VALUE GCCPUFraction 8.791381359059116e-06
+        2024/04/02 14:45:35 OUTGOING gauge VALUE GCSys 2.206016e+06
+        2024/04/02 14:45:35 OUTGOING gauge VALUE HeapAlloc 237328
+        2024/04/02 14:45:35 OUTGOING gauge VALUE HeapIdle 7.118848e+06
+        2024/04/02 14:45:35 OUTGOING gauge VALUE HeapInuse 876544
+        2024/04/02 14:45:35 OUTGOING gauge VALUE HeapObjects 672
+        2024/04/02 14:45:35 OUTGOING gauge VALUE HeapReleased 3.497984e+06
+        2024/04/02 14:45:35 OUTGOING gauge VALUE HeapSys 7.995392e+06
+        2024/04/02 14:45:35 OUTGOING gauge VALUE LastGC 1.71205832583864e+18
+        2024/04/02 14:45:35 OUTGOING gauge VALUE Lookups 0
+        2024/04/02 14:45:35 OUTGOING gauge VALUE MCacheInuse 4800
+        2024/04/02 14:45:35 OUTGOING gauge VALUE MCacheSys 15600
+        2024/04/02 14:45:35 OUTGOING gauge VALUE MSpanInuse 44160
+        2024/04/02 14:45:35 OUTGOING gauge VALUE MSpanSys 48960
+        2024/04/02 14:45:35 OUTGOING gauge VALUE Mallocs 1307
+        2024/04/02 14:45:35 OUTGOING gauge VALUE NextGC 4.194304e+06
+        2024/04/02 14:45:35 OUTGOING gauge VALUE NumForcedGC 0
+        2024/04/02 14:45:35 OUTGOING gauge VALUE NumGC 1
+        2024/04/02 14:45:35 OUTGOING gauge VALUE OtherSys 1.022857e+06
+        2024/04/02 14:45:35 OUTGOING gauge VALUE PauseTotalNs 23351
+        2024/04/02 14:45:35 OUTGOING gauge VALUE StackInuse 393216
+        2024/04/02 14:45:35 OUTGOING gauge VALUE StackSys 393216
+        2024/04/02 14:45:35 OUTGOING gauge VALUE Sys 1.1688976e+07
+        2024/04/02 14:45:35 OUTGOING gauge VALUE TotalAlloc 3.740128e+06
+        2024/04/02 14:45:35 OUTGOING gauge VALUE RandomValue 0.8020756361450431
+        2024/04/02 14:45:35 OUTGOING gauge VALUE PollCount 28
+        2024/04/02 14:45:35 500 Internal Server Error
+        2024/04/02 14:45:45 OUTGOING gauge VALUE Alloc 1.8984e+06
+        2024/04/02 14:45:45 OUTGOING gauge VALUE BuckHashSys 6935
+        2024/04/02 14:45:45 OUTGOING gauge VALUE Frees 665
+        2024/04/02 14:45:45 OUTGOING gauge VALUE GCCPUFraction 8.791381359059116e-06
+        2024/04/02 14:45:45 OUTGOING gauge VALUE GCSys 2.275792e+06
+        2024/04/02 14:45:45 OUTGOING gauge VALUE HeapAlloc 1.8984e+06
+        2024/04/02 14:45:45 OUTGOING gauge VALUE HeapIdle 5.431296e+06
+        2024/04/02 14:45:45 OUTGOING gauge VALUE HeapInuse 2.531328e+06
+        2024/04/02 14:45:45 OUTGOING gauge VALUE HeapObjects 939
+        2024/04/02 14:45:45 OUTGOING gauge VALUE HeapReleased 3.465216e+06
+        2024/04/02 14:45:45 OUTGOING gauge VALUE HeapSys 7.962624e+06
+        2024/04/02 14:45:45 OUTGOING gauge VALUE LastGC 1.71205832583864e+18
+        2024/04/02 14:45:45 OUTGOING gauge VALUE Lookups 0
+        2024/04/02 14:45:45 OUTGOING gauge VALUE MCacheInuse 4800
+        2024/04/02 14:45:45 OUTGOING gauge VALUE MCacheSys 15600
+        2024/04/02 14:45:45 OUTGOING gauge VALUE MSpanInuse 54400
+        2024/04/02 14:45:45 OUTGOING gauge VALUE MSpanSys 65280
+        2024/04/02 14:45:45 OUTGOING gauge VALUE Mallocs 1604
+        2024/04/02 14:45:45 OUTGOING gauge VALUE NextGC 4.194304e+06
+        2024/04/02 14:45:45 OUTGOING gauge VALUE NumForcedGC 0
+        2024/04/02 14:45:45 OUTGOING gauge VALUE NumGC 1
+        2024/04/02 14:45:45 OUTGOING gauge VALUE OtherSys 1.231673e+06
+        2024/04/02 14:45:45 OUTGOING gauge VALUE PauseTotalNs 23351
+        2024/04/02 14:45:45 OUTGOING gauge VALUE StackInuse 393216
+        2024/04/02 14:45:45 OUTGOING gauge VALUE StackSys 393216
+        2024/04/02 14:45:45 OUTGOING gauge VALUE Sys 1.195112e+07
+        2024/04/02 14:45:45 OUTGOING gauge VALUE TotalAlloc 5.4012e+06
+        2024/04/02 14:45:45 OUTGOING gauge VALUE RandomValue 0.9993848704757708
+        2024/04/02 14:45:45 OUTGOING gauge VALUE PollCount 28
+        2024/04/02 14:45:45 500 Internal Server Error
+        2024/04/02 14:45:55 OUTGOING gauge VALUE Alloc 3.557536e+06
+        2024/04/02 14:45:55 OUTGOING gauge VALUE BuckHashSys 6935
+        2024/04/02 14:45:55 OUTGOING gauge VALUE Frees 696
+        2024/04/02 14:45:55 OUTGOING gauge VALUE GCCPUFraction 8.791381359059116e-06
+        2024/04/02 14:45:55 OUTGOING gauge VALUE GCSys 2.320896e+06
+        2024/04/02 14:45:55 OUTGOING gauge VALUE HeapAlloc 3.557536e+06
+        2024/04/02 14:45:55 OUTGOING gauge VALUE HeapIdle 3.751936e+06
+        2024/04/02 14:45:55 OUTGOING gauge VALUE HeapInuse 4.17792e+06
+        2024/04/02 14:45:55 OUTGOING gauge VALUE HeapObjects 1196
+        2024/04/02 14:45:55 OUTGOING gauge VALUE HeapReleased 3.424256e+06
+        2024/04/02 14:45:55 OUTGOING gauge VALUE HeapSys 7.929856e+06
+        2024/04/02 14:45:55 OUTGOING gauge VALUE LastGC 1.71205832583864e+18
+        2024/04/02 14:45:55 OUTGOING gauge VALUE Lookups 0
+        2024/04/02 14:45:55 OUTGOING gauge VALUE MCacheInuse 4800
+        2024/04/02 14:45:55 OUTGOING gauge VALUE MCacheSys 15600
+        2024/04/02 14:45:55 OUTGOING gauge VALUE MSpanInuse 54400
+        2024/04/02 14:45:55 OUTGOING gauge VALUE MSpanSys 65280
+        2024/04/02 14:45:55 OUTGOING gauge VALUE Mallocs 1892
+        2024/04/02 14:45:55 OUTGOING gauge VALUE NextGC 4.194304e+06
+        2024/04/02 14:45:55 OUTGOING gauge VALUE NumForcedGC 0
+        2024/04/02 14:45:55 OUTGOING gauge VALUE NumGC 1
+        2024/04/02 14:45:55 OUTGOING gauge VALUE OtherSys 1.219337e+06
+        2024/04/02 14:45:55 OUTGOING gauge VALUE PauseTotalNs 23351
+        2024/04/02 14:45:55 OUTGOING gauge VALUE StackInuse 393216
+        2024/04/02 14:45:55 OUTGOING gauge VALUE StackSys 393216
+        2024/04/02 14:45:55 OUTGOING gauge VALUE Sys 1.195112e+07
+        2024/04/02 14:45:55 OUTGOING gauge VALUE TotalAlloc 7.060336e+06
+        2024/04/02 14:45:55 OUTGOING gauge VALUE RandomValue 0.3170939719267908
+        2024/04/02 14:45:55 OUTGOING gauge VALUE PollCount 28
+        2024/04/02 14:45:55 500 Internal Server Error
+        2024/04/02 14:46:05 OUTGOING gauge VALUE Alloc 1.889704e+06
+        2024/04/02 14:46:05 OUTGOING gauge VALUE BuckHashSys 6935
+        2024/04/02 14:46:05 OUTGOING gauge VALUE Frees 1345
+        2024/04/02 14:46:05 OUTGOING gauge VALUE GCCPUFraction 9.328009643159687e-06
+        2024/04/02 14:46:05 OUTGOING gauge VALUE GCSys 2.355712e+06
+        2024/04/02 14:46:05 OUTGOING gauge VALUE HeapAlloc 1.889704e+06
+        2024/04/02 14:46:05 OUTGOING gauge VALUE HeapIdle 5.414912e+06
+        2024/04/02 14:46:05 OUTGOING gauge VALUE HeapInuse 2.514944e+06
+        2024/04/02 14:46:05 OUTGOING gauge VALUE HeapObjects 825
+        2024/04/02 14:46:05 OUTGOING gauge VALUE HeapReleased 2.760704e+06
+        2024/04/02 14:46:05 OUTGOING gauge VALUE HeapSys 7.929856e+06
+        2024/04/02 14:46:05 OUTGOING gauge VALUE LastGC 1.7120583558359987e+18
+        2024/04/02 14:46:05 OUTGOING gauge VALUE Lookups 0
+        2024/04/02 14:46:05 OUTGOING gauge VALUE MCacheInuse 4800
+        2024/04/02 14:46:05 OUTGOING gauge VALUE MCacheSys 15600
+        2024/04/02 14:46:05 OUTGOING gauge VALUE MSpanInuse 54400
+        2024/04/02 14:46:05 OUTGOING gauge VALUE MSpanSys 65280
+        2024/04/02 14:46:05 OUTGOING gauge VALUE Mallocs 2170
+        2024/04/02 14:46:05 OUTGOING gauge VALUE NextGC 4.194304e+06
+        2024/04/02 14:46:05 OUTGOING gauge VALUE NumForcedGC 0
+        2024/04/02 14:46:05 OUTGOING gauge VALUE NumGC 2
+        2024/04/02 14:46:05 OUTGOING gauge VALUE OtherSys 1.217289e+06
+        2024/04/02 14:46:05 OUTGOING gauge VALUE PauseTotalNs 100106
+        2024/04/02 14:46:05 OUTGOING gauge VALUE StackInuse 425984
+        2024/04/02 14:46:05 OUTGOING gauge VALUE StackSys 425984
+        2024/04/02 14:46:05 OUTGOING gauge VALUE Sys 1.2016656e+07
+        2024/04/02 14:46:05 OUTGOING gauge VALUE TotalAlloc 8.716624e+06
+        2024/04/02 14:46:05 OUTGOING gauge VALUE RandomValue 0.2284491719057403
+        2024/04/02 14:46:05 OUTGOING gauge VALUE PollCount 28
+        2024/04/02 14:46:05 500 Internal Server Error
+        2024/04/02 14:46:15 OUTGOING gauge VALUE Alloc 3.542992e+06
+        2024/04/02 14:46:15 OUTGOING gauge VALUE BuckHashSys 6935
+        2024/04/02 14:46:15 OUTGOING gauge VALUE Frees 1374
+        2024/04/02 14:46:15 OUTGOING gauge VALUE GCCPUFraction 9.328009643159687e-06
+        2024/04/02 14:46:15 OUTGOING gauge VALUE GCSys 2.38848e+06
+        2024/04/02 14:46:15 OUTGOING gauge VALUE HeapAlloc 3.542992e+06
+        2024/04/02 14:46:15 OUTGOING gauge VALUE HeapIdle 3.702784e+06
+        2024/04/02 14:46:15 OUTGOING gauge VALUE HeapInuse 4.194304e+06
+        2024/04/02 14:46:15 OUTGOING gauge VALUE HeapObjects 1061
+        2024/04/02 14:46:15 OUTGOING gauge VALUE HeapReleased 2.760704e+06
+        2024/04/02 14:46:15 OUTGOING gauge VALUE HeapSys 7.897088e+06
+        2024/04/02 14:46:15 OUTGOING gauge VALUE LastGC 1.7120583558359987e+18
+        2024/04/02 14:46:15 OUTGOING gauge VALUE Lookups 0
+        2024/04/02 14:46:15 OUTGOING gauge VALUE MCacheInuse 4800
+        2024/04/02 14:46:15 OUTGOING gauge VALUE MCacheSys 15600
+        2024/04/02 14:46:15 OUTGOING gauge VALUE MSpanInuse 64640
+        2024/04/02 14:46:15 OUTGOING gauge VALUE MSpanSys 65280
+        2024/04/02 14:46:15 OUTGOING gauge VALUE Mallocs 2435
+        2024/04/02 14:46:15 OUTGOING gauge VALUE NextGC 4.194304e+06
+        2024/04/02 14:46:15 OUTGOING gauge VALUE NumForcedGC 0
+        2024/04/02 14:46:15 OUTGOING gauge VALUE NumGC 2
+        2024/04/02 14:46:15 OUTGOING gauge VALUE OtherSys 1.217289e+06
+        2024/04/02 14:46:15 OUTGOING gauge VALUE PauseTotalNs 100106
+        2024/04/02 14:46:15 OUTGOING gauge VALUE StackInuse 425984
+        2024/04/02 14:46:15 OUTGOING gauge VALUE StackSys 425984
+        2024/04/02 14:46:15 OUTGOING gauge VALUE Sys 1.2016656e+07
+        2024/04/02 14:46:15 OUTGOING gauge VALUE TotalAlloc 1.0369912e+07
+        2024/04/02 14:46:15 OUTGOING gauge VALUE RandomValue 0.8242007915362356
+        2024/04/02 14:46:15 OUTGOING gauge VALUE PollCount 28
+        2024/04/02 14:46:15 500 Internal Server Error
+    iteration14_test.go:138: Получен STDOUT лог процесса:
+        
+        2024/04/02 14:45:15 HANDLER MAIN PAGE
+        2024/04/02 14:45:16 SERVICE ViewPath
+        2024/04/02 14:45:16 SERVICE ViewPath
+        2024/04/02 14:45:16 SERVICE ViewPath
+        2024/04/02 14:45:16 SERVICE ViewPath
+        2024/04/02 14:45:16 SERVICE ViewPath
+        2024/04/02 14:45:16 SERVICE ViewPath
+        2024/04/02 14:45:16 SERVICE ViewPath
+        2024/04/02 14:45:16 SERVICE ViewPath
+        2024/04/02 14:45:16 SERVICE ViewPath
+        2024/04/02 14:45:16 SERVICE ViewPath
+        2024/04/02 14:45:17 SERVICE ViewPath
+        2024/04/02 14:45:17 SERVICE ViewPath
+        2024/04/02 14:45:17 SERVICE ViewPath
+        2024/04/02 14:45:17 SERVICE ViewPath
+        2024/04/02 14:45:17 SERVICE ViewPath
+        2024/04/02 14:45:17 SERVICE ViewPath
+        2024/04/02 14:45:17 SERVICE ViewPath
+        2024/04/02 14:45:17 SERVICE ViewPath
+        2024/04/02 14:45:17 SERVICE ViewPath
+        2024/04/02 14:45:18 SERVICE ViewPath
+        2024/04/02 14:45:18 SERVICE ViewPath
+        2024/04/02 14:45:18 SERVICE ViewPath
+        2024/04/02 14:45:18 SERVICE ViewPath
+        2024/04/02 14:45:18 SERVICE ViewPath
+        2024/04/02 14:45:18 SERVICE ViewPath
+        2024/04/02 14:45:18 SERVICE ViewPath
+        2024/04/02 14:45:18 SERVICE ViewPath
+        2024/04/02 14:45:18 SERVICE ViewPath
+        2024/04/02 14:45:18 SERVICE ViewPath
+        2024/04/02 14:45:19 SERVICE ViewPath
+        2024/04/02 14:45:19 SERVICE ViewPath
+        2024/04/02 14:45:19 SERVICE ViewPath
+        2024/04/02 14:45:19 SERVICE ViewPath
+        2024/04/02 14:45:19 SERVICE ViewPath
+        2024/04/02 14:45:19 SERVICE ViewPath
+        2024/04/02 14:45:19 SERVICE ViewPath
+        2024/04/02 14:45:19 SERVICE ViewPath
+        2024/04/02 14:45:19 SERVICE ViewPath
+        2024/04/02 14:45:19 SERVICE ViewPath
+        2024/04/02 14:45:20 SERVICE ViewPath
+        2024/04/02 14:45:20 SERVICE ViewPath
+        2024/04/02 14:45:20 SERVICE ViewPath
+        2024/04/02 14:45:20 SERVICE ViewPath
+        2024/04/02 14:45:20 SERVICE ViewPath
+        2024/04/02 14:45:20 SERVICE ViewPath
+        2024/04/02 14:45:20 SERVICE ViewPath
+        2024/04/02 14:45:20 SERVICE ViewPath
+        2024/04/02 14:45:20 SERVICE ViewPath
+        2024/04/02 14:45:21 SERVICE ViewPath
+        2024/04/02 14:45:21 SERVICE ViewPath
+        2024/04/02 14:45:21 SERVICE ViewPath
+        2024/04/02 14:45:21 SERVICE ViewPath
+        2024/04/02 14:45:21 SERVICE ViewPath
+        2024/04/02 14:45:21 SERVICE ViewPath
+        2024/04/02 14:45:21 SERVICE ViewPath
+        2024/04/02 14:45:21 SERVICE ViewPath
+        2024/04/02 14:45:21 SERVICE ViewPath
+        2024/04/02 14:45:21 SERVICE ViewPath
+        2024/04/02 14:45:22 SERVICE ViewPath
+        2024/04/02 14:45:22 SERVICE ViewPath
+        2024/04/02 14:45:22 SERVICE ViewPath
+        2024/04/02 14:45:22 SERVICE ViewPath
+        2024/04/02 14:45:22 SERVICE ViewPath
+        2024/04/02 14:45:22 SERVICE ViewPath
+        2024/04/02 14:45:22 SERVICE ViewPath
+        2024/04/02 14:45:22 SERVICE ViewPath
+        2024/04/02 14:45:22 SERVICE ViewPath
+        2024/04/02 14:45:22 SERVICE ViewPath
+        2024/04/02 14:45:23 SERVICE ViewPath
+        2024/04/02 14:45:23 SERVICE ViewPath
+        2024/04/02 14:45:23 SERVICE ViewPath
+        2024/04/02 14:45:23 SERVICE ViewPath
+        2024/04/02 14:45:23 SERVICE ViewPath
+        2024/04/02 14:45:23 SERVICE ViewPath
+        2024/04/02 14:45:23 SERVICE ViewPath
+        2024/04/02 14:45:23 SERVICE ViewPath
+        2024/04/02 14:45:23 SERVICE ViewPath
+        2024/04/02 14:45:23 SERVICE ViewPath
+        2024/04/02 14:45:24 SERVICE ViewPath
+        2024/04/02 14:45:24 SERVICE ViewPath
+        2024/04/02 14:45:24 SERVICE ViewPath
+        2024/04/02 14:45:24 SERVICE ViewPath
+        2024/04/02 14:45:24 SERVICE ViewPath
+        2024/04/02 14:45:24 SERVICE ViewPath
+        2024/04/02 14:45:24 SERVICE ViewPath
+        2024/04/02 14:45:24 SERVICE ViewPath
+        2024/04/02 14:45:24 SERVICE ViewPath
+        2024/04/02 14:45:25 SERVICE ViewPath
+        2024/04/02 14:45:25 SERVICE ViewPath
+        2024/04/02 14:45:25 SERVICE ViewPath
+        2024/04/02 14:45:25 SERVICE ViewPath
+        2024/04/02 14:45:25 SERVICE ViewPath
+        2024/04/02 14:45:25 SERVICE ViewPath
+        2024/04/02 14:45:25 SERVICE ViewPath
+        2024/04/02 14:45:25 SERVICE ViewPath
+        time="2024-04-02T14:45:25+03:00" level=info msg="key invalidkey hashHeader: 5581407fbcb69713a879d46bcf0bba4eff8410cacbf5db488264c369047c1721 hash: a3dc078cdf8ce3ba12994ca53ec10b9474d736123d2ea9ca85f186bcef268340"
+        2024/04/02 14:45:25 SERVICE ViewPath
+        2024/04/02 14:45:25 SERVICE ViewPath
+        2024/04/02 14:45:26 SERVICE ViewPath
+        2024/04/02 14:45:26 SERVICE ViewPath
+        2024/04/02 14:45:26 SERVICE ViewPath
+        2024/04/02 14:45:26 SERVICE ViewPath
+        2024/04/02 14:45:26 SERVICE ViewPath
+        2024/04/02 14:45:26 SERVICE ViewPath
+        2024/04/02 14:45:26 SERVICE ViewPath
+        2024/04/02 14:45:26 SERVICE ViewPath
+        2024/04/02 14:45:26 SERVICE ViewPath
+        2024/04/02 14:45:26 SERVICE ViewPath
+        2024/04/02 14:45:27 SERVICE ViewPath
+        2024/04/02 14:45:27 SERVICE ViewPath
+        2024/04/02 14:45:27 SERVICE ViewPath
+        2024/04/02 14:45:27 SERVICE ViewPath
+        2024/04/02 14:45:27 SERVICE ViewPath
+        2024/04/02 14:45:27 SERVICE ViewPath
+        2024/04/02 14:45:27 SERVICE ViewPath
+        2024/04/02 14:45:27 SERVICE ViewPath
+        2024/04/02 14:45:27 SERVICE ViewPath
+        2024/04/02 14:45:27 SERVICE ViewPath
+        2024/04/02 14:45:28 SERVICE ViewPath
+        2024/04/02 14:45:28 SERVICE ViewPath
+        2024/04/02 14:45:28 SERVICE ViewPath
+        2024/04/02 14:45:28 SERVICE ViewPath
+        2024/04/02 14:45:28 SERVICE ViewPath
+        2024/04/02 14:45:28 SERVICE ViewPath
+        2024/04/02 14:45:28 SERVICE ViewPath
+        2024/04/02 14:45:28 SERVICE ViewPath
+        2024/04/02 14:45:28 SERVICE ViewPath
+        2024/04/02 14:45:29 SERVICE ViewPath
+        2024/04/02 14:45:29 SERVICE ViewPath
+        2024/04/02 14:45:29 SERVICE ViewPath
+        2024/04/02 14:45:29 SERVICE ViewPath
+        2024/04/02 14:45:29 SERVICE ViewPath
+        2024/04/02 14:45:29 SERVICE ViewPath
+        2024/04/02 14:45:29 SERVICE ViewPath
+        2024/04/02 14:45:29 SERVICE ViewPath
+        2024/04/02 14:45:29 SERVICE ViewPath
+        2024/04/02 14:45:29 SERVICE ViewPath
+        2024/04/02 14:45:30 SERVICE ViewPath
+        2024/04/02 14:45:30 SERVICE ViewPath
+        2024/04/02 14:45:30 SERVICE ViewPath
+        2024/04/02 14:45:30 SERVICE ViewPath
+        2024/04/02 14:45:30 SERVICE ViewPath
+        2024/04/02 14:45:30 SERVICE ViewPath
+        2024/04/02 14:45:30 SERVICE ViewPath
+        2024/04/02 14:45:30 SERVICE ViewPath
+        2024/04/02 14:45:30 SERVICE ViewPath
+        2024/04/02 14:45:30 SERVICE ViewPath
+        2024/04/02 14:45:31 SERVICE ViewPath
+        2024/04/02 14:45:31 SERVICE ViewPath
+        2024/04/02 14:45:31 SERVICE ViewPath
+        2024/04/02 14:45:31 SERVICE ViewPath
+        2024/04/02 14:45:31 SERVICE ViewPath
+        2024/04/02 14:45:31 SERVICE ViewPath
+        2024/04/02 14:45:31 SERVICE ViewPath
+        2024/04/02 14:45:31 SERVICE ViewPath
+        2024/04/02 14:45:31 SERVICE ViewPath
+        2024/04/02 14:45:32 SERVICE ViewPath
+        2024/04/02 14:45:32 SERVICE ViewPath
+        2024/04/02 14:45:32 SERVICE ViewPath
+        2024/04/02 14:45:32 SERVICE ViewPath
+        2024/04/02 14:45:32 SERVICE ViewPath
+        2024/04/02 14:45:32 SERVICE ViewPath
+        2024/04/02 14:45:32 SERVICE ViewPath
+        2024/04/02 14:45:32 SERVICE ViewPath
+        2024/04/02 14:45:32 SERVICE ViewPath
+        2024/04/02 14:45:32 SERVICE ViewPath
+        2024/04/02 14:45:33 SERVICE ViewPath
+        2024/04/02 14:45:33 SERVICE ViewPath
+        2024/04/02 14:45:33 SERVICE ViewPath
+        2024/04/02 14:45:33 SERVICE ViewPath
+        2024/04/02 14:45:33 SERVICE ViewPath
+        2024/04/02 14:45:33 SERVICE ViewPath
+        2024/04/02 14:45:33 SERVICE ViewPath
+        2024/04/02 14:45:33 SERVICE ViewPath
+        2024/04/02 14:45:33 SERVICE ViewPath
+        2024/04/02 14:45:33 SERVICE ViewPath
+        2024/04/02 14:45:34 SERVICE ViewPath
+        2024/04/02 14:45:34 SERVICE ViewPath
+        2024/04/02 14:45:34 SERVICE ViewPath
+        2024/04/02 14:45:34 SERVICE ViewPath
+        2024/04/02 14:45:34 SERVICE ViewPath
+        2024/04/02 14:45:34 SERVICE ViewPath
+        2024/04/02 14:45:34 SERVICE ViewPath
+        2024/04/02 14:45:34 SERVICE ViewPath
+        2024/04/02 14:45:34 SERVICE ViewPath
+        2024/04/02 14:45:34 SERVICE ViewPath
+        2024/04/02 14:45:35 SERVICE ViewPath
+        2024/04/02 14:45:35 SERVICE ViewPath
+        2024/04/02 14:45:35 SERVICE ViewPath
+        2024/04/02 14:45:35 SERVICE ViewPath
+        2024/04/02 14:45:35 SERVICE ViewPath
+        2024/04/02 14:45:35 SERVICE ViewPath
+        2024/04/02 14:45:35 SERVICE ViewPath
+        2024/04/02 14:45:35 SERVICE ViewPath
+        time="2024-04-02T14:45:35+03:00" level=info msg="key invalidkey hashHeader: 727535886577d587f48f28a4bcd1802c653ff1bdc267b01d60186152d93fe23f hash: 949a57ad59adf8ca68c8e7ff5a1dcc3ba8fef1d5225ead6364f6fce96896813e"
+        2024/04/02 14:45:35 SERVICE ViewPath
+        2024/04/02 14:45:36 SERVICE ViewPath
+        2024/04/02 14:45:36 SERVICE ViewPath
+        2024/04/02 14:45:36 SERVICE ViewPath
+        2024/04/02 14:45:36 SERVICE ViewPath
+        2024/04/02 14:45:36 SERVICE ViewPath
+        2024/04/02 14:45:36 SERVICE ViewPath
+        2024/04/02 14:45:36 SERVICE ViewPath
+        2024/04/02 14:45:36 SERVICE ViewPath
+        2024/04/02 14:45:36 SERVICE ViewPath
+        2024/04/02 14:45:36 SERVICE ViewPath
+        2024/04/02 14:45:37 SERVICE ViewPath
+        2024/04/02 14:45:37 SERVICE ViewPath
+        2024/04/02 14:45:37 SERVICE ViewPath
+        2024/04/02 14:45:37 SERVICE ViewPath
+        2024/04/02 14:45:37 SERVICE ViewPath
+        2024/04/02 14:45:37 SERVICE ViewPath
+        2024/04/02 14:45:37 SERVICE ViewPath
+        2024/04/02 14:45:37 SERVICE ViewPath
+        2024/04/02 14:45:37 SERVICE ViewPath
+        2024/04/02 14:45:37 SERVICE ViewPath
+        2024/04/02 14:45:38 SERVICE ViewPath
+        2024/04/02 14:45:38 SERVICE ViewPath
+        2024/04/02 14:45:38 SERVICE ViewPath
+        2024/04/02 14:45:38 SERVICE ViewPath
+        2024/04/02 14:45:38 SERVICE ViewPath
+        2024/04/02 14:45:38 SERVICE ViewPath
+        2024/04/02 14:45:38 SERVICE ViewPath
+        2024/04/02 14:45:38 SERVICE ViewPath
+        2024/04/02 14:45:38 SERVICE ViewPath
+        2024/04/02 14:45:39 SERVICE ViewPath
+        2024/04/02 14:45:39 SERVICE ViewPath
+        2024/04/02 14:45:39 SERVICE ViewPath
+        2024/04/02 14:45:39 SERVICE ViewPath
+        2024/04/02 14:45:39 SERVICE ViewPath
+        2024/04/02 14:45:39 SERVICE ViewPath
+        2024/04/02 14:45:39 SERVICE ViewPath
+        2024/04/02 14:45:39 SERVICE ViewPath
+        2024/04/02 14:45:39 SERVICE ViewPath
+        2024/04/02 14:45:39 SERVICE ViewPath
+        2024/04/02 14:45:40 SERVICE ViewPath
+        2024/04/02 14:45:40 SERVICE ViewPath
+        2024/04/02 14:45:40 SERVICE ViewPath
+        2024/04/02 14:45:40 SERVICE ViewPath
+        2024/04/02 14:45:40 SERVICE ViewPath
+        2024/04/02 14:45:40 SERVICE ViewPath
+        2024/04/02 14:45:40 SERVICE ViewPath
+        2024/04/02 14:45:40 SERVICE ViewPath
+        2024/04/02 14:45:40 SERVICE ViewPath
+        2024/04/02 14:45:40 SERVICE ViewPath
+        2024/04/02 14:45:41 SERVICE ViewPath
+        2024/04/02 14:45:41 SERVICE ViewPath
+        2024/04/02 14:45:41 SERVICE ViewPath
+        2024/04/02 14:45:41 SERVICE ViewPath
+        2024/04/02 14:45:41 SERVICE ViewPath
+        2024/04/02 14:45:41 SERVICE ViewPath
+        2024/04/02 14:45:41 SERVICE ViewPath
+        2024/04/02 14:45:41 SERVICE ViewPath
+        2024/04/02 14:45:41 SERVICE ViewPath
+        2024/04/02 14:45:41 SERVICE ViewPath
+        2024/04/02 14:45:42 SERVICE ViewPath
+        2024/04/02 14:45:42 SERVICE ViewPath
+        2024/04/02 14:45:42 SERVICE ViewPath
+        2024/04/02 14:45:42 SERVICE ViewPath
+        2024/04/02 14:45:42 SERVICE ViewPath
+        2024/04/02 14:45:42 SERVICE ViewPath
+        2024/04/02 14:45:42 SERVICE ViewPath
+        2024/04/02 14:45:42 SERVICE ViewPath
+        2024/04/02 14:45:42 SERVICE ViewPath
+        2024/04/02 14:45:43 SERVICE ViewPath
+        2024/04/02 14:45:43 SERVICE ViewPath
+        2024/04/02 14:45:43 SERVICE ViewPath
+        2024/04/02 14:45:43 SERVICE ViewPath
+        2024/04/02 14:45:43 SERVICE ViewPath
+        2024/04/02 14:45:43 SERVICE ViewPath
+        2024/04/02 14:45:43 SERVICE ViewPath
+        2024/04/02 14:45:43 SERVICE ViewPath
+        2024/04/02 14:45:43 SERVICE ViewPath
+        2024/04/02 14:45:43 SERVICE ViewPath
+        2024/04/02 14:45:44 SERVICE ViewPath
+        2024/04/02 14:45:44 SERVICE ViewPath
+        2024/04/02 14:45:44 SERVICE ViewPath
+        2024/04/02 14:45:44 SERVICE ViewPath
+        2024/04/02 14:45:44 SERVICE ViewPath
+        2024/04/02 14:45:44 SERVICE ViewPath
+        2024/04/02 14:45:44 SERVICE ViewPath
+        2024/04/02 14:45:44 SERVICE ViewPath
+        2024/04/02 14:45:44 SERVICE ViewPath
+        2024/04/02 14:45:44 SERVICE ViewPath
+        2024/04/02 14:45:45 SERVICE ViewPath
+        2024/04/02 14:45:45 SERVICE ViewPath
+        2024/04/02 14:45:45 SERVICE ViewPath
+        2024/04/02 14:45:45 SERVICE ViewPath
+        2024/04/02 14:45:45 SERVICE ViewPath
+        2024/04/02 14:45:45 SERVICE ViewPath
+        2024/04/02 14:45:45 SERVICE ViewPath
+        2024/04/02 14:45:45 SERVICE ViewPath
+        time="2024-04-02T14:45:45+03:00" level=info msg="key invalidkey hashHeader: 7daaf71dd3bc7f8d0f17fadc7ecf5a8eedfa125e3da150bf6f41f0d812543267 hash: 7295d29269d471b5d3c026e936aeec59ee05bf1e32568a5e5819680d18b5f6b8"
+        2024/04/02 14:45:45 SERVICE ViewPath
+        2024/04/02 14:45:46 SERVICE ViewPath
+        2024/04/02 14:45:46 SERVICE ViewPath
+        2024/04/02 14:45:46 SERVICE ViewPath
+        2024/04/02 14:45:46 SERVICE ViewPath
+        2024/04/02 14:45:46 SERVICE ViewPath
+        2024/04/02 14:45:46 SERVICE ViewPath
+        2024/04/02 14:45:46 SERVICE ViewPath
+        2024/04/02 14:45:46 SERVICE ViewPath
+        2024/04/02 14:45:46 SERVICE ViewPath
+        2024/04/02 14:45:46 SERVICE ViewPath
+        2024/04/02 14:45:47 SERVICE ViewPath
+        2024/04/02 14:45:47 SERVICE ViewPath
+        2024/04/02 14:45:47 SERVICE ViewPath
+        2024/04/02 14:45:47 SERVICE ViewPath
+        2024/04/02 14:45:47 SERVICE ViewPath
+        2024/04/02 14:45:47 SERVICE ViewPath
+        2024/04/02 14:45:47 SERVICE ViewPath
+        2024/04/02 14:45:47 SERVICE ViewPath
+        2024/04/02 14:45:47 SERVICE ViewPath
+        2024/04/02 14:45:47 SERVICE ViewPath
+        2024/04/02 14:45:48 SERVICE ViewPath
+        2024/04/02 14:45:48 SERVICE ViewPath
+        2024/04/02 14:45:48 SERVICE ViewPath
+        2024/04/02 14:45:48 SERVICE ViewPath
+        2024/04/02 14:45:48 SERVICE ViewPath
+        2024/04/02 14:45:48 SERVICE ViewPath
+        2024/04/02 14:45:48 SERVICE ViewPath
+        2024/04/02 14:45:48 SERVICE ViewPath
+        2024/04/02 14:45:48 SERVICE ViewPath
+        2024/04/02 14:45:48 SERVICE ViewPath
+        2024/04/02 14:45:49 SERVICE ViewPath
+        2024/04/02 14:45:49 SERVICE ViewPath
+        2024/04/02 14:45:49 SERVICE ViewPath
+        2024/04/02 14:45:49 SERVICE ViewPath
+        2024/04/02 14:45:49 SERVICE ViewPath
+        2024/04/02 14:45:49 SERVICE ViewPath
+        2024/04/02 14:45:49 SERVICE ViewPath
+        2024/04/02 14:45:49 SERVICE ViewPath
+        2024/04/02 14:45:49 SERVICE ViewPath
+        2024/04/02 14:45:50 SERVICE ViewPath
+        2024/04/02 14:45:50 SERVICE ViewPath
+        2024/04/02 14:45:50 SERVICE ViewPath
+        2024/04/02 14:45:50 SERVICE ViewPath
+        2024/04/02 14:45:50 SERVICE ViewPath
+        2024/04/02 14:45:50 SERVICE ViewPath
+        2024/04/02 14:45:50 SERVICE ViewPath
+        2024/04/02 14:45:50 SERVICE ViewPath
+        2024/04/02 14:45:50 SERVICE ViewPath
+        2024/04/02 14:45:50 SERVICE ViewPath
+        2024/04/02 14:45:51 SERVICE ViewPath
+        2024/04/02 14:45:51 SERVICE ViewPath
+        2024/04/02 14:45:51 SERVICE ViewPath
+        2024/04/02 14:45:51 SERVICE ViewPath
+        2024/04/02 14:45:51 SERVICE ViewPath
+        2024/04/02 14:45:51 SERVICE ViewPath
+        2024/04/02 14:45:51 SERVICE ViewPath
+        2024/04/02 14:45:51 SERVICE ViewPath
+        2024/04/02 14:45:51 SERVICE ViewPath
+        2024/04/02 14:45:51 SERVICE ViewPath
+        2024/04/02 14:45:52 SERVICE ViewPath
+        2024/04/02 14:45:52 SERVICE ViewPath
+        2024/04/02 14:45:52 SERVICE ViewPath
+        2024/04/02 14:45:52 SERVICE ViewPath
+        2024/04/02 14:45:52 SERVICE ViewPath
+        2024/04/02 14:45:52 SERVICE ViewPath
+        2024/04/02 14:45:52 SERVICE ViewPath
+        2024/04/02 14:45:52 SERVICE ViewPath
+        2024/04/02 14:45:52 SERVICE ViewPath
+        2024/04/02 14:45:52 SERVICE ViewPath
+        2024/04/02 14:45:53 SERVICE ViewPath
+        2024/04/02 14:45:53 SERVICE ViewPath
+        2024/04/02 14:45:53 SERVICE ViewPath
+        2024/04/02 14:45:53 SERVICE ViewPath
+        2024/04/02 14:45:53 SERVICE ViewPath
+        2024/04/02 14:45:53 SERVICE ViewPath
+        2024/04/02 14:45:53 SERVICE ViewPath
+        2024/04/02 14:45:53 SERVICE ViewPath
+        2024/04/02 14:45:53 SERVICE ViewPath
+        2024/04/02 14:45:54 SERVICE ViewPath
+        2024/04/02 14:45:54 SERVICE ViewPath
+        2024/04/02 14:45:54 SERVICE ViewPath
+        2024/04/02 14:45:54 SERVICE ViewPath
+        2024/04/02 14:45:54 SERVICE ViewPath
+        2024/04/02 14:45:54 SERVICE ViewPath
+        2024/04/02 14:45:54 SERVICE ViewPath
+        2024/04/02 14:45:54 SERVICE ViewPath
+        2024/04/02 14:45:54 SERVICE ViewPath
+        2024/04/02 14:45:54 SERVICE ViewPath
+        2024/04/02 14:45:55 SERVICE ViewPath
+        2024/04/02 14:45:55 SERVICE ViewPath
+        2024/04/02 14:45:55 SERVICE ViewPath
+        2024/04/02 14:45:55 SERVICE ViewPath
+        2024/04/02 14:45:55 SERVICE ViewPath
+        2024/04/02 14:45:55 SERVICE ViewPath
+        2024/04/02 14:45:55 SERVICE ViewPath
+        2024/04/02 14:45:55 SERVICE ViewPath
+        time="2024-04-02T14:45:55+03:00" level=info msg="key invalidkey hashHeader: eff55038646ca4de6ded23853caf17e282638ff0f45a839f0a1d295ac0c56de3 hash: 1e8192fec9efcef943b7258ca921b9fbfd4c152664a0499fe98de27a59f9ca01"
+        2024/04/02 14:45:55 SERVICE ViewPath
+        2024/04/02 14:45:55 SERVICE ViewPath
+        2024/04/02 14:45:56 SERVICE ViewPath
+        2024/04/02 14:45:56 SERVICE ViewPath
+        2024/04/02 14:45:56 SERVICE ViewPath
+        2024/04/02 14:45:56 SERVICE ViewPath
+        2024/04/02 14:45:56 SERVICE ViewPath
+        2024/04/02 14:45:56 SERVICE ViewPath
+        2024/04/02 14:45:56 SERVICE ViewPath
+        2024/04/02 14:45:56 SERVICE ViewPath
+        2024/04/02 14:45:56 SERVICE ViewPath
+        2024/04/02 14:45:57 SERVICE ViewPath
+        2024/04/02 14:45:57 SERVICE ViewPath
+        2024/04/02 14:45:57 SERVICE ViewPath
+        2024/04/02 14:45:57 SERVICE ViewPath
+        2024/04/02 14:45:57 SERVICE ViewPath
+        2024/04/02 14:45:57 SERVICE ViewPath
+        2024/04/02 14:45:57 SERVICE ViewPath
+        2024/04/02 14:45:57 SERVICE ViewPath
+        2024/04/02 14:45:57 SERVICE ViewPath
+        2024/04/02 14:45:57 SERVICE ViewPath
+        2024/04/02 14:45:58 SERVICE ViewPath
+        2024/04/02 14:45:58 SERVICE ViewPath
+        2024/04/02 14:45:58 SERVICE ViewPath
+        2024/04/02 14:45:58 SERVICE ViewPath
+        2024/04/02 14:45:58 SERVICE ViewPath
+        2024/04/02 14:45:58 SERVICE ViewPath
+        2024/04/02 14:45:58 SERVICE ViewPath
+        2024/04/02 14:45:58 SERVICE ViewPath
+        2024/04/02 14:45:58 SERVICE ViewPath
+        2024/04/02 14:45:58 SERVICE ViewPath
+        2024/04/02 14:45:59 SERVICE ViewPath
+        2024/04/02 14:45:59 SERVICE ViewPath
+        2024/04/02 14:45:59 SERVICE ViewPath
+        2024/04/02 14:45:59 SERVICE ViewPath
+        2024/04/02 14:45:59 SERVICE ViewPath
+        2024/04/02 14:45:59 SERVICE ViewPath
+        2024/04/02 14:45:59 SERVICE ViewPath
+        2024/04/02 14:45:59 SERVICE ViewPath
+        2024/04/02 14:45:59 SERVICE ViewPath
+        2024/04/02 14:46:00 SERVICE ViewPath
+        2024/04/02 14:46:00 SERVICE ViewPath
+        2024/04/02 14:46:00 SERVICE ViewPath
+        2024/04/02 14:46:00 SERVICE ViewPath
+        2024/04/02 14:46:00 SERVICE ViewPath
+        2024/04/02 14:46:00 SERVICE ViewPath
+        2024/04/02 14:46:00 SERVICE ViewPath
+        2024/04/02 14:46:00 SERVICE ViewPath
+        2024/04/02 14:46:00 SERVICE ViewPath
+        2024/04/02 14:46:00 SERVICE ViewPath
+        2024/04/02 14:46:01 SERVICE ViewPath
+        2024/04/02 14:46:01 SERVICE ViewPath
+        2024/04/02 14:46:01 SERVICE ViewPath
+        2024/04/02 14:46:01 SERVICE ViewPath
+        2024/04/02 14:46:01 SERVICE ViewPath
+        2024/04/02 14:46:01 SERVICE ViewPath
+        2024/04/02 14:46:01 SERVICE ViewPath
+        2024/04/02 14:46:01 SERVICE ViewPath
+        2024/04/02 14:46:01 SERVICE ViewPath
+        2024/04/02 14:46:01 SERVICE ViewPath
+        2024/04/02 14:46:02 SERVICE ViewPath
+        2024/04/02 14:46:02 SERVICE ViewPath
+        2024/04/02 14:46:02 SERVICE ViewPath
+        2024/04/02 14:46:02 SERVICE ViewPath
+        2024/04/02 14:46:02 SERVICE ViewPath
+        2024/04/02 14:46:02 SERVICE ViewPath
+        2024/04/02 14:46:02 SERVICE ViewPath
+        2024/04/02 14:46:02 SERVICE ViewPath
+        2024/04/02 14:46:02 SERVICE ViewPath
+        2024/04/02 14:46:02 SERVICE ViewPath
+        2024/04/02 14:46:03 SERVICE ViewPath
+        2024/04/02 14:46:03 SERVICE ViewPath
+        2024/04/02 14:46:03 SERVICE ViewPath
+        2024/04/02 14:46:03 SERVICE ViewPath
+        2024/04/02 14:46:03 SERVICE ViewPath
+        2024/04/02 14:46:03 SERVICE ViewPath
+        2024/04/02 14:46:03 SERVICE ViewPath
+        2024/04/02 14:46:03 SERVICE ViewPath
+        2024/04/02 14:46:03 SERVICE ViewPath
+        2024/04/02 14:46:04 SERVICE ViewPath
+        2024/04/02 14:46:04 SERVICE ViewPath
+        2024/04/02 14:46:04 SERVICE ViewPath
+        2024/04/02 14:46:04 SERVICE ViewPath
+        2024/04/02 14:46:04 SERVICE ViewPath
+        2024/04/02 14:46:04 SERVICE ViewPath
+        2024/04/02 14:46:04 SERVICE ViewPath
+        2024/04/02 14:46:04 SERVICE ViewPath
+        2024/04/02 14:46:04 SERVICE ViewPath
+        2024/04/02 14:46:04 SERVICE ViewPath
+        2024/04/02 14:46:05 SERVICE ViewPath
+        2024/04/02 14:46:05 SERVICE ViewPath
+        2024/04/02 14:46:05 SERVICE ViewPath
+        2024/04/02 14:46:05 SERVICE ViewPath
+        2024/04/02 14:46:05 SERVICE ViewPath
+        2024/04/02 14:46:05 SERVICE ViewPath
+        2024/04/02 14:46:05 SERVICE ViewPath
+        2024/04/02 14:46:05 SERVICE ViewPath
+        time="2024-04-02T14:46:05+03:00" level=info msg="key invalidkey hashHeader: d2f1fd2ae184541ea4aee60459c32c249308c9341e15f91d2192c3345d77ffd5 hash: a52ebb349c7867765f5290ae26b63f959ed9173119f339cbfed42319df60347b"
+        2024/04/02 14:46:05 SERVICE ViewPath
+        2024/04/02 14:46:05 SERVICE ViewPath
+        2024/04/02 14:46:06 SERVICE ViewPath
+        2024/04/02 14:46:06 SERVICE ViewPath
+        2024/04/02 14:46:06 SERVICE ViewPath
+        2024/04/02 14:46:06 SERVICE ViewPath
+        2024/04/02 14:46:06 SERVICE ViewPath
+        2024/04/02 14:46:06 SERVICE ViewPath
+        2024/04/02 14:46:06 SERVICE ViewPath
+        2024/04/02 14:46:06 SERVICE ViewPath
+        2024/04/02 14:46:06 SERVICE ViewPath
+        2024/04/02 14:46:07 SERVICE ViewPath
+        2024/04/02 14:46:07 SERVICE ViewPath
+        2024/04/02 14:46:07 SERVICE ViewPath
+        2024/04/02 14:46:07 SERVICE ViewPath
+        2024/04/02 14:46:07 SERVICE ViewPath
+        2024/04/02 14:46:07 SERVICE ViewPath
+        2024/04/02 14:46:07 SERVICE ViewPath
+        2024/04/02 14:46:07 SERVICE ViewPath
+        2024/04/02 14:46:07 SERVICE ViewPath
+        2024/04/02 14:46:07 SERVICE ViewPath
+        2024/04/02 14:46:08 SERVICE ViewPath
+        2024/04/02 14:46:08 SERVICE ViewPath
+        2024/04/02 14:46:08 SERVICE ViewPath
+        2024/04/02 14:46:08 SERVICE ViewPath
+        2024/04/02 14:46:08 SERVICE ViewPath
+        2024/04/02 14:46:08 SERVICE ViewPath
+        2024/04/02 14:46:08 SERVICE ViewPath
+        2024/04/02 14:46:08 SERVICE ViewPath
+        2024/04/02 14:46:08 SERVICE ViewPath
+        2024/04/02 14:46:08 SERVICE ViewPath
+        2024/04/02 14:46:09 SERVICE ViewPath
+        2024/04/02 14:46:09 SERVICE ViewPath
+        2024/04/02 14:46:09 SERVICE ViewPath
+        2024/04/02 14:46:09 SERVICE ViewPath
+        2024/04/02 14:46:09 SERVICE ViewPath
+        2024/04/02 14:46:09 SERVICE ViewPath
+        2024/04/02 14:46:09 SERVICE ViewPath
+        2024/04/02 14:46:09 SERVICE ViewPath
+        2024/04/02 14:46:09 SERVICE ViewPath
+        2024/04/02 14:46:09 SERVICE ViewPath
+        2024/04/02 14:46:10 SERVICE ViewPath
+        2024/04/02 14:46:10 SERVICE ViewPath
+        2024/04/02 14:46:10 SERVICE ViewPath
+        2024/04/02 14:46:10 SERVICE ViewPath
+        2024/04/02 14:46:10 SERVICE ViewPath
+        2024/04/02 14:46:10 SERVICE ViewPath
+        2024/04/02 14:46:10 SERVICE ViewPath
+        2024/04/02 14:46:10 SERVICE ViewPath
+        2024/04/02 14:46:10 SERVICE ViewPath
+        2024/04/02 14:46:11 SERVICE ViewPath
+        2024/04/02 14:46:11 SERVICE ViewPath
+        2024/04/02 14:46:11 SERVICE ViewPath
+        2024/04/02 14:46:11 SERVICE ViewPath
+        2024/04/02 14:46:11 SERVICE ViewPath
+        2024/04/02 14:46:11 SERVICE ViewPath
+        2024/04/02 14:46:11 SERVICE ViewPath
+        2024/04/02 14:46:11 SERVICE ViewPath
+        2024/04/02 14:46:11 SERVICE ViewPath
+        2024/04/02 14:46:11 SERVICE ViewPath
+        2024/04/02 14:46:12 SERVICE ViewPath
+        2024/04/02 14:46:12 SERVICE ViewPath
+        2024/04/02 14:46:12 SERVICE ViewPath
+        2024/04/02 14:46:12 SERVICE ViewPath
+        2024/04/02 14:46:12 SERVICE ViewPath
+        2024/04/02 14:46:12 SERVICE ViewPath
+        2024/04/02 14:46:12 SERVICE ViewPath
+        2024/04/02 14:46:12 SERVICE ViewPath
+        2024/04/02 14:46:12 SERVICE ViewPath
+        2024/04/02 14:46:12 SERVICE ViewPath
+        2024/04/02 14:46:13 SERVICE ViewPath
+        2024/04/02 14:46:13 SERVICE ViewPath
+        2024/04/02 14:46:13 SERVICE ViewPath
+        2024/04/02 14:46:13 SERVICE ViewPath
+        2024/04/02 14:46:13 SERVICE ViewPath
+        2024/04/02 14:46:13 SERVICE ViewPath
+        2024/04/02 14:46:13 SERVICE ViewPath
+        2024/04/02 14:46:13 SERVICE ViewPath
+        2024/04/02 14:46:13 SERVICE ViewPath
+        2024/04/02 14:46:14 SERVICE ViewPath
+        2024/04/02 14:46:14 SERVICE ViewPath
+        2024/04/02 14:46:14 SERVICE ViewPath
+        2024/04/02 14:46:14 SERVICE ViewPath
+        2024/04/02 14:46:14 SERVICE ViewPath
+        2024/04/02 14:46:14 SERVICE ViewPath
+        2024/04/02 14:46:14 SERVICE ViewPath
+        2024/04/02 14:46:14 SERVICE ViewPath
+        2024/04/02 14:46:14 SERVICE ViewPath
+        2024/04/02 14:46:14 SERVICE ViewPath
+        2024/04/02 14:46:15 SERVICE ViewPath
+        2024/04/02 14:46:15 SERVICE ViewPath
+        2024/04/02 14:46:15 SERVICE ViewPath
+        2024/04/02 14:46:15 SERVICE ViewPath
+        2024/04/02 14:46:15 SERVICE ViewPath
+        2024/04/02 14:46:15 SERVICE ViewPath
+        2024/04/02 14:46:15 SERVICE ViewPath
+        2024/04/02 14:46:15 SERVICE ViewPath
+        time="2024-04-02T14:46:15+03:00" level=info msg="key invalidkey hashHeader: 828c91299e7d2597921b643b3d5db325a70ede08b7732e0d7a18113f4879947a hash: ea22e3f9691f4b3fd982e431f83f53c6d527b630056293c19c9a2066e01bd0c4"
+        2024/04/02 14:46:15 SERVICE ViewPath
+        2024/04/02 14:46:15 SERVICE ViewPath
+        2024/04/02 14:46:16 SERVICE ViewPath
+        2024/04/02 14:46:16 SERVICE ViewPath
+        2024/04/02 14:46:16 SERVICE ViewPath
+        2024/04/02 14:46:16 SERVICE ViewPath
+        2024/04/02 14:46:16 SERVICE ViewPath
+        2024/04/02 14:46:16 SERVICE ViewPath
+        2024/04/02 14:46:16 SERVICE ViewPath
+        2024/04/02 14:46:16 STORAGE ReadCounter ERROR no rows in result set
+        2024/04/02 14:46:16 HANDLER ValueJSONHandler ViewPath ERROR no counter has been matched
+        2024/04/02 14:46:16 HANDLER UpdateJSONHandler PAGE
+        2024/04/02 14:46:16 SERVICE UpdatePath
+        2024/04/02 14:46:16 AddGauge--> GetSetZip175  --> 1039939087
+        2024/04/02 14:46:16 HANDLER UpdateJSONHandler UpdatePath ERROR STORAGE AddCounter SCAN ERROR
+        2024/04/02 14:46:16 HANDLER UpdateJSONHandler PAGE
+        2024/04/02 14:46:16 SERVICE UpdatePath
+        2024/04/02 14:46:16 AddGauge--> GetSetZip175  --> 1810455535
+        2024/04/02 14:46:16 HANDLER UpdateJSONHandler UpdatePath ERROR STORAGE AddCounter SCAN ERROR
+        2024/04/02 14:46:16 SERVICE ViewPath
+        2024/04/02 14:46:16 STORAGE ReadCounter ERROR no rows in result set
+        2024/04/02 14:46:16 HANDLER ValueJSONHandler ViewPath ERROR no counter has been matched
+        2024/04/02 14:46:16 HANDLER UpdateJSONHandler PAGE
+        2024/04/02 14:46:16 SERVICE UpdatePath
+        2024/04/02 14:46:16 AddGauge--> GetSetZip126
+        2024/04/02 14:46:16 AddGauge value --> 582303.0032393499
+        2024/04/02 14:46:16 AddGauge mValue --> 582303.0032393499
+        2024/04/02 14:46:16 SERVICE ViewPath
+--- FAIL: TestIteration14 (70.80s)
+    --- FAIL: TestIteration14/TestCollectAgentMetrics (60.65s)
+        --- FAIL: TestIteration14/TestCollectAgentMetrics/counter/PollCount (0.00s)
+        --- FAIL: TestIteration14/TestCollectAgentMetrics/gauge/RandomValue (0.00s)
+        --- FAIL: TestIteration14/TestCollectAgentMetrics/gauge/Alloc (0.00s)
+        --- PASS: TestIteration14/TestCollectAgentMetrics/gauge/BuckHashSys (0.00s)
+        --- FAIL: TestIteration14/TestCollectAgentMetrics/gauge/Frees (0.00s)
+        --- PASS: TestIteration14/TestCollectAgentMetrics/gauge/GCCPUFraction (0.00s)
+        --- PASS: TestIteration14/TestCollectAgentMetrics/gauge/GCSys (0.00s)
+        --- FAIL: TestIteration14/TestCollectAgentMetrics/gauge/HeapAlloc (0.00s)
+        --- FAIL: TestIteration14/TestCollectAgentMetrics/gauge/HeapIdle (0.00s)
+        --- FAIL: TestIteration14/TestCollectAgentMetrics/gauge/HeapInuse (0.00s)
+        --- FAIL: TestIteration14/TestCollectAgentMetrics/gauge/HeapObjects (0.00s)
+        --- PASS: TestIteration14/TestCollectAgentMetrics/gauge/HeapReleased (0.00s)
+        --- PASS: TestIteration14/TestCollectAgentMetrics/gauge/HeapSys (0.00s)
+        --- PASS: TestIteration14/TestCollectAgentMetrics/gauge/LastGC (0.00s)
+        --- PASS: TestIteration14/TestCollectAgentMetrics/gauge/Lookups (0.00s)
+        --- PASS: TestIteration14/TestCollectAgentMetrics/gauge/MCacheInuse (0.00s)
+        --- PASS: TestIteration14/TestCollectAgentMetrics/gauge/MCacheSys (0.00s)
+        --- PASS: TestIteration14/TestCollectAgentMetrics/gauge/MSpanInuse (0.00s)
+        --- PASS: TestIteration14/TestCollectAgentMetrics/gauge/MSpanSys (0.00s)
+        --- FAIL: TestIteration14/TestCollectAgentMetrics/gauge/Mallocs (0.00s)
+        --- PASS: TestIteration14/TestCollectAgentMetrics/gauge/NextGC (0.00s)
+        --- PASS: TestIteration14/TestCollectAgentMetrics/gauge/NumForcedGC (0.00s)
+        --- PASS: TestIteration14/TestCollectAgentMetrics/gauge/NumGC (0.00s)
+        --- PASS: TestIteration14/TestCollectAgentMetrics/gauge/OtherSys (0.00s)
+        --- PASS: TestIteration14/TestCollectAgentMetrics/gauge/PauseTotalNs (0.00s)
+        --- PASS: TestIteration14/TestCollectAgentMetrics/gauge/StackInuse (0.00s)
+        --- PASS: TestIteration14/TestCollectAgentMetrics/gauge/StackSys (0.00s)
+        --- PASS: TestIteration14/TestCollectAgentMetrics/gauge/Sys (0.00s)
+        --- FAIL: TestIteration14/TestCollectAgentMetrics/gauge/TotalAlloc (0.00s)
+    --- FAIL: TestIteration14/TestCounterGzipHandlers (0.01s)
+        --- FAIL: TestIteration14/TestCounterGzipHandlers/update (0.01s)
+    --- PASS: TestIteration14/TestGaugeGzipHandlers (0.00s)
+        --- PASS: TestIteration14/TestGaugeGzipHandlers/update (0.00s)
+FAIL

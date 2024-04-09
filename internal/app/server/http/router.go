@@ -6,17 +6,18 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/imirjar/metrx/config"
-	"github.com/imirjar/metrx/internal/app/server/http/middleware/compressor"
-	"github.com/imirjar/metrx/internal/app/server/http/middleware/logger"
+	"github.com/imirjar/metrx/internal/app/server/http/middleware"
 	"github.com/imirjar/metrx/internal/models"
-	"github.com/imirjar/metrx/internal/service/server"
+	"github.com/imirjar/metrx/internal/service"
 )
 
 func NewGateway(cfg config.ServerConfig) *HTTPGateway {
-	service := server.NewServerService(cfg)
+	service := service.NewServerService(cfg)
+	middleware := middleware.New()
 	app := HTTPGateway{
-		Service: service,
-		cfg:     cfg,
+		Service:    service,
+		Middleware: middleware,
+		Secret:     cfg.SECRET,
 	}
 	return &app
 }
@@ -28,37 +29,48 @@ type Service interface {
 	MetricPage(ctx context.Context) (string, error)
 }
 
-type HTTPGateway struct {
-	Service Service
-	cfg     config.ServerConfig
+type Middleware interface {
+	Encrypting(key string) func(next http.Handler) http.Handler
+	Logging() func(next http.Handler) http.Handler
+	Compressing() func(next http.Handler) http.Handler
+	EncWrite(key string) func(next http.Handler) http.Handler
 }
 
-func (h *HTTPGateway) Run() error {
+type HTTPGateway struct {
+	Service    Service
+	Middleware Middleware
+	Secret     string
+}
+
+func (h *HTTPGateway) Start(path, conn string) error {
 
 	router := chi.NewRouter()
 
-	router.Use(compressor.Compressor)
-	router.Use(logger.Logger)
+	// compression is upper then encrypting its matter!
+	router.Use(h.Middleware.Compressing())
+	router.Use(h.Middleware.Encrypting(h.Secret))
+	router.Use(h.Middleware.EncWrite(h.Secret))
+	// router.Use(h.Middleware.Logging())
 
 	router.Route("/update", func(update chi.Router) {
-		update.Post("/{type}/{name}/{value}", h.UpdatePathHandler)
-		update.Post("/", h.UpdateJSONHandler)
+		update.Post("/{type}/{name}/{value}", h.UpdatePathHandler())
+		update.Post("/", h.UpdateJSONHandler())
 	})
 
 	router.Route("/value", func(value chi.Router) {
-		value.Get("/{type}/{name}", h.ValuePathHandler)
-		value.Post("/", h.ValueJSONHandler)
+		value.Get("/{type}/{name}", h.ValuePathHandler())
+		value.Post("/", h.ValueJSONHandler())
 	})
 
-	router.Route("/updates", func(value chi.Router) {
-		value.Post("/", h.BatchHandler)
+	router.Route("/updates", func(batch chi.Router) {
+		batch.Post("/", h.BatchHandler())
 	})
 
-	router.Get("/ping", h.Ping)
-	router.Get("/", h.MainPage)
+	router.Get("/ping", h.Ping(conn))
+	router.Get("/", h.MainPage())
 
 	s := &http.Server{
-		Addr:    h.cfg.URL,
+		Addr:    path,
 		Handler: router,
 	}
 

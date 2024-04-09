@@ -10,6 +10,7 @@ import (
 )
 
 type AgentConfig struct {
+	SECRET         string
 	URL            string
 	PollInterval   time.Duration
 	ReportInterval time.Duration
@@ -37,13 +38,17 @@ func (c *AgentConfig) setEnv() {
 		}
 		c.PollInterval = time.Duration(1_000_000_000 * pInt) //Nanoseconds to seconds
 	}
+	if k := os.Getenv("SECRET"); k != "" {
+		c.SECRET = k
+	}
 }
 
 // set params from os.Args[]
 func (c *AgentConfig) setFlags() {
-	a := flag.String("a", "", "executable port")
-	p := flag.Int("p", 0, "executable port")
-	r := flag.Int("r", 0, "executable port")
+	a := flag.String("a", "", "api adress")
+	p := flag.Int("p", 0, "collect interval")
+	r := flag.Int("r", 0, "sending interval")
+	k := flag.String("k", "", "SHA-256 hash key")
 
 	flag.Parse()
 
@@ -56,4 +61,9 @@ func (c *AgentConfig) setFlags() {
 	if *p != 0 {
 		c.PollInterval = time.Duration(1_000_000_000 * *p)
 	}
+	if *k != "" {
+		log.Println("MY LOVELY KEY", *k)
+		c.SECRET = *k
+	}
+
 }

@@ -12,16 +12,30 @@ type ServerConfig struct {
 	ServiceConfig
 }
 
+type AppConfig struct {
+	SECRET string
+	URL    string
+}
+
+type ServiceConfig struct {
+	Interval   time.Duration
+	FilePath   string
+	AutoImport bool
+	DBConn     string
+}
+
 func (s *ServerConfig) setEnv() {
-	//if address in env
+	//APP START ON ADDRESS
 	if a := os.Getenv("ADDRESS"); a != "" {
 		s.AppConfig.URL = a
 	}
 
+	//BACKUP DATA WHEN MOCK STORAGE
 	if f := os.Getenv("FILE_STORAGE_PATH"); f != "" {
 		s.ServiceConfig.FilePath = f
 	}
 
+	//AUTO RESTORE FROM BACKUP
 	if r := os.Getenv("RESTORE"); r != "" {
 		rf, err := strconv.ParseBool(r)
 		if err != nil {
@@ -30,6 +44,7 @@ func (s *ServerConfig) setEnv() {
 		s.ServiceConfig.AutoImport = rf
 	}
 
+	//AUTO RESTORE FROM BACKUP
 	if i := os.Getenv("STORE_INTERVAL"); i != "" {
 		intI, err := strconv.ParseInt(i, 10, 64)
 		if err != nil {
@@ -37,9 +52,13 @@ func (s *ServerConfig) setEnv() {
 		}
 		s.ServiceConfig.Interval = time.Duration(1_000_000_000 * intI)
 	}
-
+	//DATABASE CONNECTION STRING
 	if d := os.Getenv("DATABASE_DSN"); d != "" {
 		s.ServiceConfig.DBConn = d
+	}
+
+	if k := os.Getenv("SECRET"); k != "" {
+		s.AppConfig.SECRET = k
 	}
 }
 
@@ -50,6 +69,7 @@ func (s *ServerConfig) setFlags() {
 	r := flag.Bool("r", s.AutoImport, "if true -> load data from the backup File into storage automatically at startup")
 	i := flag.Int("i", -1, "frequency at which data should be saved")
 	d := flag.String("d", "", "string postgresql connection")
+	k := flag.String("k", "", "SHA-256 hash key")
 
 	flag.Parse()
 
@@ -68,15 +88,8 @@ func (s *ServerConfig) setFlags() {
 	if *d != "" {
 		s.ServiceConfig.DBConn = *d
 	}
-}
-
-type AppConfig struct {
-	URL string
-}
-
-type ServiceConfig struct {
-	Interval   time.Duration
-	FilePath   string
-	AutoImport bool
-	DBConn     string
+	if *k != "" {
+		// log.Println("MY LOVELY KEY", *k)
+		s.AppConfig.SECRET = *k
+	}
 }

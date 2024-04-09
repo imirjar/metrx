@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strconv"
 
 	"github.com/imirjar/metrx/internal/models"
 	"github.com/jackc/pgx/v5"
@@ -13,67 +12,76 @@ import (
 func (m *DB) AddGauges(ctx context.Context, gauges map[string]float64) error {
 	batch := &pgx.Batch{}
 	for i, v := range gauges {
-		// value := strconv.FormatFloat(v, 'f', 6, 64)
+		// log.Println("AddGauges-->", i)
+		// log.Println("AddGauges v -->", v)
 		value := fmt.Sprint(v)
+		// log.Println("AddGauges value -->", value)
+		// value := fmt.Sprintln(v)
 		batch.Queue(`
 			INSERT INTO metrics (id, type, value)
 			VALUES($1, $2, $3)
 			ON CONFLICT (id) DO 
 			UPDATE SET value = $3`, i, "gauge", value)
 	}
-	return m.db.SendBatch(ctx, batch).Close()
+	err := m.db.SendBatch(ctx, batch).Close()
+	if err != nil {
+		return errAddGaugesCloseError
+	}
+	return err
 }
 
 func (m *DB) AddCounters(ctx context.Context, counters map[string]int64) error {
 	batch := &pgx.Batch{}
 
 	for i, d := range counters {
-		delta := strconv.FormatFloat(float64(d), 'f', 6, 64)
+		log.Println("database AddCounters", i, "-->", d)
 		batch.Queue(`
 			INSERT INTO metrics (id, type, value)
 			VALUES($1, $2, $3)
 			ON CONFLICT (id) DO 
-			UPDATE SET value = EXCLUDED.value + metrics.value`, i, "counter", delta)
+			UPDATE SET value = EXCLUDED.value + metrics.value`, i, "counter", fmt.Sprint(d))
 	}
-	return m.db.SendBatch(ctx, batch).Close()
+	err := m.db.SendBatch(ctx, batch).Close()
+	if err != nil {
+		return errAddCountersCloseError
+	}
+	return err
 }
 
 func (m *DB) AddGauge(ctx context.Context, name string, value float64) (float64, error) {
-	mValue := strconv.FormatFloat(value, 'f', 6, 64)
+	mValue := fmt.Sprint(value)
+	log.Println("AddGauge-->", name)
+	log.Println("AddGauge value -->", value)
+	log.Println("AddGauge mValue -->", mValue)
 
 	_, err := m.db.Exec(ctx,
 		`INSERT INTO metrics (id, type, value) VALUES($1, $2, $3)
 		ON CONFLICT (id) DO UPDATE SET value = $3`, name, "gauge", mValue,
 	)
-
 	if err != nil {
-		log.Println(err)
-		return 0, err
+		return 0, errAddGaugeExecError
 	}
-
-	return value, nil
+	return value, err
 }
 
 func (m *DB) AddCounter(ctx context.Context, name string, delta int64) (int64, error) {
-	mDelta := strconv.FormatInt(delta, 10)
+	// mDelta := fmt.Sprint(delta)
+	// log.Println("AddCounter-->", name, " -->", mDelta)
 
-	_, err := m.db.Exec(ctx,
+	res, err := m.db.Exec(ctx,
 		`INSERT INTO metrics (id, type, value) VALUES($1, $2, $3)
-		ON CONFLICT (id) DO UPDATE SET value = EXCLUDED.value + metrics.value`, name, "counter", mDelta,
+		ON CONFLICT (id) DO UPDATE SET value = EXCLUDED.value + metrics.value`, name, "counter", delta,
 	)
 	if err != nil {
-		log.Println(err)
-		return 0, err
+		return 0, errAddCounterExecError
 	}
 
 	var result int64
-	rows := m.db.QueryRow(ctx, "SELECT value FROM metrics WHERE type=$1 AND id=$2", "counter", name)
-
-	err = rows.Scan(&result)
-
+	err = m.db.QueryRow(ctx, "SELECT value FROM metrics WHERE id=$1", name).Scan(&result)
 	if err != nil {
-		log.Println(err)
-		return 0, err
+		log.Println("RES", res.String())
+		log.Println("", err)
+		return 0, errAddCounterScanError
 	}
 
 	return result, nil
@@ -86,7 +94,7 @@ func (m *DB) ReadGauge(ctx context.Context, name string) (float64, bool) {
 	err := rows.Scan(&value)
 
 	if err != nil {
-		log.Println(err)
+		log.Println("STORAGE ReadGauge ERROR", err)
 		return value, false
 	}
 
@@ -100,7 +108,7 @@ func (m *DB) ReadCounter(ctx context.Context, name string) (int64, bool) {
 	err := rows.Scan(&delta)
 
 	if err != nil {
-		log.Println(err)
+		log.Println("STORAGE ReadCounter ERROR", err)
 		return delta, false
 	}
 
@@ -112,8 +120,7 @@ func (m *DB) ReadAllGauges(ctx context.Context) (map[string]float64, error) {
 
 	rows, err := m.db.Query(ctx, `SELECT id, value FROM metrics WHERE type = $1`, "gauge")
 	if err != nil {
-		log.Println(err)
-		panic(err)
+		return map[string]float64{}, errReadAllGaugesQueryError
 	}
 
 	// обязательно закрываем перед возвратом функции
@@ -124,8 +131,7 @@ func (m *DB) ReadAllGauges(ctx context.Context) (map[string]float64, error) {
 		var m models.Metrics
 		err = rows.Scan(&m.ID, &m.Value)
 		if err != nil {
-			log.Println(err)
-			return gauges, err
+			return map[string]float64{}, errReadAllGaugesScanError
 		}
 		gauges[m.ID] = *m.Value
 	}
@@ -133,8 +139,7 @@ func (m *DB) ReadAllGauges(ctx context.Context) (map[string]float64, error) {
 	// проверяем на ошибки
 	err = rows.Err()
 	if err != nil {
-		log.Println(err)
-		return gauges, err
+		return gauges, errReadAllGaugesRowsError
 	}
 
 	return gauges, nil
@@ -145,9 +150,7 @@ func (m *DB) ReadAllCounters(ctx context.Context) (map[string]int64, error) {
 
 	rows, err := m.db.Query(ctx, `SELECT id, value FROM metrics WHERE type = $1`, "counter")
 	if err != nil {
-		log.Println("###ReadAllCounters 1--->", err)
-		log.Println(err)
-		panic(err)
+		return map[string]int64{}, errReadAllCountersQueryError
 	}
 
 	// обязательно закрываем перед возвратом функции
@@ -158,8 +161,7 @@ func (m *DB) ReadAllCounters(ctx context.Context) (map[string]int64, error) {
 		var m models.Metrics
 		err = rows.Scan(&m.ID, &m.Delta)
 		if err != nil {
-			log.Println("###ReadAllCounters 2--->", err)
-			return counters, err
+			return counters, errReadAllCountersScanError
 		}
 		counters[m.ID] = *m.Delta
 	}
@@ -167,9 +169,7 @@ func (m *DB) ReadAllCounters(ctx context.Context) (map[string]int64, error) {
 	// проверяем на ошибки
 	err = rows.Err()
 	if err != nil {
-		log.Println("###ReadAllCounters 3--->", err)
-		log.Println(err)
-		return counters, err
+		return counters, errReadAllCountersRowsError
 	}
 
 	// fmt.Println(counters)
