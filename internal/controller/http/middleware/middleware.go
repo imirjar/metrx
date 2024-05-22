@@ -13,8 +13,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/imirjar/metrx/internal/app/server/http/middleware/compressor"
-	"github.com/imirjar/metrx/internal/app/server/http/middleware/logger"
+	"github.com/imirjar/metrx/internal/controller/http/middleware/compressor"
+	"github.com/imirjar/metrx/internal/controller/http/middleware/logger"
 	"github.com/imirjar/metrx/pkg/encrypt"
 )
 
@@ -34,16 +34,19 @@ func (m *Middleware) Compressing() func(next http.Handler) http.Handler {
 			acceptEncoding := req.Header.Get("Accept-Encoding")
 			contentEncoding := req.Header.Get("Content-Encoding")
 
+			//client can read
 			supportsGzip := strings.Contains(acceptEncoding, "gzip")
 			sendsGzip := strings.Contains(contentEncoding, "gzip")
 
-			if supportsGzip {
+			if supportsGzip && sendsGzip {
+				log.Println("supportsGzip")
 				cResp := compressor.NewCompressWriter(resp)
 				defer cResp.Close()
 				resp = cResp
 			}
 
 			if sendsGzip {
+				log.Println("sendsGzip")
 				cr, err := compressor.NewCompressReader(req.Body)
 				if err != nil {
 					resp.WriteHeader(http.StatusInternalServerError)
@@ -200,6 +203,7 @@ func (hw hashWriter) Write(b []byte) (int, error) {
 	hw.Header().Add("HashSHA256", hex.EncodeToString(hashByte))
 	return hw.w.Write(b)
 }
+
 func (hw *hashWriter) Close() error {
 	if c, ok := hw.w.(io.WriteCloser); ok {
 		return c.Close()

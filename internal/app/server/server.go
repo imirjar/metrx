@@ -1,8 +1,10 @@
 package server
 
 import (
+	_ "net/http/pprof"
+
 	"github.com/imirjar/metrx/config"
-	"github.com/imirjar/metrx/internal/app/server/http"
+	"github.com/imirjar/metrx/internal/controller/http"
 )
 
 type Gatewayer interface {
