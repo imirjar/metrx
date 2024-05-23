@@ -1,7 +1,6 @@
 package http
 
 import (
-	"context"
 	"expvar"
 	"net/http"
 	"net/http/pprof"
@@ -9,7 +8,6 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/imirjar/metrx/config"
 	"github.com/imirjar/metrx/internal/controller/http/middleware"
-	"github.com/imirjar/metrx/internal/models"
 	"github.com/imirjar/metrx/internal/service"
 )
 
@@ -22,13 +20,6 @@ func NewGateway(cfg config.ServerConfig) *HTTPGateway {
 		Secret:     cfg.SECRET,
 	}
 	return &app
-}
-
-type Service interface {
-	BatchUpdate(ctx context.Context, metrics []models.Metrics) error
-	UpdatePath(ctx context.Context, name, mType, mValue string) (string, error)
-	ViewPath(ctx context.Context, name, mType string) (string, error)
-	MetricPage(ctx context.Context) (string, error)
 }
 
 type Middleware interface {

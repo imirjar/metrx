@@ -1,8 +1,6 @@
 package server
 
 import (
-	_ "net/http/pprof"
-
 	"github.com/imirjar/metrx/config"
 	"github.com/imirjar/metrx/internal/controller/http"
 )

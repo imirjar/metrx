@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strconv"
 
 	"github.com/imirjar/metrx/internal/models"
 )
@@ -35,58 +34,52 @@ func (s ServerService) MetricPage(ctx context.Context) (string, error) {
 	return form, nil
 }
 
-func (s ServerService) ViewPath(ctx context.Context, name, mType string) (string, error) {
+func (s ServerService) ViewMetric(ctx context.Context, metric models.Metrics) (models.Metrics, error) {
 	// log.Println("SERVICE ViewPath")
-	switch mType {
+	switch metric.MType {
 	case "gauge":
-		value, ok := s.MemStorager.ReadGauge(ctx, name)
+		value, ok := s.MemStorager.ReadGauge(ctx, metric.ID)
 		if !ok {
-			return "", errGaugeDoesNotMatched
+			return metric, errGaugeDoesNotMatched
 		}
-		return fmt.Sprint(value), nil
+		metric.Value = &value
+		return metric, nil
 	case "counter":
-		delta, ok := s.MemStorager.ReadCounter(ctx, name)
+		delta, ok := s.MemStorager.ReadCounter(ctx, metric.ID)
 		if !ok {
-			return "", errCounterDoesNotMatched
+			return metric, errCounterDoesNotMatched
 		}
-		return fmt.Sprint(delta), nil
+		metric.Delta = &delta
+		return metric, nil
 	default:
-		return "", errMetricTypeError
+		return metric, errMetricTypeError
 	}
 }
 
-func (s ServerService) UpdatePath(ctx context.Context, name, mType, mValue string) (string, error) {
+func (s ServerService) UpdateMetric(ctx context.Context, metric models.Metrics) (models.Metrics, error) {
 	log.Println("SERVICE UpdatePath")
-	switch mType {
+	switch metric.MType {
 	case "gauge":
-		value, err := strconv.ParseFloat(mValue, 64)
+		newValue, err := s.MemStorager.AddGauge(ctx, metric.ID, *metric.Value)
 		if err != nil {
-			return "", errConvertationError
+			return metric, err
 		}
-		newValue, err := s.MemStorager.AddGauge(ctx, name, value)
-		if err != nil {
-			return "", err
-		}
-		return fmt.Sprint(newValue), nil
+		metric.Value = &newValue
+		return metric, nil
 
 	case "counter":
-		delta, err := strconv.ParseInt(mValue, 10, 64)
+		newDelta, err := s.MemStorager.AddCounter(ctx, metric.ID, *metric.Delta)
 		if err != nil {
-			return "", errConvertationError
+			return metric, err
 		}
-
-		newDelta, err := s.MemStorager.AddCounter(ctx, name, delta)
-		if err != nil {
-			return "", err
-		}
-
-		return fmt.Sprint(newDelta), nil
+		metric.Delta = &newDelta
+		return metric, nil
 	default:
-		return "", errMetricTypeError
+		return metric, errMetricTypeError
 	}
 }
 
-func (s ServerService) BatchUpdate(ctx context.Context, metrics []models.Metrics) error {
+func (s ServerService) UpdateMetrics(ctx context.Context, metrics []models.Metrics) error {
 	log.Println("SERVICE BatchUpdate")
 	var (
 		gauges   = map[string]float64{}
