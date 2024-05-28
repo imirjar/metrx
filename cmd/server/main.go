@@ -7,6 +7,5 @@ import (
 )
 
 func main() {
-	// app := server.NewServerApp()
 	server.Run()
 }
