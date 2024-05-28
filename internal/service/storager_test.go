@@ -4,58 +4,70 @@ import (
 	"context"
 	"testing"
 
-	"github.com/imirjar/metrx/config"
+	"github.com/imirjar/metrx/internal/models"
+)
+
+var (
+	i int64   = 100
+	f float64 = 123.998
 )
 
 func TestServerService_PathHandler(t *testing.T) {
+	service := NewServerService()
 
-	service := NewServerService(config.Testcfg)
-	type args struct {
-		mName  string
-		mType  string
-		mValue string
-	}
 	tests := []struct {
 		name    string
-		args    args
-		want    string
+		metric  models.Metrics
+		want    models.Metrics
 		wantErr bool
 	}{
 		// TODO: Add test cases.
 		{
 			name: "OK Gauge",
-			args: args{
-				mName:  "gaugeMetric",
-				mType:  "gauge",
-				mValue: "100",
+			metric: models.Metrics{
+				ID:    "gaugeMetric",
+				MType: "gauge",
+				Value: &f,
 			},
-			want:    "100",
+			want: models.Metrics{
+				ID:    "gaugeMetric",
+				MType: "gauge",
+				Value: &f,
+			},
 			wantErr: false,
 		},
 		{
 			name: "OK Counter",
-			args: args{
-				mName:  "counterMetric",
-				mType:  "counter",
-				mValue: "100",
+			metric: models.Metrics{
+				ID:    "counterMetric",
+				MType: "counter",
+				Delta: &i,
 			},
-			want:    "100",
+			want: models.Metrics{
+				ID:    "gaugeMetric",
+				MType: "gauge",
+				Value: &f,
+			},
 			wantErr: false,
 		},
 		{
 			name: "OK Add Counter",
-			args: args{
-				mName:  "counterMetric",
-				mType:  "counter",
-				mValue: "100",
+			metric: models.Metrics{
+				ID:    "counterMetric",
+				MType: "counter",
+				Delta: &i,
 			},
-			want:    "200",
+			want: models.Metrics{
+				ID:    "gaugeMetric",
+				MType: "gauge",
+				Value: &f,
+			},
 			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := service.UpdatePath(context.Background(), tt.args.mName, tt.args.mType, tt.args.mValue)
+			result, err := service.UpdateMetric(context.Background(), tt.metric)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ServerService.ViewPath() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -65,7 +77,7 @@ func TestServerService_PathHandler(t *testing.T) {
 			}
 		})
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := service.ViewPath(context.Background(), tt.args.mName, tt.args.mType)
+			result, err := service.ViewMetric(context.Background(), tt.metric)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ServerService.ViewPath() error = %v, wantErr %v", err, tt.wantErr)
 				return

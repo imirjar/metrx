@@ -1,13 +1,13 @@
 package mock
 
 import (
-	"github.com/imirjar/metrx/config"
+	"time"
 )
 
-func NewMockStorage(cfg config.ServerConfig) *Storage {
+func NewMockStorage(filePath string) *Storage {
 
 	storage := Storage{
-		DumpPath:   cfg.FilePath,
+		DumpPath:   filePath,
 		AutoExport: false,
 		MemStorage: MemStorage{
 
@@ -16,7 +16,31 @@ func NewMockStorage(cfg config.ServerConfig) *Storage {
 		},
 	}
 
-	storage.configure(cfg)
-
 	return &storage
+}
+
+type Storage struct {
+	DumpPath   string
+	AutoExport bool
+	MemStorage
+}
+
+func (s *Storage) Configure(filePath string, autoImport bool, interval time.Duration) {
+	if autoImport {
+		s.MemStorage.Import(filePath)
+	}
+
+	if interval == 0 {
+		s.AutoExport = true
+	}
+
+	if interval > 0 {
+		go func() {
+			defer s.MemStorage.Export(filePath)
+			for {
+				time.Sleep(interval)
+				s.MemStorage.Export(filePath)
+			}
+		}()
+	}
 }

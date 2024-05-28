@@ -20,7 +20,6 @@ type Service interface {
 	MetricPage(ctx context.Context) (string, error)
 }
 
-// MainPage ...
 func (h *HTTPGateway) MainPage() http.HandlerFunc {
 	log.Println("HANDLER MAIN PAGE")
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -38,7 +37,6 @@ func (h *HTTPGateway) MainPage() http.HandlerFunc {
 	}
 }
 
-// PARAMS ...
 func (h *HTTPGateway) UpdatePathHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Println("HANDLER UpdatePathHandler PAGE")
@@ -96,7 +94,6 @@ func (h *HTTPGateway) ValuePathHandler() http.HandlerFunc {
 	}
 }
 
-// JSON ...
 func (h *HTTPGateway) UpdateJSONHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
@@ -158,7 +155,6 @@ func (h *HTTPGateway) ValueJSONHandler() http.HandlerFunc {
 	}
 }
 
-// Batch ...
 func (h *HTTPGateway) BatchHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Println("HANDLER BatchHandler PAGE")
@@ -182,7 +178,6 @@ func (h *HTTPGateway) BatchHandler() http.HandlerFunc {
 	}
 }
 
-// Check ...
 func (h *HTTPGateway) Ping(path string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Println("HANDLER Ping PAGE")

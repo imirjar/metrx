@@ -2,36 +2,7 @@ package mock
 
 import (
 	"context"
-	"time"
-
-	"github.com/imirjar/metrx/config"
 )
-
-type Storage struct {
-	DumpPath   string
-	AutoExport bool
-	MemStorage
-}
-
-func (s *Storage) configure(cfg config.ServerConfig) {
-	if cfg.AutoImport {
-		s.MemStorage.Import(cfg.FilePath)
-	}
-
-	if cfg.Interval == 0 {
-		s.AutoExport = true
-	}
-
-	if cfg.Interval > 0 {
-		go func() {
-			defer s.MemStorage.Export(cfg.FilePath)
-			for {
-				time.Sleep(cfg.Interval)
-				s.MemStorage.Export(cfg.FilePath)
-			}
-		}()
-	}
-}
 
 func (s *Storage) AddGauge(ctx context.Context, name string, value float64) (float64, error) {
 	s.MemStorage.Gauge[name] = value
@@ -53,7 +24,6 @@ func (s *Storage) AddCounter(ctx context.Context, name string, delta int64) (int
 }
 
 func (s *Storage) AddGauges(ctx context.Context, gauges map[string]float64) error {
-
 	for i, v := range gauges {
 		s.MemStorage.Gauge[i] = v
 	}

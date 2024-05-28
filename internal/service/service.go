@@ -2,38 +2,14 @@ package service
 
 import (
 	"context"
-	"log"
-
-	"github.com/imirjar/metrx/config"
-	"github.com/imirjar/metrx/internal/storage/database"
-	"github.com/imirjar/metrx/internal/storage/mock"
-	"github.com/imirjar/metrx/pkg/ping"
 )
 
-func NewServerService(cfg config.ServerConfig) *ServerService {
-	backupService := ServerService{
-		cfg: cfg,
-	}
-
-	db, err := ping.NewDBPool(context.Background(), cfg.DBConn)
-	if err != nil {
-		log.Print(err)
-	}
-	if err = db.Ping(context.Background()); err != nil {
-		mock := mock.NewMockStorage(cfg)
-		backupService.MemStorager = mock
-
-	} else {
-		db := database.NewDB(cfg)
-		backupService.MemStorager = db
-	}
-
-	return &backupService
+func NewServerService() *ServerService {
+	return &ServerService{}
 }
 
 type ServerService struct {
 	MemStorager Storager
-	cfg         config.ServerConfig
 }
 
 type Storager interface {

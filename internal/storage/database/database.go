@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 
-	"github.com/imirjar/metrx/config"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -12,12 +11,12 @@ type DB struct {
 	db *pgx.Conn
 }
 
-func NewDB(cfg config.ServerConfig) *DB {
-	conn, err := pgx.Connect(context.Background(), cfg.DBConn)
-
+func NewDB(DBConn string) *DB {
+	conn, err := pgx.Connect(context.Background(), DBConn)
 	if err != nil {
 		log.Fatalln(err)
 	}
+
 	storage := DB{
 		db: conn,
 	}

@@ -1,30 +1,58 @@
 package logger
 
-import "net/http"
+import (
+	"log"
+	"net/http"
+	"time"
+)
 
 type (
-	// берём структуру для хранения сведений об ответе
-	ResponseData struct {
-		Status int
-		Size   int
+	MetaData struct {
+		host        string
+		Status      int
+		method      string
+		ContentType string
+		Size        int
 	}
 
-	// добавляем реализацию http.ResponseWriter
-	LoggedResponseWriter struct {
-		http.ResponseWriter // встраиваем оригинальный http.ResponseWriter
-		ResponseData        *ResponseData
+	loggedW struct {
+		http.ResponseWriter
+		MetaData *MetaData
 	}
 )
 
-func (r *LoggedResponseWriter) Write(b []byte) (int, error) {
-	// записываем ответ, используя оригинальный http.ResponseWriter
-	size, err := r.ResponseWriter.Write(b)
-	r.ResponseData.Size += size // захватываем размер
+func Logger() func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+			start := time.Now()
+			method := r.Method
+			contentType := r.Header.Get("Content-Type")
+
+			var lw = loggedW{ResponseWriter: w}
+			metaData := &MetaData{
+				method:      method,
+				host:        r.Host,
+				ContentType: contentType,
+				Size:        0,
+			}
+
+			lw.MetaData = metaData
+
+			next.ServeHTTP(lw, r)
+			duration := time.Since(start)
+
+			log.Println(lw.MetaData.host, duration, lw.MetaData.method, lw.MetaData.ContentType, lw.MetaData.Size)
+		})
+	}
+}
+
+func (lw loggedW) Write(b []byte) (int, error) {
+	size, err := lw.ResponseWriter.Write(b)
+	lw.MetaData.Size += size
 	return size, err
 }
 
-func (r *LoggedResponseWriter) WriteHeader(statusCode int) {
-	// записываем код статуса, используя оригинальный http.ResponseWriter
-	r.ResponseWriter.WriteHeader(statusCode)
-	r.ResponseData.Status = statusCode // захватываем код статуса
+func (lw loggedW) WriteHeader(statusCode int) {
+	lw.ResponseWriter.WriteHeader(statusCode)
 }
