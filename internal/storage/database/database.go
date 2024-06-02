@@ -7,10 +7,12 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+// Postgres storage
 type DB struct {
 	db *pgx.Conn
 }
 
+// Create new postgres storage layer
 func NewDB(DBConn string) *DB {
 	conn, err := pgx.Connect(context.Background(), DBConn)
 	if err != nil {

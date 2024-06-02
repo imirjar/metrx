@@ -7,22 +7,20 @@ import (
 	"github.com/imirjar/metrx/internal/storage"
 )
 
-type Gatewayer interface {
-	Start(path, conn string) error
-}
-
-type ServerApp struct {
-	Gateway Gatewayer
-}
-
 func Run() {
+	// Application configuration variables
 	cfg := config.NewServerConfig()
 
-	// //STORAGE layer
-	// log.Println("###", cfg.DBConn, "###")
+	//Storage layer
+	// cfg.DBConn for db connection
+	// if database doesn't exist we create mock storage
+	// witch can:
+	// place dump to cfg.FilePath
+	// witch cfg.Interval periodicity
+	// and can autorestore if сfg.AutoImport
 	storage := storage.NewStorage(cfg.DBConn, cfg.FilePath, cfg.Interval, cfg.AutoImport)
 
-	// //SERVICE layer
+	// Service layer
 	service := service.NewServerService()
 	service.MemStorager = storage
 
@@ -30,10 +28,8 @@ func Run() {
 	gateway := http.NewGateway(cfg.SECRET)
 	gateway.Service = service
 
-	s := ServerApp{
-		Gateway: gateway,
-	}
-	if err := s.Gateway.Start(cfg.URL, cfg.DBConn); err != nil {
+	//Run app on cfg.URL, pass dbconn for /ping handler
+	if err := gateway.Start(cfg.URL, cfg.DBConn); err != nil {
 		panic(err)
 	}
 }

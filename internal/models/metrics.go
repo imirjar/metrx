@@ -6,6 +6,7 @@ import (
 	"strconv"
 )
 
+// Metrcis structure is used for containing system metric value, its name and type
 type Metrics struct {
 	ID    string   `json:"id" schema:"memberId"` // имя метрики
 	MType string   `json:"type"`                 // параметр, принимающий значение gauge или counter
@@ -13,6 +14,7 @@ type Metrics struct {
 	Value *float64 `json:"value,omitempty"`      // значение метрики в случае передачи gauge
 }
 
+// Getter
 func (m *Metrics) GetVal() (string, error) {
 	switch m.MType {
 	case "gauge":
@@ -27,6 +29,7 @@ func (m *Metrics) GetVal() (string, error) {
 	}
 }
 
+// Setter
 func (m *Metrics) SetVal(strVal string) error {
 	switch m.MType {
 	case "gauge":

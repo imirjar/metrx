@@ -8,11 +8,13 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/go-chi/chi"
 	"github.com/imirjar/metrx/internal/models"
 	"github.com/imirjar/metrx/pkg/ping"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
+// Provide methods of the service layer
 type Service interface {
 	UpdateMetrics(ctx context.Context, metrics []models.Metrics) error
 	UpdateMetric(ctx context.Context, metric models.Metrics) (models.Metrics, error)
@@ -20,6 +22,7 @@ type Service interface {
 	MetricPage(ctx context.Context) (string, error)
 }
 
+// Html page consist of the saved metrics
 func (h *HTTPGateway) MainPage() http.HandlerFunc {
 	log.Println("HANDLER MAIN PAGE")
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -37,13 +40,16 @@ func (h *HTTPGateway) MainPage() http.HandlerFunc {
 	}
 }
 
+// Update metric value by passing params in url path
 func (h *HTTPGateway) UpdatePathHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Println("HANDLER UpdatePathHandler PAGE")
 
-		metric, err := URLParamsToMetric(r)
-		if err != nil {
-			http.Error(w, errMetricNameIncorrect.Error(), http.StatusBadRequest)
+		var metric models.Metrics
+		metric.ID = chi.URLParam(r, "name")
+		metric.MType = chi.URLParam(r, "type")
+		if err := metric.SetVal(chi.URLParam(r, "value")); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
@@ -64,16 +70,14 @@ func (h *HTTPGateway) UpdatePathHandler() http.HandlerFunc {
 	}
 }
 
+// Read metric value by passing params in url path
 func (h *HTTPGateway) ValuePathHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Println("HANDLER ValuePathHandler PAGE")
 
-		metric, err := URLParamsToMetric(r)
-		if err != nil {
-			log.Println("URLParamsToMetric ERROR", err)
-			http.Error(w, errMetricNameIncorrect.Error(), http.StatusBadRequest)
-			return
-		}
+		var metric models.Metrics
+		metric.ID = chi.URLParam(r, "name")
+		metric.MType = chi.URLParam(r, "type")
 
 		newMetric, err := h.Service.ViewMetric(r.Context(), metric)
 		if err != nil {
@@ -94,6 +98,7 @@ func (h *HTTPGateway) ValuePathHandler() http.HandlerFunc {
 	}
 }
 
+// Update metric value with application/json by passing json
 func (h *HTTPGateway) UpdateJSONHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
@@ -126,6 +131,7 @@ func (h *HTTPGateway) UpdateJSONHandler() http.HandlerFunc {
 	}
 }
 
+// Read metric value with application/json by passing json
 func (h *HTTPGateway) ValueJSONHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// log.Println("HANDLER ValueJSONHandler PAGE")
@@ -155,6 +161,7 @@ func (h *HTTPGateway) ValueJSONHandler() http.HandlerFunc {
 	}
 }
 
+// Update metrics with application/json by passing json list of metrics
 func (h *HTTPGateway) BatchHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Println("HANDLER BatchHandler PAGE")
@@ -178,6 +185,7 @@ func (h *HTTPGateway) BatchHandler() http.HandlerFunc {
 	}
 }
 
+// Check db connection
 func (h *HTTPGateway) Ping(path string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Println("HANDLER Ping PAGE")
