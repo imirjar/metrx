@@ -5,8 +5,9 @@ import (
 	"log"
 	"time"
 
+	"github.com/imirjar/metrx/internal/models"
 	"github.com/imirjar/metrx/internal/storage/database"
-	"github.com/imirjar/metrx/internal/storage/mock"
+	"github.com/imirjar/metrx/internal/storage/memory"
 	"github.com/imirjar/metrx/pkg/ping"
 )
 
@@ -19,8 +20,16 @@ type IStorage interface {
 	ReadCounter(ctx context.Context, name string) (int64, bool)
 	ReadAllGauges(ctx context.Context) (map[string]float64, error)
 	ReadAllCounters(ctx context.Context) (map[string]int64, error)
+	//new
+	AddMetrics(ctx context.Context, metrics []models.Metrics) error
+	AddMetric(ctx context.Context, metric models.Metrics) error
+	ReadMetrics(ctx context.Context, mType string) ([]models.Metrics, error)
+	ReadMetric(ctx context.Context, metric models.Metrics) (models.Metrics, error)
 }
 
+// Create storage layer
+// if db connection string from config isn't ok,
+// then create "in memory" storage
 func NewStorage(DBConn string, filePath string, interval time.Duration, autoImport bool) IStorage {
 	if DBConn != "" {
 		log.Println("NOTNULLDBCONN")
@@ -34,7 +43,7 @@ func NewStorage(DBConn string, filePath string, interval time.Duration, autoImpo
 			return database.NewDB(DBConn)
 		}
 	}
-	store := mock.NewMockStorage(filePath)
+	store := memory.InMemoryStorage(filePath)
 	store.Configure(filePath, autoImport, interval)
 	return store
 }

@@ -165,12 +165,9 @@ func TestPathValueHandler(t *testing.T) {
 	}
 }
 
-var (
-	ms MockService
-	ts HTTPGateway = HTTPGateway{
-		Service: &ms,
-	}
-)
+var ts HTTPGateway = HTTPGateway{
+	Service: &MockService{},
+}
 
 type MockService struct {
 }
