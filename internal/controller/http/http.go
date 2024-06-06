@@ -42,7 +42,7 @@ func (h *HTTPGateway) Start(path, conn string) error {
 		update.Post("/", h.UpdateJSONHandler())
 	})
 
-	// Read metric  if exists
+	// Read metric if exists
 	router.Route("/value", func(value chi.Router) {
 		value.Get("/{type}/{name}", h.ValuePathHandler())
 		value.Post("/", h.ValueJSONHandler())
