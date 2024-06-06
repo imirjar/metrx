@@ -8,7 +8,6 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-// New version
 func (m *DB) AddMetrics(ctx context.Context, metrics []models.Metrics) error {
 
 	batch := &pgx.Batch{}
