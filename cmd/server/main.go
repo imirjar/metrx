@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/imirjar/metrx/internal/app/server"
+	_ "net/http/pprof"
+
+	app "github.com/imirjar/metrx/internal/app/server"
 )
 
 func main() {
-	app := server.NewServerApp()
 	app.Run()
 }
