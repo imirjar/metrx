@@ -33,3 +33,10 @@ git fetch template && git checkout template/main .github
 
 ## Контейнер с тестовой базой
 sudo docker run --name postgres -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=praktikum -d postgres:latest
+
+
+## Проверить процент покрытия можно с помощью команды:
+go test -coverprofile=coverage.out ./... ;    go tool cover -func=coverage.out
+
+На данный момент он составляет:
+total:         (statements)            18.8%
