@@ -3,7 +3,7 @@ package main
 import (
 	_ "net/http/pprof"
 
-	app "github.com/imirjar/metrx/internal/app/server"
+	app "github.com/imirjar/metrx/internal/server/app"
 )
 
 func main() {
