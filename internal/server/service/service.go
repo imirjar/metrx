@@ -10,11 +10,13 @@ import (
 
 // Generate html page witch consist all of metrics
 func (s ServerService) MetricPage(ctx context.Context) (string, error) {
+
 	// log.Println("SERVICE MetricPage")
 	gauges, err := s.MemStorager.ReadMetrics(ctx, "gauge")
 	if err != nil {
 		return "", err
 	}
+
 	counters, err := s.MemStorager.ReadMetrics(ctx, "counter")
 	if err != nil {
 		return "", err
@@ -41,6 +43,23 @@ func (s ServerService) MetricPage(ctx context.Context) (string, error) {
 func (s ServerService) ViewMetric(ctx context.Context, metric models.Metrics) (models.Metrics, error) {
 	// log.Println("SERVICE ViewPath")
 	return s.MemStorager.ReadMetric(ctx, metric)
+}
+
+func (s ServerService) ViewMetrics(ctx context.Context) (map[string][]models.Metrics, error) {
+	// log.Println("SERVICE ViewPath")
+	ms := make(map[string][]models.Metrics)
+	var err error
+	ms["gauges"], err = s.MemStorager.ReadMetrics(ctx, "gauge")
+	if err != nil {
+		return ms, err
+	}
+
+	ms["counters"], err = s.MemStorager.ReadMetrics(ctx, "counter")
+	if err != nil {
+		return ms, err
+	}
+
+	return ms, nil
 }
 
 // Set or update Metric in store

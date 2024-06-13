@@ -4,9 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
+	"html/template"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/go-chi/chi"
 	"github.com/imirjar/metrx/internal/models"
@@ -19,6 +20,7 @@ type Service interface {
 	UpdateMetrics(ctx context.Context, metrics []models.Metrics) error
 	UpdateMetric(ctx context.Context, metric models.Metrics) (models.Metrics, error)
 	ViewMetric(ctx context.Context, metric models.Metrics) (models.Metrics, error)
+	ViewMetrics(ctx context.Context) (map[string][]models.Metrics, error)
 	MetricPage(ctx context.Context) (string, error)
 }
 
@@ -27,16 +29,37 @@ func (h *HTTPGateway) MainPage() http.HandlerFunc {
 	log.Println("HANDLER MAIN PAGE")
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		page, err := h.Service.MetricPage(ctx)
-
+		metrics, err := h.Service.ViewMetrics(ctx)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
+		tmp, err := os.ReadFile("internal/server/controller/http/templates/metrics.html")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			log.Print("")
+			return
+		}
+
+		t := template.Must(template.New("tmp").Funcs(template.FuncMap{
+			"Deref": func(i models.Metrics) string {
+				val, err := i.GetVal()
+				log.Print(val)
+				if err != nil {
+					log.Print(err)
+				}
+				return val
+
+			},
+		}).Parse(string(tmp)))
+
 		w.Header().Set("content-type", "text/html")
 		w.WriteHeader(http.StatusOK)
-		io.WriteString(w, page)
+		err = t.Execute(w, metrics)
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 

@@ -42,7 +42,7 @@ func run(pass *analysis.Pass) (interface{}, error) {
 	tuplefunc := func(x *ast.AssignStmt) {
 		// рассматриваем присваивание, при котором
 		// вместо получения ошибок используется '_'
-		// a, b, _ := tuplefunc()
+		// a, b, _ := tuplefuёnc()
 		// проверяем, что это вызов функции
 		if call, ok := x.Rhs[0].(*ast.CallExpr); ok {
 			results := resultErrors(pass, call)
