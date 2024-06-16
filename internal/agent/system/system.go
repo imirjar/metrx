@@ -2,7 +2,6 @@ package system
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"runtime"
 
@@ -102,7 +101,6 @@ func getMemStat(ms *runtime.MemStats, n string) (string, error) {
 	case "TotalAlloc":
 		return fmt.Sprint(ms.TotalAlloc), nil
 	default:
-		err := errors.New(fmt.Sprintf("There is no metric named %s", n))
-		return "", err
+		return "", fmt.Errorf("there is no metric named %s", n)
 	}
 }
