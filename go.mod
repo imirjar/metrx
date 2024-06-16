@@ -8,7 +8,11 @@ require (
 	github.com/stretchr/testify v1.9.0
 )
 
-require github.com/golang/mock v1.6.0 // indirect
+require (
+	github.com/golang/mock v1.6.0 // indirect
+	golang.org/x/exp/typeparams v0.0.0-20221208152030-732eee02a75a // indirect
+	honnef.co/go/tools v0.4.7 // indirect
+)
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
