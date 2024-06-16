@@ -34,7 +34,7 @@ func NewStorage(DBConn string, filePath string, interval time.Duration, autoImpo
 			return database.NewDB(DBConn)
 		}
 	}
-	store := memory.InMemoryStorage(filePath)
+	store := memory.NewMemoryStorage(filePath)
 	store.Configure(filePath, autoImport, interval)
 	return store
 }

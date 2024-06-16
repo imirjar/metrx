@@ -10,6 +10,14 @@ require (
 
 require (
 	github.com/golang/mock v1.6.0 // indirect
+	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
+	github.com/jackc/pgconn v1.13.0 // indirect
+	github.com/jackc/pgio v1.0.0 // indirect
+	github.com/jackc/pgproto3/v2 v2.3.1 // indirect
+	github.com/jackc/pgtype v1.12.0 // indirect
+	github.com/jackc/pgx/v4 v4.17.0 // indirect
+	github.com/jackc/puddle v1.2.1 // indirect
+	github.com/pashagolub/pgxmock v1.8.0 // indirect
 	golang.org/x/exp/typeparams v0.0.0-20221208152030-732eee02a75a // indirect
 	honnef.co/go/tools v0.4.7 // indirect
 )

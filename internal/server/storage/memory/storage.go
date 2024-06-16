@@ -9,7 +9,7 @@ import (
 )
 
 // Create new storage layer
-func InMemoryStorage(filePath string) *Storage {
+func NewMemoryStorage(filePath string) *Storage {
 
 	storage := Storage{
 		DumpPath:   filePath,
