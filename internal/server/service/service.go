@@ -2,42 +2,10 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"github.com/imirjar/metrx/internal/models"
 )
-
-// Generate html page witch consist all of metrics
-func (s ServerService) MetricPage(ctx context.Context) (string, error) {
-
-	// log.Println("SERVICE MetricPage")
-	gauges, err := s.MemStorager.ReadMetrics(ctx, "gauge")
-	if err != nil {
-		return "", err
-	}
-
-	counters, err := s.MemStorager.ReadMetrics(ctx, "counter")
-	if err != nil {
-		return "", err
-	}
-
-	gaugeForm := "<a>Gauge</a>"
-	for _, g := range gauges {
-		// log.Println(g.ID, *g.Value)
-		gaugeForm += fmt.Sprintf("<li>%s:%f</li>", g.ID, *g.Value)
-	}
-
-	counterForm := "<a>Counter</a>"
-	for _, c := range counters {
-		// log.Println(c.ID, *c.Delta)
-		counterForm += fmt.Sprintf("<li>%s:%d</li>", c.ID, *c.Delta)
-	}
-
-	form := fmt.Sprintf("<html><ul>%s</ul><ul>%s</ul></html>", gaugeForm, counterForm)
-
-	return form, nil
-}
 
 // Get Metric from store
 func (s ServerService) ViewMetric(ctx context.Context, metric models.Metrics) (models.Metrics, error) {

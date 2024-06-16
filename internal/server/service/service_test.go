@@ -6,51 +6,15 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/imirjar/metrx/internal/models"
-	"github.com/imirjar/metrx/mocks"
 	"github.com/stretchr/testify/assert"
 )
-
-func TestMetricPage(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	m := mocks.NewMockStorager(ctrl)
-
-	m.EXPECT().ReadMetrics(context.Background(), "gauge").Return([]models.Metrics{}, nil)
-	m.EXPECT().ReadMetrics(context.Background(), "counter").Return([]models.Metrics{}, nil)
-
-	testService := ServerService{
-		MemStorager: m,
-	}
-
-	tests := []struct {
-		name string
-		want string
-	}{
-		{
-			name: "ok",
-			want: "<html><ul><a>Gauge</a></ul><ul><a>Counter</a></ul></html>",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result, err := testService.MetricPage(context.Background())
-			if err != nil {
-				t.Error(err)
-			}
-
-			assert.Equal(t, tt.want, result)
-		})
-	}
-}
 
 func TestViewMetric(t *testing.T) {
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	m := mocks.NewMockStorager(ctrl)
+	m := NewMockStorager(ctrl)
 
 	var value float64 = 110
 	gaugeMetric := models.Metrics{
@@ -127,7 +91,7 @@ func TestUpdateMetric(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	m := mocks.NewMockStorager(ctrl)
+	m := NewMockStorager(ctrl)
 
 	var value float64 = 110
 	gaugeMetric := models.Metrics{
@@ -199,7 +163,7 @@ func TestUpdateMetrics(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	m := mocks.NewMockStorager(ctrl)
+	m := NewMockStorager(ctrl)
 
 	var value float64 = 110
 	gaugeMetrics := []models.Metrics{

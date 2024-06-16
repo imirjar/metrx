@@ -1,1 +1,0 @@
-mockgen -destination=mocks/mock_store.go -package=mocks  github.com/imirjar/metrx/internal/service Storager

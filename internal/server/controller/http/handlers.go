@@ -21,7 +21,6 @@ type Service interface {
 	UpdateMetric(ctx context.Context, metric models.Metrics) (models.Metrics, error)
 	ViewMetric(ctx context.Context, metric models.Metrics) (models.Metrics, error)
 	ViewMetrics(ctx context.Context) (map[string][]models.Metrics, error)
-	MetricPage(ctx context.Context) (string, error)
 }
 
 // Html page consist of the saved metrics
@@ -35,10 +34,9 @@ func (h *HTTPGateway) MainPage() http.HandlerFunc {
 			return
 		}
 
-		tmp, err := os.ReadFile("internal/server/controller/http/templates/metrics.html")
+		tmp, err := os.ReadFile("./internal/server/controller/http/templates/metrics.html")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-			log.Print("")
 			return
 		}
 
