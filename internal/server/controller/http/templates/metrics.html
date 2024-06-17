@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metrix</title>
+    <style>
+        table {
+          font-family: arial, sans-serif;
+          border-collapse: collapse;
+          width: 100%;
+        }
+        
+        td, th {
+          border: 1px solid #dddddd;
+          text-align: left;
+          padding: 8px;
+        }
+        
+        tr:nth-child(even) {
+          background-color: #dddddd;
+        }
+        </style>
+</head>
+<body>
+    <h2>GAUGES:</h2>
+    <table>
+        <tr>
+          <th>Name</th>
+          <th>Value</th>
+        </tr>
+        {{range .gauges}}
+        <tr>
+            <td>{{.ID}}</td>
+            <td>{{.Value}}</td>
+        </tr>
+        {{end}}
+    </table>
+
+    <h2>COUNTERS:</h2>
+    <table>
+        <tr>
+          <th>Name</th>
+          <th>Value</th>
+        </tr>
+        {{range .counters}}
+        <tr>
+            <td>{{.ID}}</td>
+            <td>{{.Delta}}</td>
+        </tr>
+        {{end}}
+    </table>
+</body>
+</html>

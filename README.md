@@ -31,5 +31,15 @@ git fetch template && git checkout template/main .github
 
 Подробнее про локальный и автоматический запуск читайте в [README автотестов](https://github.com/Yandex-Practicum/go-autotests).
 
+## Создаем моки для тестов слоев сервиса
+ mockgen -destination=internal/server/service/mock_storage.go -package=mocks  github.com/imirjar/metrx/internal/server/service Storager
+
+## Проверить процент покрытия можно с помощью команды:
+go test -coverprofile=coverage.out ./... ;    go tool cover -func=coverage.out
+
+На данный момент он составляет:
+total:         (statements)            18.8%
+
+
 ## Контейнер с тестовой базой
 sudo docker run --name postgres -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=praktikum -d postgres:latest

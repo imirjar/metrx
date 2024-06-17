@@ -2,7 +2,6 @@ package models
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 )
 
@@ -18,14 +17,11 @@ type Metrics struct {
 func (m *Metrics) GetVal() (string, error) {
 	switch m.MType {
 	case "gauge":
-		log.Println("GAUGE", m.Value)
 		return fmt.Sprint(*m.Value), nil
 	case "counter":
-		log.Println("VALUE", *m.Delta)
 		return fmt.Sprint(*m.Delta), nil
 	default:
-		log.Print("Metric GetVal incorrect metric type ERROR")
-		return "", fmt.Errorf("error incorrect metric type")
+		return "", errMetricTypeError
 	}
 }
 
@@ -35,18 +31,18 @@ func (m *Metrics) SetVal(strVal string) error {
 	case "gauge":
 		value, err := strconv.ParseFloat(strVal, 64)
 		if err != nil {
-			return fmt.Errorf("error metric isn't float64")
+			return errTypeAssertionError
 		}
 		m.Value = &value
 		return nil
 	case "counter":
 		delta, err := strconv.ParseInt(strVal, 10, 64)
 		if err != nil {
-			return fmt.Errorf("error metric isn't int64")
+			return errTypeAssertionError
 		}
 		m.Delta = &delta
 		return nil
 	default:
-		return fmt.Errorf("error incorrect metric type")
+		return errMetricTypeError
 	}
 }
