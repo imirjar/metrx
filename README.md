@@ -43,3 +43,6 @@ total:         (statements)            18.8%
 
 ## Контейнер с тестовой базой
 sudo docker run --name postgres -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=praktikum -d postgres:latest
+
+
+mockgen -destination=internal/agent/app/mock_client.go -package=app  github.com/imirjar/metrx/internal/agent/app Client

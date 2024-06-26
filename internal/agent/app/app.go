@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/imirjar/metrx/config"
+	config "github.com/imirjar/metrx/config/agent"
 	"github.com/imirjar/metrx/internal/agent/client"
 	"github.com/imirjar/metrx/internal/agent/system"
 	"github.com/imirjar/metrx/internal/models"
@@ -32,7 +32,7 @@ func Run() {
 	cfg := config.NewAgentConfig()
 
 	// HTTP lient for sending metrix to host
-	client := client.NewClient(cfg.SECRET, cfg.URL)
+	client := client.NewClient(cfg.Secret, cfg.Addr)
 	// OS heap
 	system := system.NewSystem()
 

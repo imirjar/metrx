@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/imirjar/metrx/config"
+	config "github.com/imirjar/metrx/config/server"
 	"github.com/imirjar/metrx/internal/server/controller/http"
 	"github.com/imirjar/metrx/internal/server/service"
 	"github.com/imirjar/metrx/internal/server/storage"
@@ -9,7 +9,7 @@ import (
 
 func Run() {
 	// Application configuration variables
-	cfg := config.NewServerConfig()
+	cfg := config.NewConfig()
 
 	//Storage layer
 	// cfg.DBConn for db connection
@@ -25,11 +25,11 @@ func Run() {
 	service.MemStorager = storage
 
 	//GATEWAY layer
-	gateway := http.NewGateway(cfg.SECRET)
+	gateway := http.NewGateway(cfg.Secret)
 	gateway.Service = service
 
 	//Run app on cfg.URL, pass dbconn for /ping handler
-	if err := gateway.Start(cfg.URL, cfg.DBConn); err != nil {
+	if err := gateway.Start(cfg.Addr, cfg.DBConn); err != nil {
 		panic(err)
 	}
 }

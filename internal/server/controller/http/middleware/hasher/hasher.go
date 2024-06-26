@@ -1,4 +1,4 @@
-package encryptor
+package hasher
 
 import (
 	"bytes"
@@ -13,7 +13,7 @@ import (
 	"github.com/imirjar/metrx/pkg/encrypt"
 )
 
-func Encrypting(key string) func(next http.Handler) http.Handler {
+func HashRead(key string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			body, err := io.ReadAll(r.Body)
@@ -48,7 +48,7 @@ func Encrypting(key string) func(next http.Handler) http.Handler {
 	}
 }
 
-func EncWrite(key string) func(next http.Handler) http.Handler {
+func HashWrite(key string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 

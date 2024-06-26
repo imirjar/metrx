@@ -7,7 +7,7 @@ import (
 	"github.com/go-chi/chi/middleware"
 
 	"github.com/imirjar/metrx/internal/server/controller/http/middleware/compressor"
-	"github.com/imirjar/metrx/internal/server/controller/http/middleware/encryptor"
+	"github.com/imirjar/metrx/internal/server/controller/http/middleware/hasher"
 	"github.com/imirjar/metrx/internal/server/controller/http/middleware/logger"
 )
 
@@ -32,8 +32,8 @@ func (h *HTTPGateway) Start(path, conn string) error {
 	router.Use(middleware.NoCache)
 
 	router.Use(compressor.Compressing())
-	router.Use(encryptor.Encrypting(h.Secret))
-	router.Use(encryptor.EncWrite(h.Secret))
+	router.Use(hasher.HashRead(h.Secret))
+	router.Use(hasher.HashWrite(h.Secret))
 	router.Use(logger.Logger())
 
 	// Save metric
