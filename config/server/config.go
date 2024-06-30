@@ -1,40 +1,62 @@
 package config
 
 import (
+	"encoding/json"
 	"flag"
+	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/caarlos0/env"
+	"github.com/imirjar/metrx/internal/models"
 )
 
 func NewConfig() *Config {
-	cfg := Config{
-		Addr: "localhost:8080",
-		Storage: Storage{
-			Interval:   time.Duration(1_000_000_000 * 300), //300s
-			FilePath:   "/tmp/metrics-db.json",
-			AutoImport: true,
-			DBConn:     "",
-		},
-	}
+	// cfg := Config{
+	// 	Addr: "localhost:8080",
+	// 	Storage: Storage{
+	// 		Interval:   time.Duration(1_000_000_000 * 300), //300s
+	// 		FilePath:   "/tmp/metrics-db.json",
+	// 		AutoImport: true,
+	// 		DBConn:     "",
+	// 	},
+	// }
+	cfg := Config{}
+	cfg.setFileEnv()
 	cfg.setEnv()
 	cfg.setFlags()
 	return &cfg
 }
 
 type Config struct {
-	Addr      string `env:"ADDRESS" toml:"addr"`
-	Secret    string `env:"SECRET" toml:"secret"`
-	CryptoKey string `env:CRYPTO_KEY toml:"crypto"`
+	Addr      string `env:"ADDRESS" json:"address"`
+	Secret    string `env:"SECRET"`
+	CryptoKey string `env:CRYPTO_KEY json:"crypto_key"`
 	Storage
 }
 
 type Storage struct {
-	Interval   time.Duration `env:"STORE_INTERVAL" toml:"backup_interval"`
-	FilePath   string        `env:"FILE_STORAGE_PATH" toml:"dump_file"`
-	AutoImport bool          `env:"RESTORE" toml:"auto_restore"`
-	DBConn     string        `env:"DATABASE_DSN" toml:"conn"`
+	Interval   models.Duration `env:"STORE_INTERVAL" toml:"backup_interval"`
+	FilePath   string          `env:"FILE_STORAGE_PATH" toml:"dump_file"`
+	AutoImport bool            `env:"RESTORE" toml:"auto_restore"`
+	DBConn     string          `env:"DATABASE_DSN" toml:"conn"`
+}
+
+// set params from file environment
+func (ac *Config) setFileEnv() {
+	configFile, err := os.ReadFile("config/server/config.json")
+	if err != nil {
+		fmt.Println("Error reading file:", err)
+		return
+	}
+
+	// Parse JSON into AgentConfig
+	err = json.Unmarshal(configFile, &ac)
+	if err != nil {
+		fmt.Println("Error parsing JSON:", err)
+		return
+	}
 }
 
 func (s *Config) setEnv() {
@@ -72,7 +94,7 @@ func (s *Config) setFlags() {
 		s.Storage.AutoImport = *r
 	}
 	if *i != -1 {
-		s.Storage.Interval = time.Duration(1_000_000_000 * *i)
+		s.Storage.Interval.Duration = time.Duration(1_000_000_000 * *i)
 	}
 	if *d != "" {
 		s.Storage.DBConn = *d

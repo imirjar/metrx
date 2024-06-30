@@ -18,7 +18,7 @@ func Run() {
 	// place dump to cfg.FilePath
 	// witch cfg.Interval periodicity
 	// and can autorestore if сfg.AutoImport
-	storage := storage.NewStorage(cfg.DBConn, cfg.FilePath, cfg.Interval, cfg.AutoImport)
+	storage := storage.NewStorage(cfg.DBConn, cfg.FilePath, cfg.Interval.Duration, cfg.AutoImport)
 
 	// Service layer
 	service := service.NewServerService()

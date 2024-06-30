@@ -41,7 +41,7 @@ func Run() {
 		system: system,
 	}
 
-	if err := app.Start(cfg.PollInterval, cfg.ReportInterval); err != nil {
+	if err := app.Start(cfg.PollInterval.Duration, cfg.ReportInterval.Duration); err != nil {
 		panic(err)
 	}
 

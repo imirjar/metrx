@@ -1,12 +1,15 @@
 package config
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/caarlos0/env"
+	"github.com/imirjar/metrx/internal/models"
 )
 
 // Create agent app configuration with:
@@ -14,12 +17,8 @@ import (
 // 2. local environment params
 // 3. os.Args[] params
 func NewAgentConfig() *AgentConfig {
-	cfg := AgentConfig{
-
-		Addr:           "http://localhost:8080",
-		PollInterval:   time.Duration(1_000_000_000 * 2),  //2s
-		ReportInterval: time.Duration(1_000_000_000 * 10), //10s
-	}
+	cfg := AgentConfig{}
+	cfg.setFileEnv()
 	cfg.setEnv()
 	cfg.setFlags()
 
@@ -27,22 +26,39 @@ func NewAgentConfig() *AgentConfig {
 }
 
 type AgentConfig struct {
-	Addr           string        `env:"ADDRESS"`
-	Secret         string        `env:"SECRET"`
-	CryptoKey      string        `env:"CRYPTO_KEY"`
-	PollInterval   time.Duration `env:"POLL_INTERVAL"`
-	ReportInterval time.Duration `env:"REPORT_INTERVAL"`
+	Addr           string          `env:"ADDRESS" json:"address"`
+	Secret         string          `env:"SECRET"`
+	CryptoKey      string          `env:"CRYPTO_KEY" json:"crypto_key"`
+	PollInterval   models.Duration `env:"POLL_INTERVAL" json:"poll_interval"`
+	ReportInterval models.Duration `env:"REPORT_INTERVAL" json:"report_interval" `
 }
 
-// set params from local environment
-func (c *AgentConfig) setEnv() {
-	if err := env.Parse(c); err != nil {
-		log.Printf("%+v\n", err)
+// set params from file environment
+func (ac *AgentConfig) setFileEnv() {
+	configFile, err := os.ReadFile("config/agent/config.json")
+	if err != nil {
+		fmt.Println("Error reading file:", err)
+		return
+	}
+
+	// Parse JSON into AgentConfig
+	err = json.Unmarshal(configFile, &ac)
+	if err != nil {
+		fmt.Println("Error parsing JSON:", err)
+		return
 	}
 }
 
+// set params from local environment
+func (ac *AgentConfig) setEnv() {
+	if err := env.Parse(ac); err != nil {
+		log.Printf("%+v\n", err)
+	}
+	log.Print(ac.PollInterval)
+}
+
 // set params from os.Args[]
-func (c *AgentConfig) setFlags() {
+func (ac *AgentConfig) setFlags() {
 	a := flag.String("a", "", "api adress")
 	p := flag.Int("p", 0, "collect interval")
 	r := flag.Int("r", 0, "sending interval")
@@ -52,19 +68,19 @@ func (c *AgentConfig) setFlags() {
 	flag.Parse()
 
 	if *a != "" {
-		c.Addr = fmt.Sprint("http://", *a)
+		ac.Addr = fmt.Sprint("http://", *a)
 	}
 	if *k != "" {
-		c.Secret = *k
+		ac.Secret = *k
 	}
 	if *cryptoKey != "" {
-		c.CryptoKey = *k
+		ac.CryptoKey = *k
 	}
 
 	if *r != 0 {
-		c.ReportInterval = time.Duration(1_000_000_000 * *r)
+		ac.ReportInterval.Duration = time.Duration(1_000_000_000 * *r)
 	}
 	if *p != 0 {
-		c.PollInterval = time.Duration(1_000_000_000 * *p)
+		ac.PollInterval.Duration = time.Duration(1_000_000_000 * *p)
 	}
 }

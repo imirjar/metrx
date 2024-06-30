@@ -65,8 +65,9 @@ func (ew encWriter) Write(b []byte) (int, error) {
 	hk.LoadPublicKey(ew.pubKey)
 	newB, err := hk.EncryptByKey(b)
 	if err != nil {
+		log.Print(err)
 	}
-	return ew.w.Write(b)
+	return ew.w.Write(newB)
 }
 
 func (ew encWriter) WriteHeader(s int) {

@@ -32,7 +32,9 @@ git fetch template && git checkout template/main .github
 Подробнее про локальный и автоматический запуск читайте в [README автотестов](https://github.com/Yandex-Practicum/go-autotests).
 
 ## Создаем моки для тестов слоев сервиса
- mockgen -destination=internal/server/service/mock_storage.go -package=mocks  github.com/imirjar/metrx/internal/server/service Storager
+mockgen -destination=internal/server/controller/http/mock_service.go -package=http  github.com/imirjar/metrx/internal/server/controller/http Service
+
+mockgen -destination=internal/server/service/mock_storage.go -package=mocks  github.com/imirjar/metrx/internal/server/service Storager
 
 ## Проверить процент покрытия можно с помощью команды:
 go test -coverprofile=coverage.out ./... ;    go tool cover -func=coverage.out
