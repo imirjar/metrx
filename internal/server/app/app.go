@@ -1,8 +1,16 @@
 package server
 
 import (
+	"context"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
 	config "github.com/imirjar/metrx/config/server"
-	"github.com/imirjar/metrx/internal/server/controller/http"
+	gateway "github.com/imirjar/metrx/internal/server/controller/http"
 	"github.com/imirjar/metrx/internal/server/service"
 	"github.com/imirjar/metrx/internal/server/storage"
 )
@@ -25,11 +33,40 @@ func Run() {
 	service.MemStorager = storage
 
 	//GATEWAY layer
-	gateway := http.NewGateway(cfg.Secret)
-	gateway.Service = service
+	gw := gateway.NewGateway(cfg.Addr, cfg.Secret, cfg.DBConn)
+	gw.Service = service
 
-	//Run app on cfg.URL, pass dbconn for /ping handler
-	if err := gateway.Start(cfg.Addr, cfg.DBConn); err != nil {
-		panic(err)
+	serverCtx, serverStopCtx := context.WithCancel(context.Background())
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	go func() {
+		<-sig
+
+		// Shutdown signal with grace period of 30 seconds
+		shutdownCtx, _ := context.WithTimeout(serverCtx, 30*time.Second)
+
+		go func() {
+			<-shutdownCtx.Done()
+
+			if shutdownCtx.Err() == context.DeadlineExceeded {
+				log.Fatal("graceful shutdown timed out.. forcing exit.")
+			}
+		}()
+
+		// Trigger graceful shutdown
+		err := gw.Server.Shutdown(shutdownCtx)
+		if err != nil {
+			log.Fatal(err)
+		}
+		serverStopCtx()
+	}()
+
+	// Run the server
+	err := gw.Server.ListenAndServe()
+	if err != nil && err != http.ErrServerClosed {
+		log.Fatal(err)
 	}
+
+	// Wait for server context to be stopped
+	<-serverCtx.Done()
 }

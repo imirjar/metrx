@@ -34,7 +34,9 @@ git fetch template && git checkout template/main .github
 ## Создаем моки для тестов слоев сервиса
 mockgen -destination=internal/server/controller/http/mock_service.go -package=http  github.com/imirjar/metrx/internal/server/controller/http Service
 
-mockgen -destination=internal/server/service/mock_storage.go -package=mocks  github.com/imirjar/metrx/internal/server/service Storager
+mockgen -destination=internal/server/service/mock_storage.go -package=service  github.com/imirjar/metrx/internal/server/service Storager
+
+
 
 ## Проверить процент покрытия можно с помощью команды:
 go test -coverprofile=coverage.out ./... ;    go tool cover -func=coverage.out
