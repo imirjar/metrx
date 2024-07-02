@@ -2,8 +2,12 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 	"time"
 
 	config "github.com/imirjar/metrx/config/agent"
@@ -25,6 +29,7 @@ type AgentApp struct {
 	client Client
 	system System
 	sync.Mutex
+	ctx context.Context
 }
 
 func Run() {
@@ -37,6 +42,7 @@ func Run() {
 	system := system.NewSystem()
 
 	app := AgentApp{
+		ctx:    context.Background(),
 		client: client,
 		system: system,
 	}
@@ -50,6 +56,9 @@ func Run() {
 func (app *AgentApp) Start(p, r time.Duration) error {
 	poll := time.NewTicker(p)
 	report := time.NewTicker(r)
+
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 
 	var metrics []models.Metrics
 	var err error
@@ -78,6 +87,18 @@ func (app *AgentApp) Start(p, r time.Duration) error {
 				return err
 			}
 			mute.RUnlock()
+		case <-sig:
+			// сюда попадем, если вызвали cancelFunc()
+			fmt.Printf("worker stopped\n")
+
+			time.Sleep(p)
+			poll.Stop()
+
+			time.Sleep(r)
+			report.Stop()
+
+			return nil
+
 		}
 	}
 	// return nil
