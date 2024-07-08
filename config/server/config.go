@@ -35,7 +35,7 @@ type Storage struct {
 }
 
 // set params from file environment
-func (ac *Config) setFileEnv() {
+func (s *Config) setFileEnv() {
 	configFile, err := os.ReadFile("config/server/config.json")
 	if err != nil {
 		fmt.Println("Error reading file:", err)
@@ -43,7 +43,7 @@ func (ac *Config) setFileEnv() {
 	}
 
 	// Parse JSON into AgentConfig
-	err = json.Unmarshal(configFile, &ac)
+	err = json.Unmarshal(configFile, &s)
 	if err != nil {
 		fmt.Println("Error parsing JSON:", err)
 		return
