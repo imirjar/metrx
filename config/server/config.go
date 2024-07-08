@@ -32,7 +32,7 @@ func NewConfig() *Config {
 type Config struct {
 	Addr      string `env:"ADDRESS" json:"address"`
 	Secret    string `env:"SECRET"`
-	CryptoKey string `env:CRYPTO_KEY json:"crypto_key"`
+	CryptoKey string `env:"CRYPTO_KEY" json:"crypto_key"`
 	Storage
 }
 

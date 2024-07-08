@@ -18,6 +18,7 @@ type Collector struct {
 
 func (c *Collector) Collect(ctx context.Context) ([]models.Metrics, error) {
 	runtime.ReadMemStats(&c.Ms)
+	var counter int64
 
 	var metrics []models.Metrics
 	var gaugeList = []string{
@@ -36,10 +37,19 @@ func (c *Collector) Collect(ctx context.Context) ([]models.Metrics, error) {
 			MType: "gauge",
 		}
 
+		counter += 1
+
 		metric.SetVal(v)
 		metrics = append(metrics, metric)
 		// log.Println("###", *metric.Value)
 	}
+
+	cMetric := models.Metrics{
+		ID:    "PollCounter",
+		MType: "counter",
+		Delta: &counter,
+	}
+	metrics = append(metrics, cMetric)
 
 	return metrics, nil
 }

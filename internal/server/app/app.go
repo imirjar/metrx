@@ -33,7 +33,7 @@ func Run() {
 	service.MemStorager = storage
 
 	//GATEWAY layer
-	gw := gateway.NewGateway(cfg.Addr, cfg.Secret, cfg.DBConn)
+	gw := gateway.NewGateway(cfg.Addr, cfg.CryptoKey, cfg.Secret, cfg.DBConn)
 	gw.Service = service
 
 	serverCtx, serverStopCtx := context.WithCancel(context.Background())

@@ -36,7 +36,7 @@ mockgen -destination=internal/server/controller/http/mock_service.go -package=ht
 
 mockgen -destination=internal/server/service/mock_storage.go -package=service  github.com/imirjar/metrx/internal/server/service Storager
 
-
+mockgen -destination=internal/agent/app/mock_client.go -package=app  github.com/imirjar/metrx/internal/agent/app Client
 
 ## Проверить процент покрытия можно с помощью команды:
 go test -coverprofile=coverage.out ./... ;    go tool cover -func=coverage.out
@@ -49,4 +49,8 @@ total:         (statements)            18.8%
 sudo docker run --name postgres -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=praktikum -d postgres:latest
 
 
-mockgen -destination=internal/agent/app/mock_client.go -package=app  github.com/imirjar/metrx/internal/agent/app Client
+
+## RSA
+используем .pem формат для хранения ключей
+ключи обязятельно должны быть достаточной длинны для шифрования большого количества отправляемых метрик
+я использую размер 4096

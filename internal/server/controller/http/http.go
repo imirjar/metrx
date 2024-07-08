@@ -1,13 +1,18 @@
 package http
 
 import (
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 
 	"github.com/imirjar/metrx/internal/server/controller/http/middleware/compressor"
-	"github.com/imirjar/metrx/internal/server/controller/http/middleware/hasher"
+	"github.com/imirjar/metrx/internal/server/controller/http/middleware/encryptor"
 	"github.com/imirjar/metrx/internal/server/controller/http/middleware/logger"
 )
 
@@ -16,18 +21,43 @@ import (
 type HTTPGateway struct {
 	Service Service
 	Server  *http.Server
+	pk      *rsa.PrivateKey
 }
 
-func NewGateway(path, secret, conn string) *HTTPGateway {
-
+func NewGateway(path, crypto, secret, conn string) *HTTPGateway {
 	gtw := HTTPGateway{}
+
+	if crypto != "" {
+		b, err := os.ReadFile(crypto)
+		if err != nil {
+			log.Print(errLoadPrivateKey)
+		}
+
+		block, _ := pem.Decode(b)
+		if block == nil || block.Type != "RSA PRIVATE KEY" {
+			log.Print("Block type is nil or not RSA PRIVATE KEY", block.Type)
+		}
+
+		privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+		if err != nil {
+			// log.Print("#####er")
+			log.Print(err)
+		}
+
+		// rsaPrivateKey, ok := privateKey.(*rsa.PrivateKey)
+		// if !ok {
+		// 	log.Print("Ключ не является RSA приватным ключом")
+		// }
+
+		gtw.pk = privateKey
+
+	}
 
 	router := chi.NewRouter()
 	router.Use(middleware.NoCache)
 
+	router.Use(encryptor.DecryptR(gtw.pk))
 	router.Use(compressor.Compressing())
-	router.Use(hasher.HashRead(secret))
-	router.Use(hasher.HashWrite(secret))
 	router.Use(logger.Logger())
 
 	// Save metric

@@ -37,7 +37,7 @@ func Run() {
 	cfg := config.NewAgentConfig()
 
 	// HTTP lient for sending metrix to host
-	client := client.NewClient(cfg.Secret, cfg.Addr)
+	client := client.NewClient(cfg.Secret, cfg.CryptoKey, cfg.Addr)
 	// OS heap
 	system := system.NewSystem()
 

@@ -111,6 +111,7 @@ func (s *Storage) ReadMetrics(ctx context.Context, mType string) ([]models.Metri
 				Delta: &d,
 			}
 			metrics = append(metrics, m)
+			log.Print(m.ID)
 		}
 		// log.Print(metrics)
 		return metrics, nil //s.MemStorage.Counter[m.ID]

@@ -4,29 +4,65 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
-	"encoding/hex"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
 	"encoding/json"
+	"encoding/pem"
+	"errors"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 
 	"github.com/imirjar/metrx/internal/models"
-	"github.com/imirjar/metrx/pkg/encrypt"
 )
 
-func NewClient(secret, host string) *Client {
-	return &Client{
-		client: &http.Client{Timeout: time.Millisecond * 200},
+func NewClient(secret, crypto, host string) *Client {
+
+	cli := Client{
 		secret: secret,
 		host:   host,
+		client: &http.Client{Timeout: time.Millisecond * 200},
 	}
+
+	if crypto != "" {
+
+		file, err := os.ReadFile(crypto)
+		if err != nil {
+			log.Print(err)
+		}
+
+		block, _ := pem.Decode(file)
+		if block == nil || block.Type != "PUBLIC KEY" {
+			log.Print(errors.New("failed to decode PEM block containing public key"))
+		}
+
+		pub, err := x509.ParsePKIXPublicKey(block.Bytes)
+		if err != nil {
+			log.Print(err)
+		}
+
+		switch pub := pub.(type) {
+		case *rsa.PublicKey:
+			// log.Print("PUB", pub)
+			cli.pk = pub
+		default:
+			log.Print(fmt.Errorf("unexpected key type: %T", pub))
+		}
+
+	}
+
+	return &cli
 }
 
 // Client application part witch provide
 type Client struct {
 	secret string
 	host   string
+	pk     *rsa.PublicKey
 	client *http.Client
 	sync.Mutex
 }
@@ -39,12 +75,29 @@ func (c *Client) POST(ctx context.Context, metrics []models.Metrics) error {
 	if err != nil {
 		return err
 	}
+	// fmt.Println("#####1", len(ms))
 
 	// Rewrite compressed version of metrics list in buffer
 	var cms bytes.Buffer
 	w := gzip.NewWriter(&cms)
 	w.Write(ms)
 	w.Close()
+
+	if c.pk != nil {
+
+		rng := rand.Reader
+
+		bms := cms.Bytes()
+		// hash := encrypt.EncryptSHA256(hex.EncodeToString(ms), c.secret)
+		ciphertext, err := rsa.EncryptPKCS1v15(rng, c.pk, bms)
+		if err != nil {
+			return err
+		}
+
+		cms.Reset()
+		cms.Write(ciphertext)
+
+	}
 
 	// Create request with necessary params
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.host+"/updates", &cms)
@@ -53,14 +106,15 @@ func (c *Client) POST(ctx context.Context, metrics []models.Metrics) error {
 		return err
 	}
 	// Adding necessary headers
+
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Content-Encoding", "gzip")
 
 	// If secret key exists in .env then we must add encoding header
-	if c.secret != "" {
-		hash := encrypt.EncryptSHA256(hex.EncodeToString(ms), c.secret)
-		req.Header.Add("HashSHA256", hex.EncodeToString(hash))
-	}
+	// if c.secret != "" {
+	// hash := encrypt.EncryptSHA256(hex.EncodeToString(ms), c.secret)
+	// 	req.Header.Add("HashSHA256", hex.EncodeToString(hash))
+	// }
 
 	// Make request
 	resp, err := c.client.Do(req)
