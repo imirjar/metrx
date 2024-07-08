@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	config "github.com/imirjar/metrx/config/server"
 	gateway "github.com/imirjar/metrx/internal/server/controller/http"
@@ -42,19 +41,16 @@ func Run() {
 	go func() {
 		<-sig
 
-		// Shutdown signal with grace period of 30 seconds
-		shutdownCtx, _ := context.WithTimeout(serverCtx, 30*time.Second)
-
 		go func() {
-			<-shutdownCtx.Done()
+			<-serverCtx.Done()
 
-			if shutdownCtx.Err() == context.DeadlineExceeded {
+			if serverCtx.Err() == context.DeadlineExceeded {
 				log.Fatal("graceful shutdown timed out.. forcing exit.")
 			}
 		}()
 
 		// Trigger graceful shutdown
-		err := gw.Server.Shutdown(shutdownCtx)
+		err := gw.Server.Shutdown(serverCtx)
 		if err != nil {
 			log.Fatal(err)
 		}

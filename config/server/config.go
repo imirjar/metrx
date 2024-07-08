@@ -13,15 +13,6 @@ import (
 )
 
 func NewConfig() *Config {
-	// cfg := Config{
-	// 	Addr: "localhost:8080",
-	// 	Storage: Storage{
-	// 		Interval:   time.Duration(1_000_000_000 * 300), //300s
-	// 		FilePath:   "/tmp/metrics-db.json",
-	// 		AutoImport: true,
-	// 		DBConn:     "",
-	// 	},
-	// }
 	cfg := Config{}
 	cfg.setFileEnv()
 	cfg.setEnv()
