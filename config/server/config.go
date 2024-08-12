@@ -21,9 +21,10 @@ func NewConfig() *Config {
 }
 
 type Config struct {
-	Addr      string `env:"ADDRESS" json:"address"`
-	Secret    string `env:"SECRET"`
-	CryptoKey string `env:"CRYPTO_KEY" json:"crypto_key"`
+	Addr          string `env:"ADDRESS" json:"address"`
+	Secret        string `env:"SECRET"`
+	CryptoKey     string `env:"CRYPTO_KEY" json:"crypto_key"`
+	TrustedSubnet string `env:"TRUSTED_SUBNET" json:"trusted_subnet"`
 	Storage
 }
 

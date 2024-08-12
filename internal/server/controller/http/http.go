@@ -14,6 +14,7 @@ import (
 	"github.com/imirjar/metrx/internal/server/controller/http/middleware/compressor"
 	"github.com/imirjar/metrx/internal/server/controller/http/middleware/encryptor"
 	"github.com/imirjar/metrx/internal/server/controller/http/middleware/logger"
+	"github.com/imirjar/metrx/internal/server/controller/http/middleware/truster"
 )
 
 // Http gateway using secret value for encoding
@@ -24,7 +25,7 @@ type HTTPGateway struct {
 	pk      *rsa.PrivateKey
 }
 
-func NewGateway(path, crypto, secret, conn string) *HTTPGateway {
+func NewGateway(path, crypto, secret, conn, ip string) *HTTPGateway {
 	gtw := HTTPGateway{}
 
 	if crypto != "" {
@@ -59,6 +60,7 @@ func NewGateway(path, crypto, secret, conn string) *HTTPGateway {
 	router.Use(encryptor.DecryptR(gtw.pk))
 	router.Use(compressor.Compressing())
 	router.Use(logger.Logger())
+	router.Use(truster.Truster(ip))
 
 	// Save metric
 	router.Route("/update", func(update chi.Router) {

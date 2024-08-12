@@ -12,6 +12,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"sync"
@@ -110,6 +111,12 @@ func (c *Client) POST(ctx context.Context, metrics []models.Metrics) error {
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Content-Encoding", "gzip")
 
+	ip, err := getMyIP()
+	if err != nil {
+		log.Println("#######", err)
+	}
+	log.Print(ip)
+	req.Header.Add("X-Real-IP", ip)
 	// If secret key exists in .env then we must add encoding header
 	// if c.secret != "" {
 	// hash := encrypt.EncryptSHA256(hex.EncodeToString(ms), c.secret)
@@ -127,4 +134,16 @@ func (c *Client) POST(ctx context.Context, metrics []models.Metrics) error {
 	// log.Print(resp.Status)
 
 	return err
+}
+
+func getMyIP() (string, error) {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		log.Print("client.go Dial ERROR", err)
+		return "", err
+	}
+	defer conn.Close()
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+	ip := localAddr.IP.String()
+	return ip, nil
 }

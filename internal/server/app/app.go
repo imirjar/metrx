@@ -2,10 +2,12 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 
 	config "github.com/imirjar/metrx/config/server"
@@ -32,29 +34,27 @@ func Run() {
 	service.MemStorager = storage
 
 	//GATEWAY layer
-	gw := gateway.NewGateway(cfg.Addr, cfg.CryptoKey, cfg.Secret, cfg.DBConn)
+	gw := gateway.NewGateway(cfg.Addr, cfg.CryptoKey, cfg.Secret, cfg.DBConn, cfg.TrustedSubnet)
 	gw.Service = service
 
-	serverCtx, serverStopCtx := context.WithCancel(context.Background())
-	sig := make(chan os.Signal, 1)
-	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	defer stop()
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+
 	go func() {
-		<-sig
+		defer wg.Done()
 
-		go func() {
-			<-serverCtx.Done()
-
-			if serverCtx.Err() == context.DeadlineExceeded {
-				log.Fatal("graceful shutdown timed out.. forcing exit.")
-			}
-		}()
-
-		// Trigger graceful shutdown
-		err := gw.Server.Shutdown(serverCtx)
-		if err != nil {
-			log.Fatal(err)
+		<-ctx.Done()
+		fmt.Println("Break the loop")
+		if err := gw.Server.Shutdown(context.TODO()); err != nil {
+			panic(err) // failure/timeout shutting down the server gracefully
 		}
-		serverStopCtx()
+		return
+		// case <-time.After(1 * time.Second):
+		// 	fmt.Println("Hello in a loop")
+
 	}()
 
 	// Run the server
@@ -63,6 +63,6 @@ func Run() {
 		log.Fatal(err)
 	}
 
-	// Wait for server context to be stopped
-	<-serverCtx.Done()
+	wg.Wait()
+	fmt.Println("Main done")
 }
