@@ -166,7 +166,7 @@ func TestPathValueHandler(t *testing.T) {
 	}
 }
 
-var ts HTTPGateway = HTTPGateway{
+var ts HTTPServer = HTTPServer{
 	Service: &MockService{},
 }
 
@@ -211,7 +211,7 @@ func TestMainPageHandler(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockService := NewMockService(ctrl)
-			h := &HTTPGateway{
+			h := &HTTPServer{
 				Service: mockService,
 			}
 

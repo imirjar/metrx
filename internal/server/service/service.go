@@ -46,7 +46,7 @@ func (s ServerService) UpdateMetrics(ctx context.Context, metrics []models.Metri
 }
 
 // Create new Service layer
-func NewServerService() *ServerService {
+func New() *ServerService {
 	return &ServerService{}
 }
 

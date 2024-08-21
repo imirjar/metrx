@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -17,7 +18,7 @@ import (
 )
 
 type Client interface {
-	POST(context.Context, []models.Metrics) error
+	POST(context.Context, []byte) error
 }
 
 type System interface {
@@ -37,7 +38,7 @@ func Run() {
 	cfg := config.NewAgentConfig()
 
 	// HTTP lient for sending metrix to host
-	client := client.NewClient(cfg.Secret, cfg.CryptoKey, cfg.Addr)
+	client := client.New(cfg.Secret, cfg.CryptoKey, cfg.Addr)
 	// OS heap
 	system := system.NewSystem()
 
@@ -81,7 +82,11 @@ func (app *AgentApp) Start(p, r time.Duration) error {
 			mute.RLock()
 			// log.Println("Send", metrics)
 
-			err := app.client.POST(context.Background(), metrics)
+			ms, err := json.Marshal(metrics)
+			if err != nil {
+				return err
+			}
+			err = app.client.POST(context.Background(), ms)
 			if err != nil {
 				log.Println(err)
 				return err

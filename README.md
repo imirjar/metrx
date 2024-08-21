@@ -54,3 +54,9 @@ sudo docker run --name postgres -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGR
 используем .pem формат для хранения ключей
 ключи обязятельно должны быть достаточной длинны для шифрования большого количества отправляемых метрик
 я использую размер 4096
+
+
+## PROTOC
+protoc --go_out=. --go_opt=paths=source_relative \
+  --go-grpc_out=. --go-grpc_opt=paths=source_relative \
+  internal/api/api.proto 

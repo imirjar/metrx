@@ -5,5 +5,5 @@
     "store_file": "./backup.txt", 
     "database_dsn": "",
     "crypto_key": "./private_key.pem",
-    "trusted_subnet": "192.168.0.0/24"
+    "trusted_subnet": ""
 } 

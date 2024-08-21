@@ -1,12 +1,17 @@
 package http
 
 import (
+	"context"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"sync"
+	"syscall"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
@@ -19,14 +24,44 @@ import (
 
 // Http gateway using secret value for encoding
 // it has few endpoints for handlers whitch use Service interface
-type HTTPGateway struct {
+type HTTPServer struct {
 	Service Service
 	Server  *http.Server
 	pk      *rsa.PrivateKey
 }
 
-func NewGateway(path, crypto, secret, conn, ip string) *HTTPGateway {
-	gtw := HTTPGateway{}
+func (h *HTTPServer) Start(addr string) error {
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	defer stop()
+
+	go func() {
+		defer wg.Done()
+
+		<-ctx.Done()
+		fmt.Println("Break the loop")
+		if err := h.Stop(); err != nil {
+			panic(err) // failure/timeout shutting down the server gracefully
+		}
+		// case <-time.After(1 * time.Second):
+		// 	fmt.Println("Hello in a loop")
+
+	}()
+
+	h.Server.Addr = addr
+	err := h.Server.ListenAndServe()
+	wg.Wait()
+	return err
+}
+
+func (h *HTTPServer) Stop() error {
+	return h.Server.Shutdown(context.TODO())
+}
+
+func New(crypto, secret, conn, ip string) *HTTPServer {
+	gtw := HTTPServer{}
 
 	if crypto != "" {
 		b, err := os.ReadFile(crypto)
@@ -89,7 +124,6 @@ func NewGateway(path, crypto, secret, conn, ip string) *HTTPGateway {
 	router.Mount("/debug", middleware.Profiler())
 
 	gtw.Server = &http.Server{
-		Addr:    path,
 		Handler: router,
 	}
 

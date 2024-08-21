@@ -24,7 +24,7 @@ type Service interface {
 }
 
 // Html page consist of the saved metrics
-func (h *HTTPGateway) MainPage() http.HandlerFunc {
+func (h *HTTPServer) MainPage() http.HandlerFunc {
 	log.Println("HANDLER MAIN PAGE")
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
@@ -62,7 +62,7 @@ func (h *HTTPGateway) MainPage() http.HandlerFunc {
 }
 
 // Update metric value by passing params in url path
-func (h *HTTPGateway) UpdatePathHandler() http.HandlerFunc {
+func (h *HTTPServer) UpdatePathHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Println("HANDLER UpdatePathHandler PAGE")
 
@@ -92,7 +92,7 @@ func (h *HTTPGateway) UpdatePathHandler() http.HandlerFunc {
 }
 
 // Read metric value by passing params in url path
-func (h *HTTPGateway) ValuePathHandler() http.HandlerFunc {
+func (h *HTTPServer) ValuePathHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Println("HANDLER ValuePathHandler PAGE")
 
@@ -120,7 +120,7 @@ func (h *HTTPGateway) ValuePathHandler() http.HandlerFunc {
 }
 
 // Update metric value with application/json by passing json
-func (h *HTTPGateway) UpdateJSONHandler() http.HandlerFunc {
+func (h *HTTPServer) UpdateJSONHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		log.Println("HANDLER UpdateJSONHandler PAGE")
@@ -153,7 +153,7 @@ func (h *HTTPGateway) UpdateJSONHandler() http.HandlerFunc {
 }
 
 // Read metric value with application/json by passing json
-func (h *HTTPGateway) ValueJSONHandler() http.HandlerFunc {
+func (h *HTTPServer) ValueJSONHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// log.Println("HANDLER ValueJSONHandler PAGE")
 
@@ -183,7 +183,7 @@ func (h *HTTPGateway) ValueJSONHandler() http.HandlerFunc {
 }
 
 // Update metrics with application/json by passing json list of metrics
-func (h *HTTPGateway) BatchHandler() http.HandlerFunc {
+func (h *HTTPServer) BatchHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Println("HANDLER BatchHandler PAGE")
 		var metrics []models.Metrics
@@ -214,7 +214,7 @@ func (h *HTTPGateway) BatchHandler() http.HandlerFunc {
 }
 
 // Check db connection
-func (h *HTTPGateway) Ping(path string) http.HandlerFunc {
+func (h *HTTPServer) Ping(path string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Println("HANDLER Ping PAGE")
 		ctx := r.Context()
