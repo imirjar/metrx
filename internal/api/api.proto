@@ -4,12 +4,12 @@ package api;
 option go_package = "github.com/imirjar/metrx/internal/api";
 
 service GoMetrics {
-  rpc BatchUpdate(Request) returns (Response) {}
+  rpc BatchUpdate(stream Metric) returns (Response) {}
 }
 
 message Metric {
   string id = 1;
-  string mtype = 2;
+  string type = 2;
   int64 delta = 3;
   double value = 4;
 }

@@ -7,7 +7,7 @@ import (
 )
 
 func TestCollector_Collect(t *testing.T) {
-	collector := NewSystem()
+	collector := New()
 
 	metrics, err := collector.Collect(context.Background())
 	if err != nil {

@@ -28,9 +28,11 @@ func NewAgentConfig() *AgentConfig {
 type AgentConfig struct {
 	Addr           string          `env:"ADDRESS" json:"address"`
 	Secret         string          `env:"SECRET"`
-	CryptoKey      string          `env:"CRYPTO_KEY" json:"crypto_key"`
+	CryptoKey      PKey            `env:"CRYPTO_KEY" json:"crypto_key"`
 	PollInterval   models.Duration `env:"POLL_INTERVAL" json:"poll_interval"`
 	ReportInterval models.Duration `env:"REPORT_INTERVAL" json:"report_interval" `
+
+	Host string
 }
 
 // set params from file environment
@@ -63,7 +65,7 @@ func (ac *AgentConfig) setFlags() {
 	p := flag.Int("p", 0, "collect interval")
 	r := flag.Int("r", 0, "sending interval")
 	k := flag.String("k", "", "SHA-256 hash key")
-	cryptoKey := flag.String("crypto-key", "", "crypto key")
+	// cryptoKey := flag.String("crypto-key", "", "crypto key")
 
 	flag.Parse()
 
@@ -73,9 +75,13 @@ func (ac *AgentConfig) setFlags() {
 	if *k != "" {
 		ac.Secret = *k
 	}
-	if *cryptoKey != "" {
-		ac.CryptoKey = *k
-	}
+	// if *cryptoKey != "" {
+	// 	rsa, err := encrypt.GetRSA(*cryptoKey)
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
+	// 	ac.CryptoKey = rsa
+	// }
 
 	if *r != 0 {
 		ac.ReportInterval.Duration = time.Duration(1_000_000_000 * *r)

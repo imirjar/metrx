@@ -3,21 +3,15 @@ package system
 import (
 	"context"
 	"fmt"
+	"log"
 	"runtime"
 
 	"github.com/imirjar/metrx/internal/models"
 )
 
-func NewSystem() *Collector {
-	return &Collector{}
-}
-
-type Collector struct {
-	Ms runtime.MemStats
-}
-
-func (c *Collector) Collect(ctx context.Context) ([]models.Metrics, error) {
-	runtime.ReadMemStats(&c.Ms)
+func Collect(ctx context.Context) ([]models.Metrics, error) {
+	var rms runtime.MemStats
+	runtime.ReadMemStats(&rms)
 	var counter int64
 
 	var metrics []models.Metrics
@@ -28,19 +22,20 @@ func (c *Collector) Collect(ctx context.Context) ([]models.Metrics, error) {
 	}
 
 	for _, n := range gaugeList {
-		v, err := getMemStat(&c.Ms, n)
-		if err != nil {
-			return metrics, err
-		}
+
 		metric := models.Metrics{
 			ID:    n,
 			MType: "gauge",
 		}
 
+		v := getMemStat(&rms, n)
+		if err := metric.SetVal(v); err != nil {
+			log.Print(err)
+		}
+
+		metrics = append(metrics, metric)
 		counter += 1
 
-		metric.SetVal(v)
-		metrics = append(metrics, metric)
 		// log.Println("###", *metric.Value)
 	}
 
@@ -54,63 +49,63 @@ func (c *Collector) Collect(ctx context.Context) ([]models.Metrics, error) {
 	return metrics, nil
 }
 
-func getMemStat(ms *runtime.MemStats, n string) (string, error) {
+func getMemStat(ms *runtime.MemStats, n string) string {
 	switch n {
 	case "Alloc":
-		return fmt.Sprint(ms.Alloc), nil
+		return fmt.Sprint(ms.Alloc)
 	case "BuckHashSys":
-		return fmt.Sprint(ms.BuckHashSys), nil
+		return fmt.Sprint(ms.BuckHashSys)
 	case "Frees":
-		return fmt.Sprint(ms.Frees), nil
+		return fmt.Sprint(ms.Frees)
 	case "GCCPUFraction":
-		return fmt.Sprint(ms.GCCPUFraction), nil
+		return fmt.Sprint(ms.GCCPUFraction)
 	case "GCSys":
-		return fmt.Sprint(ms.GCSys), nil
+		return fmt.Sprint(ms.GCSys)
 	case "HeapAlloc":
-		return fmt.Sprint(ms.HeapAlloc), nil
+		return fmt.Sprint(ms.HeapAlloc)
 	case "HeapIdle":
-		return fmt.Sprint(ms.HeapIdle), nil
+		return fmt.Sprint(ms.HeapIdle)
 	case "HeapInuse":
-		return fmt.Sprint(ms.HeapInuse), nil
+		return fmt.Sprint(ms.HeapInuse)
 	case "HeapObjects":
-		return fmt.Sprint(ms.HeapObjects), nil
+		return fmt.Sprint(ms.HeapObjects)
 	case "HeapReleased":
-		return fmt.Sprint(ms.HeapReleased), nil
+		return fmt.Sprint(ms.HeapReleased)
 	case "HeapSys":
-		return fmt.Sprint(ms.HeapSys), nil
+		return fmt.Sprint(ms.HeapSys)
 	case "LastGC":
-		return fmt.Sprint(ms.LastGC), nil
+		return fmt.Sprint(ms.LastGC)
 	case "Lookups":
-		return fmt.Sprint(ms.Lookups), nil
+		return fmt.Sprint(ms.Lookups)
 	case "MCacheInuse":
-		return fmt.Sprint(ms.MCacheInuse), nil
+		return fmt.Sprint(ms.MCacheInuse)
 	case "MCacheSys":
-		return fmt.Sprint(ms.MCacheSys), nil
+		return fmt.Sprint(ms.MCacheSys)
 	case "MSpanInuse":
-		return fmt.Sprint(ms.MSpanInuse), nil
+		return fmt.Sprint(ms.MSpanInuse)
 	case "MSpanSys":
-		return fmt.Sprint(ms.MSpanSys), nil
+		return fmt.Sprint(ms.MSpanSys)
 	case "Mallocs":
-		return fmt.Sprint(ms.Mallocs), nil
+		return fmt.Sprint(ms.Mallocs)
 	case "NextGC":
-		return fmt.Sprint(ms.NextGC), nil
+		return fmt.Sprint(ms.NextGC)
 	case "NumForcedGC":
-		return fmt.Sprint(ms.NumForcedGC), nil
+		return fmt.Sprint(ms.NumForcedGC)
 	case "NumGC":
-		return fmt.Sprint(ms.NumGC), nil
+		return fmt.Sprint(ms.NumGC)
 	case "OtherSys":
-		return fmt.Sprint(ms.OtherSys), nil
+		return fmt.Sprint(ms.OtherSys)
 	case "PauseTotalNs":
-		return fmt.Sprint(ms.PauseTotalNs), nil
+		return fmt.Sprint(ms.PauseTotalNs)
 	case "StackInuse":
-		return fmt.Sprint(ms.StackInuse), nil
+		return fmt.Sprint(ms.StackInuse)
 	case "StackSys":
-		return fmt.Sprint(ms.StackSys), nil
+		return fmt.Sprint(ms.StackSys)
 	case "Sys":
-		return fmt.Sprint(ms.Sys), nil
+		return fmt.Sprint(ms.Sys)
 	case "TotalAlloc":
-		return fmt.Sprint(ms.TotalAlloc), nil
+		return fmt.Sprint(ms.TotalAlloc)
 	default:
-		return "", fmt.Errorf("there is no metric named %s", n)
+		return "0"
 	}
 }

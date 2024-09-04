@@ -16,8 +16,6 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 
-	"github.com/imirjar/metrx/internal/server/controller/http/middleware/compressor"
-	"github.com/imirjar/metrx/internal/server/controller/http/middleware/encryptor"
 	"github.com/imirjar/metrx/internal/server/controller/http/middleware/logger"
 	"github.com/imirjar/metrx/internal/server/controller/http/middleware/truster"
 )
@@ -92,8 +90,8 @@ func New(crypto, secret, conn, ip string) *HTTPServer {
 	router := chi.NewRouter()
 	router.Use(middleware.NoCache)
 
-	router.Use(encryptor.DecryptR(gtw.pk))
-	router.Use(compressor.Compressing())
+	// router.Use(encryptor.DecryptR(gtw.pk))
+	// router.Use(compressor.Compressing())
 	router.Use(logger.Logger())
 	router.Use(truster.Truster(ip))
 

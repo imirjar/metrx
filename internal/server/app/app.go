@@ -3,7 +3,6 @@ package server
 import (
 	config "github.com/imirjar/metrx/config/server"
 	"github.com/imirjar/metrx/internal/server/controller/grpc"
-	HTTPServer "github.com/imirjar/metrx/internal/server/controller/http"
 	"github.com/imirjar/metrx/internal/server/service"
 	"github.com/imirjar/metrx/internal/server/storage"
 )
@@ -31,15 +30,15 @@ func Run() {
 	service.MemStorager = storage
 
 	// Controller layer
-	HTTP := HTTPServer.New(cfg.CryptoKey, cfg.Secret, cfg.DBConn, cfg.TrustedSubnet)
-	HTTP.Service = service
+	// HTTP := HTTPServer.New(cfg.CryptoKey, cfg.Secret, cfg.DBConn, cfg.TrustedSubnet)
+	// HTTP.Service = service
 
-	GRPC := grpc.NewGRPCServer()
+	GRPC := grpc.New()
 	GRPC.Service = service
 
 	// Run the server
-	HTTP.Start(cfg.Addr)
-	GRPC.Start()
+	// HTTP.Start(cfg.Addr)
+	GRPC.Start(cfg.Addr)
 	// if err := server.Start(cfg.Addr); err != nil && err != http.ErrServerClosed {
 	// 	log.Fatal(err)
 	// }

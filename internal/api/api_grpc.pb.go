@@ -26,7 +26,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type GoMetricsClient interface {
-	BatchUpdate(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
+	BatchUpdate(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[Metric, Response], error)
 }
 
 type goMetricsClient struct {
@@ -37,21 +37,24 @@ func NewGoMetricsClient(cc grpc.ClientConnInterface) GoMetricsClient {
 	return &goMetricsClient{cc}
 }
 
-func (c *goMetricsClient) BatchUpdate(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error) {
+func (c *goMetricsClient) BatchUpdate(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[Metric, Response], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Response)
-	err := c.cc.Invoke(ctx, GoMetrics_BatchUpdate_FullMethodName, in, out, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &GoMetrics_ServiceDesc.Streams[0], GoMetrics_BatchUpdate_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &grpc.GenericClientStream[Metric, Response]{ClientStream: stream}
+	return x, nil
 }
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type GoMetrics_BatchUpdateClient = grpc.ClientStreamingClient[Metric, Response]
 
 // GoMetricsServer is the server API for GoMetrics service.
 // All implementations must embed UnimplementedGoMetricsServer
 // for forward compatibility.
 type GoMetricsServer interface {
-	BatchUpdate(context.Context, *Request) (*Response, error)
+	BatchUpdate(grpc.ClientStreamingServer[Metric, Response]) error
 	mustEmbedUnimplementedGoMetricsServer()
 }
 
@@ -62,8 +65,8 @@ type GoMetricsServer interface {
 // pointer dereference when methods are called.
 type UnimplementedGoMetricsServer struct{}
 
-func (UnimplementedGoMetricsServer) BatchUpdate(context.Context, *Request) (*Response, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method BatchUpdate not implemented")
+func (UnimplementedGoMetricsServer) BatchUpdate(grpc.ClientStreamingServer[Metric, Response]) error {
+	return status.Errorf(codes.Unimplemented, "method BatchUpdate not implemented")
 }
 func (UnimplementedGoMetricsServer) mustEmbedUnimplementedGoMetricsServer() {}
 func (UnimplementedGoMetricsServer) testEmbeddedByValue()                   {}
@@ -86,23 +89,12 @@ func RegisterGoMetricsServer(s grpc.ServiceRegistrar, srv GoMetricsServer) {
 	s.RegisterService(&GoMetrics_ServiceDesc, srv)
 }
 
-func _GoMetrics_BatchUpdate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Request)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(GoMetricsServer).BatchUpdate(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: GoMetrics_BatchUpdate_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GoMetricsServer).BatchUpdate(ctx, req.(*Request))
-	}
-	return interceptor(ctx, in, info, handler)
+func _GoMetrics_BatchUpdate_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(GoMetricsServer).BatchUpdate(&grpc.GenericServerStream[Metric, Response]{ServerStream: stream})
 }
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type GoMetrics_BatchUpdateServer = grpc.ClientStreamingServer[Metric, Response]
 
 // GoMetrics_ServiceDesc is the grpc.ServiceDesc for GoMetrics service.
 // It's only intended for direct use with grpc.RegisterService,
@@ -110,12 +102,13 @@ func _GoMetrics_BatchUpdate_Handler(srv interface{}, ctx context.Context, dec fu
 var GoMetrics_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "api.GoMetrics",
 	HandlerType: (*GoMetricsServer)(nil),
-	Methods: []grpc.MethodDesc{
+	Methods:     []grpc.MethodDesc{},
+	Streams: []grpc.StreamDesc{
 		{
-			MethodName: "BatchUpdate",
-			Handler:    _GoMetrics_BatchUpdate_Handler,
+			StreamName:    "BatchUpdate",
+			Handler:       _GoMetrics_BatchUpdate_Handler,
+			ClientStreams: true,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
 	Metadata: "internal/api/api.proto",
 }

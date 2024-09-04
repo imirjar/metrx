@@ -2,7 +2,8 @@ package grpc
 
 import (
 	"context"
-	"fmt"
+	"errors"
+	"io"
 	"log"
 	"net"
 
@@ -19,36 +20,68 @@ type Service interface {
 }
 
 type GRPCServer struct {
+	api.UnimplementedGoMetricsServer
 	Service Service
-	Server  *grpc.Server
 }
 
-func NewGRPCServer() *GRPCServer {
-	gtw := GRPCServer{}
-	return &gtw
+func New() *GRPCServer {
+	return &GRPCServer{}
 }
 
-func (gs *GRPCServer) Start() error {
-	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%s", "3200"))
+func (gs *GRPCServer) Start(addr string) error {
+	var opts []grpc.ServerOption
+	s := grpc.NewServer(opts...)
+
+	lis, err := net.Listen("tcp", addr)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	var opts []grpc.ServerOption
-	grpcServer := grpc.NewServer(opts...)
-	// api.RegisterGoMetricsServer(grpcServer, api.UnimplementedGoMetricsServer{})
-	return grpcServer.Serve(lis)
+
+	api.RegisterGoMetricsServer(s, gs)
+
+	log.Printf("RUN GRPC on: %s", addr)
+	return s.Serve(lis)
 }
 
-func (gs *GRPCServer) Stop() {
-	gs.Server.Stop()
-}
+func (gs *GRPCServer) BatchUpdate(stream api.GoMetrics_BatchUpdateServer) error {
+	metrics := []models.Metrics{}
 
-func (gs *GRPCServer) Update(ctx context.Context, r *api.Request) (*api.Response, error) {
-	var w api.Response
+	for {
+		metric, err := stream.Recv()
 
-	for _, m := range r.Metrics {
-		log.Print(m)
+		if err != nil {
+			if err == io.EOF {
+				err = gs.Service.UpdateMetrics(context.Background(), metrics)
+				if err != nil {
+					log.Print(err)
+				}
+				return stream.SendAndClose(&api.Response{})
+			}
+			return err
+		}
+
+		switch metric.Type {
+		case "gauge":
+			value := &metric.Value
+			var m = models.Metrics{
+				ID:    metric.Id,
+				MType: "gauge",
+				Value: value,
+			}
+			metrics = append(metrics, m)
+
+		case "counter":
+			delta := &metric.Delta
+			var m = models.Metrics{
+				ID:    metric.Id,
+				MType: "counter",
+				Delta: delta,
+			}
+			metrics = append(metrics, m)
+
+		default:
+			return errors.New("wrong Metrics type")
+		}
+
 	}
-
-	return &w, nil
 }
