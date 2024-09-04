@@ -21,7 +21,6 @@ func TestAgentApp_Start(t *testing.T) {
 
 	app := AgentApp{
 		client: mockClient,
-		system: mockSystem,
 	}
 
 	metrics := []models.Metrics{
@@ -58,9 +57,5 @@ func TestRun(t *testing.T) {
 
 // Вспомогательные функции для указателей
 func float64Pointer(v float64) *float64 {
-	return &v
-}
-
-func int64Pointer(v int64) *int64 {
 	return &v
 }
