@@ -79,7 +79,7 @@ func TestClient_POST(t *testing.T) {
 			}))
 			defer ts.Close()
 
-			client := New(tt.secret, "", ts.URL)
+			client := New(tt.secret, ts.URL, nil)
 
 			// Создаем контекст с тайм-аутом
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
