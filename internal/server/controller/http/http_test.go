@@ -166,7 +166,7 @@ func TestPathValueHandler(t *testing.T) {
 	}
 }
 
-var ts HTTPGateway = HTTPGateway{
+var ts HTTPServer = HTTPServer{
 	Service: &MockService{},
 }
 
@@ -206,24 +206,13 @@ func TestMainPageHandler(t *testing.T) {
 			expectedBody:   "value1value2value3", // Проверьте, что HTML содержит ожидаемые значения
 			expectedError:  nil,
 		},
-		// {
-		// 	name: "Error case",
-		// 	mockService: func(service *MockService) {
-		// 		expectedError := errors.New("error fetching metrics")
-		// 		service.EXPECT().ViewMetrics(gomock.Any()).Return(nil, expectedError)
-		// 	},
-		// 	expectedStatus: http.StatusInternalServerError,
-		// 	expectedBody:   "error fetching metrics",
-		// 	expectedError:  nil,
-		// },
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockService := NewMockService(ctrl)
-			h := &HTTPGateway{
+			h := &HTTPServer{
 				Service: mockService,
-				Secret:  "",
 			}
 
 			if tt.mockService != nil {
@@ -251,27 +240,3 @@ func TestMainPageHandler(t *testing.T) {
 		})
 	}
 }
-
-// func (fs *MockService) UpdateMetrics(ctx context.Context, metrics []models.Metrics) error {
-// 	return nil
-// }
-// func (fs *MockService) UpdateMetric(ctx context.Context, metric models.Metrics) (models.Metrics, error) {
-// 	return metric, nil
-// }
-// func (fs *MockService) ViewMetric(ctx context.Context, metric models.Metrics) (models.Metrics, error) {
-// 	switch metric.MType {
-// 	case "gauge":
-// 		var val float64 = 100
-// 		metric.Value = &val
-// 	case "counter":
-// 		var del int64 = 100
-// 		metric.Delta = &del
-// 	default:
-// 		return metric, errMetricTypeIncorrect
-// 	}
-
-// 	return metric, nil
-// }
-// func (fs *MockService) ViewMetrics(ctx context.Context) (map[string][]models.Metrics, error) {
-// 	return make(map[string][]models.Metrics), nil
-// }

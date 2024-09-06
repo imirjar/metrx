@@ -20,5 +20,6 @@ func main() {
 Build date: %s
 Build commit: %s 
 `, buildVersion, buildDate, buildCommit)
+
 	app.Run()
 }

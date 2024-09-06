@@ -41,12 +41,12 @@ func (s ServerService) UpdateMetric(ctx context.Context, metric models.Metrics) 
 
 // Set or update list of Metrics in store
 func (s ServerService) UpdateMetrics(ctx context.Context, metrics []models.Metrics) error {
-	log.Println("SERVICE BatchUpdate")
+	// log.Println("SERVICE BatchUpdate")
 	return s.MemStorager.AddMetrics(ctx, metrics)
 }
 
 // Create new Service layer
-func NewServerService() *ServerService {
+func New() *ServerService {
 	return &ServerService{}
 }
 

@@ -30,6 +30,7 @@ func Compressing() func(next http.Handler) http.Handler {
 				log.Println("sendsGzip")
 				cr, err := NewCompressReader(req.Body)
 				if err != nil {
+					log.Print(err)
 					resp.WriteHeader(http.StatusInternalServerError)
 					return
 				}
@@ -51,6 +52,7 @@ type CompressReader struct {
 func NewCompressReader(r io.ReadCloser) (*CompressReader, error) {
 	zr, err := gzip.NewReader(r)
 	if err != nil {
+		log.Print(err)
 		return nil, err
 	}
 
@@ -100,6 +102,7 @@ func (c CompressReader) Read(p []byte) (n int, err error) {
 
 func (c *CompressReader) Close() error {
 	if err := c.Req.Close(); err != nil {
+		log.Print(err)
 		return err
 	}
 	return c.GzReq.Close()

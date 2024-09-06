@@ -53,6 +53,7 @@ func (s *Storage) Configure(filePath string, autoImport bool, interval time.Dura
 
 func (s *Storage) AddMetrics(ctx context.Context, metrics []models.Metrics) error {
 	for _, m := range metrics {
+		// log.Println("STORAGE", m)
 		switch m.MType {
 		case "gauge":
 			s.MemStorage.Gauge[m.ID] = *m.Value
@@ -111,6 +112,7 @@ func (s *Storage) ReadMetrics(ctx context.Context, mType string) ([]models.Metri
 				Delta: &d,
 			}
 			metrics = append(metrics, m)
+			log.Print(m.ID)
 		}
 		// log.Print(metrics)
 		return metrics, nil //s.MemStorage.Counter[m.ID]

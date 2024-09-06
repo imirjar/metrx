@@ -21,7 +21,7 @@ type IStorage interface {
 // Create storage layer
 // if db connection string from config isn't ok,
 // then create "in memory" storage
-func NewStorage(DBConn string, filePath string, interval time.Duration, autoImport bool) IStorage {
+func New(DBConn string, filePath string, interval time.Duration, autoImport bool) IStorage {
 	if DBConn != "" {
 		log.Println("NOTNULLDBCONN")
 		db, err := ping.NewDBPool(context.Background(), DBConn)

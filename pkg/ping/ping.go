@@ -3,6 +3,7 @@ package ping
 import (
 	"context"
 	"log"
+	"net"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -27,4 +28,16 @@ func (db *DB) Ping(ctx context.Context) error {
 		return err
 	}
 	return nil
+}
+
+func GetMyIP() (string, error) {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		log.Print("client.go Dial ERROR", err)
+		return "", err
+	}
+	defer conn.Close()
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+	ip := localAddr.IP.String()
+	return ip, nil
 }

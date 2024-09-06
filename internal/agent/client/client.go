@@ -1,76 +1,62 @@
 package client
 
 import (
-	"bytes"
-	"compress/gzip"
 	"context"
-	"encoding/hex"
-	"encoding/json"
+	"crypto/rsa"
 	"log"
-	"net/http"
 	"sync"
-	"time"
 
+	"github.com/imirjar/metrx/internal/agent/client/grpc"
 	"github.com/imirjar/metrx/internal/models"
-	"github.com/imirjar/metrx/pkg/encrypt"
+	"github.com/imirjar/metrx/pkg/ping"
 )
-
-func NewClient(secret, host string) *Client {
-	return &Client{
-		client: &http.Client{Timeout: time.Millisecond * 200},
-		secret: secret,
-		host:   host,
-	}
-}
 
 // Client application part witch provide
 type Client struct {
-	secret string
-	host   string
-	client *http.Client
+	secret string         // secret is using for hash function which place in HashSHA256 HTTP header
+	target string         // server ip where we will sent request
+	host   string         // our ip for X-Real-IP HTTP header
+	pk     *rsa.PublicKey // public key for security
 	sync.Mutex
 }
 
-// Using http.Client to sent our metrics to host+/updates
-func (c *Client) POST(ctx context.Context, metrics []models.Metrics) error {
+func New(secret, target string, crypto *rsa.PublicKey) *Client {
 
-	// Convert metrics to slice of bytes
-	ms, err := json.Marshal(metrics)
-	if err != nil {
-		return err
-	}
-
-	// Rewrite compressed version of metrics list in buffer
-	var cms bytes.Buffer
-	w := gzip.NewWriter(&cms)
-	w.Write(ms)
-	w.Close()
-
-	// Create request with necessary params
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.host+"/updates", &cms)
-	if err != nil {
-		log.Print("client.go NewRequestWithContext ERROR", err)
-		return err
-	}
-	// Adding necessary headers
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Content-Encoding", "gzip")
-
-	// If secret key exists in .env then we must add encoding header
-	if c.secret != "" {
-		hash := encrypt.EncryptSHA256(hex.EncodeToString(ms), c.secret)
-		req.Header.Add("HashSHA256", hex.EncodeToString(hash))
-	}
-
-	// Make request
-	resp, err := c.client.Do(req)
+	// get host IP
+	host, err := ping.GetMyIP()
 	if err != nil {
 		log.Print(err)
-		return err
 	}
-	defer resp.Body.Close()
 
-	// log.Print(resp.Status)
+	// make client
+	cli := Client{
+		secret: secret,
+		host:   host,
+		target: target,
+		pk:     crypto,
+	}
 
-	return err
+	return &cli
+}
+
+// Using http.Client to sent our metrics to host+/updates
+func (c *Client) POST(ctx context.Context, batch []models.Metrics) error {
+
+	// var request Requester
+
+	// request := http.New(batch)
+	request := grpc.New(batch)
+
+	//Add middlewares
+	request.Hash(c.secret)
+	request.Encrypt(c.pk)
+
+	return request.Push(ctx, c.target)
+
+}
+
+type Requester interface {
+	Push(ctx context.Context, url string) error
+	Hash(secret string) error
+	Encrypt(pk *rsa.PublicKey) error
 }

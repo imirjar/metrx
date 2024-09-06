@@ -27,6 +27,12 @@ vendor/
 metricstest
 cmd/test/*
 
+#crypto
+*.key
+*.pem
+*.der
 
 .github/
+
+#generated files
 .coverage.out
